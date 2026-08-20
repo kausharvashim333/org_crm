@@ -177,9 +177,14 @@ export default function Sidebar({ role, isOpen, onClose }) {
                 return (
                   <img
                     src={logo}
-                    alt="logo"
-                    className="w-10 h-10 rounded-xl object-cover flex-shrink-0"
-                    onError={(e) => { e.target.style.display = 'none'; }}
+                    onError={(e) => {
+                      if (!e.target.dataset.retried && logo.startsWith('/uploads/')) {
+                        e.target.dataset.retried = 'true';
+                        e.target.src = `/api${logo}`;
+                      } else {
+                        e.target.style.display = 'none';
+                      }
+                    }}
                   />
                 );
               }

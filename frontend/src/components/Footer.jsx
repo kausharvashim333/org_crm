@@ -24,8 +24,20 @@ export default function Footer({ homepageData }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 mb-6">
-              {logo && typeof logo === 'string' && logo !== 'undefined' ? (
-                <img src={logo} alt="logo" className="w-10 h-10 rounded-xl object-cover border border-slate-800" onError={(e) => { e.target.style.display = 'none'; }} />
+              {logo && typeof logo === 'string' && logo.trim() !== '' && logo !== 'undefined' ? (
+                <img
+                  src={logo}
+                  alt="logo"
+                  className="w-10 h-10 rounded-xl object-cover border border-slate-800"
+                  onError={(e) => {
+                    if (!e.target.dataset.retried && logo.startsWith('/uploads/')) {
+                      e.target.dataset.retried = 'true';
+                      e.target.src = `/api${logo}`;
+                    } else {
+                      e.target.style.display = 'none';
+                    }
+                  }}
+                />
               ) : (
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: themeColor }}>
                   <GraduationCap className="w-6 h-6 text-white" />

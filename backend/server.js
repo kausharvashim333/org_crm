@@ -106,12 +106,16 @@ app.use(mongoSanitize({
   replaceWith: '_',
 }));
 
-// Static uploads directory with security headers
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+// Static uploads directory with security and CORS headers (accessible via /uploads and /api/uploads)
+const uploadsStatic = express.static(path.join(__dirname, 'uploads'), {
   setHeaders: (res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=2592000');
   }
-}));
+});
+app.use('/uploads', uploadsStatic);
+app.use('/api/uploads', uploadsStatic);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Franchise CRM API is running securely' });
