@@ -379,14 +379,22 @@ router.put('/:id', protect, async (req, res) => {
   }
 });
 
-// Partner Logo Upload Route
-router.post('/:id/upload-logo', protect, upload.single('logo'), async (req, res) => {
+// Partner Logo Upload Route with safe error handler
+router.post('/:id/upload-logo', protect, (req, res, next) => {
+  upload.single('logo')(req, res, (err) => {
+    if (err) {
+      console.error('[PARTNER LOGO UPLOAD ERROR]', err.message);
+      return res.status(400).json({ success: false, message: err.message || 'Logo upload failed' });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
-    if (req.user.role === 'partner' && req.user.partnerId.toString() !== req.params.id) {
+    if (req.user.role === 'partner' && req.user.partnerId?.toString() !== req.params.id) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Please upload a logo image' });
+      return res.status(400).json({ success: false, message: 'Please upload a logo image file' });
     }
     const logoPath = `/uploads/${req.file.filename}`;
     const partner = await Partner.findByIdAndUpdate(req.params.id, { logo: logoPath }, { new: true });

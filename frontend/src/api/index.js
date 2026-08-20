@@ -16,9 +16,9 @@ export const createFranchiseOrder = (data) => API.post('/partners/public/create-
 export const getFranchiseReceipt = (franchiseId) => API.get(`/partners/public/receipt/${franchiseId}`);
 export const getPartner = (id) => API.get(`/partners/${id}`);
 export const getPartnerBySlug = (slug) => API.get(`/partners/slug/${slug}`);
-export const createPartner = (data) => API.post('/partners', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const createPartner = (data) => API.post('/partners', data);
 export const updatePartner = (id, data) => API.put(`/partners/${id}`, data);
-export const uploadPartnerLogo = (id, formData) => API.post(`/partners/${id}/upload-logo`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const uploadPartnerLogo = (id, formData) => API.post(`/partners/${id}/upload-logo`, formData);
 export const updatePartnerStatus = (id, status) => API.put(`/partners/${id}/status`, { status });
 export const deletePartner = (id) => API.delete(`/partners/${id}`);
 
@@ -27,9 +27,9 @@ export const getStudent = (id) => API.get(`/students/${id}`);
 export const createStudent = (data) => API.post('/students', data);
 export const updateStudent = (id, data) => API.put(`/students/${id}`, data);
 export const deleteStudent = (id) => API.delete(`/students/${id}`);
-export const uploadStudentDocument = (id, formData) => API.post(`/students/${id}/upload-document`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const uploadStudentDocument = (id, formData) => API.post(`/students/${id}/upload-document`, formData);
 export const createAdmissionOrder = (data) => API.post('/students/public/create-admission-order', data);
-export const submitPublicAdmission = (formData) => API.post('/students/public/apply', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const submitPublicAdmission = (formData) => API.post('/students/public/apply', formData);
 export const getPublicAdmissionReceipt = (applicationNo) => API.get(`/students/public/receipt/${applicationNo}`);
 
 export const getCourses = (params) => API.get('/courses', { params });
@@ -43,7 +43,7 @@ export const updateCourse = (id, data) => API.put(`/courses/${id}`, data);
 export const updatePartnerCourseFee = (id, customStudentFee) => API.put(`/courses/${id}/partner-fee`, { customStudentFee });
 export const approveCourse = (id, status) => API.put(`/courses/${id}/approve`, { approvalStatus: status });
 export const deleteCourse = (id) => API.delete(`/courses/${id}`);
-export const uploadCourseVideo = (formData) => API.post('/courses/upload-video', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const uploadCourseVideo = (formData) => API.post('/courses/upload-video', formData);
 export const updateCourseChapters = (id, chapters) => API.put(`/courses/${id}/chapters`, { chapters });
 export const updateCourseAssessment = (id, assessment) => API.put(`/courses/${id}/assessment`, { assessment });
 
@@ -122,7 +122,7 @@ export const getPublicHomepage = (slug) => API.get(`/homepage/public/${slug}`);
 export const updateHomepage = (data) => API.put('/homepage', data);
 export const updateHomepageSection = (section, data) => API.put(`/homepage/section/${section}`, data);
 export const publishHomepage = (isPublished) => API.put('/homepage/publish', { isPublished });
-export const uploadHomepageBanner = (formData) => API.post('/homepage/upload-banner', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const uploadHomepageBanner = (formData) => API.post('/homepage/upload-banner', formData);
 export const uploadGalleryPhoto = (data) => API.post('/homepage/gallery/upload', data);
 export const deleteGalleryPhoto = (index) => API.delete(`/homepage/gallery/${index}`);
 export const addTestimonial = (data) => API.post('/homepage/testimonials', data);
@@ -140,7 +140,7 @@ export const updateInquiryStatus = (id, status) => API.put(`/inquiries/${id}/sta
 export const addFollowUp = (id, note) => API.post(`/inquiries/${id}/followup`, { note });
 
 export const getMaterials = (params) => API.get('/materials', { params });
-export const uploadMaterial = (formData) => API.post('/materials/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const uploadMaterial = (formData) => API.post('/materials/upload', formData);
 export const updateMaterial = (id, data) => API.put(`/materials/${id}`, data);
 export const approveMaterial = (id, status) => API.put(`/materials/${id}/approve`, { approvalStatus: status });
 export const deleteMaterial = (id) => API.delete(`/materials/${id}`);
