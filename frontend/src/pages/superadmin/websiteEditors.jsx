@@ -42,6 +42,7 @@ export function HeroEditor({ homepage, onSave }) {
   const handleUploadImage = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
     setUploading(true);
     const fd = new FormData();
     fd.append('image', file);
@@ -52,9 +53,10 @@ export function HeroEditor({ homepage, onSave }) {
       setData({ ...data, sliderImages: arr });
       showSuccess('Image uploaded and added to slider');
     } catch (error) {
-      showError('Upload failed');
+      showError(getUploadErrorMessage(error));
     }
     setUploading(false);
+    e.target.value = '';
   };
 
   return (
@@ -777,6 +779,7 @@ export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
     setUploadingLogo(true);
     const fd = new FormData();
     fd.append('image', file);
@@ -785,7 +788,7 @@ export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
       setNewItem(prev => ({ ...prev, logo: res.data.imageUrl }));
       showSuccess('Certification logo uploaded');
     } catch (err) {
-      showError(err.response?.data?.message || 'Upload failed');
+      showError(getUploadErrorMessage(err));
     } finally {
       setUploadingLogo(false);
       e.target.value = '';
@@ -837,6 +840,7 @@ export function GalleryEditor({ homepage, onAdd, onDelete }) {
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
     setUploading(true);
     const fd = new FormData();
     fd.append('image', file);
@@ -845,7 +849,7 @@ export function GalleryEditor({ homepage, onAdd, onDelete }) {
       onAdd({ url: res.data.imageUrl, caption: '' });
       showSuccess('Photo uploaded successfully');
     } catch (err) {
-      showError(err.response?.data?.message || 'Upload failed');
+      showError(getUploadErrorMessage(err));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -921,6 +925,7 @@ export function NoticesEditor({ homepage, onSave, onAdd, onDelete, onUpdate }) {
   const handlePdfUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
     setUploadingPdf(true);
     const fd = new FormData();
     fd.append('pdf', file);
@@ -929,9 +934,10 @@ export function NoticesEditor({ homepage, onSave, onAdd, onDelete, onUpdate }) {
       setNewItem(prev => ({ ...prev, pdfUrl: res.data.pdfUrl }));
       showSuccess('PDF uploaded successfully');
     } catch (error) {
-      showError('PDF upload failed. Please try again.');
+      showError(getUploadErrorMessage(error));
     }
     setUploadingPdf(false);
+    e.target.value = '';
   };
 
   const startEdit = (index, item) => {
@@ -1099,6 +1105,24 @@ export function ContactEditor({ homepage, onSave }) {
   );
 }
 
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+const getUploadErrorMessage = (err) => {
+  const status = err.response?.status;
+  if (status === 413) return 'File too large. Server rejected it. Max size is 50MB. If on production, ask admin to update nginx client_max_body_size.';
+  if (status === 401) return 'Session expired. Please login again.';
+  if (status === 403) return 'You do not have permission to upload files.';
+  return err.response?.data?.message || 'Upload failed';
+};
+
+const validateFileSize = (file, showError) => {
+  if (file.size > MAX_FILE_SIZE) {
+    showError(`File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max allowed: 50MB`);
+    return false;
+  }
+  return true;
+};
+
 export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
   const [settings, setSettings] = useState(homepage.settings || {});
   const { showSuccess, showError } = useToast();
@@ -1108,6 +1132,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
     setUploadingLogo(true);
     const fd = new FormData();
     fd.append('logo', file);
@@ -1117,7 +1142,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
       if (onHomepageUpdate) onHomepageUpdate(res.data.homepage);
       showSuccess('Logo uploaded successfully');
     } catch (err) {
-      showError(err.response?.data?.message || 'Upload failed');
+      showError(getUploadErrorMessage(err));
     } finally {
       setUploadingLogo(false);
       e.target.value = '';
@@ -1127,6 +1152,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
   const handleFaviconUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
     setUploadingFavicon(true);
     const fd = new FormData();
     fd.append('favicon', file);
@@ -1136,7 +1162,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
       if (onHomepageUpdate) onHomepageUpdate(res.data.homepage);
       showSuccess('Favicon uploaded successfully');
     } catch (err) {
-      showError(err.response?.data?.message || 'Upload failed');
+      showError(getUploadErrorMessage(err));
     } finally {
       setUploadingFavicon(false);
       e.target.value = '';
