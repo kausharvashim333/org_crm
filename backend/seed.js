@@ -10,18 +10,27 @@ const seed = async () => {
   await connectDB();
   try {
     // Check if Super Admin already exists
-    let admin = await User.findOne({ email: 'admin@skillindia.com' });
+    let admin = await User.findOne({ email: 'admin@liliorg.in' });
+    if (!admin) {
+      admin = await User.findOne({ role: 'super_admin' });
+    }
     if (!admin) {
       admin = await User.create({
         name: 'Super Admin',
-        email: 'admin@skillindia.com',
-        password: 'admin123',
+        email: 'admin@liliorg.in',
+        password: 'Abc@12345',
         phone: '9999999999',
         role: 'super_admin',
+        isActive: true,
       });
       console.log('Super Admin created:', admin.email);
     } else {
-      console.log('Super Admin already exists:', admin.email);
+      admin.email = 'admin@liliorg.in';
+      admin.password = 'Abc@12345';
+      admin.role = 'super_admin';
+      admin.isActive = true;
+      await admin.save();
+      console.log('Super Admin credentials updated:', admin.email);
     }
 
     const standardCourses = [
