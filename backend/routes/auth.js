@@ -12,8 +12,10 @@ const sendEmail = require('../utils/sendEmail');
 
 const router = express.Router();
 
+const JWT_SECRET = process.env.JWT_SECRET || 'liliorg_production_jwt_secret_key_9876543210';
+
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
+  return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
 };
 
 router.post('/login', async (req, res) => {

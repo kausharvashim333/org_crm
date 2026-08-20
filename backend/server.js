@@ -10,6 +10,13 @@ const connectDB = require('./config/db');
 const fs = require('fs');
 dotenv.config();
 
+// Ensure critical environment variables always have solid fallbacks
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'liliorg_production_jwt_secret_key_9876543210';
+process.env.JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
+process.env.MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/franchise_crm';
+process.env.PORT = process.env.PORT || '5001';
+process.env.CLIENT_URL = process.env.CLIENT_URL || 'https://liliorg.in';
+
 process.on('uncaughtException', (err) => {
   fs.appendFileSync(path.join(__dirname, 'out.log'), `[UNCAUGHT EXCEPTION] ${err.stack || err.message}\n`);
 });
