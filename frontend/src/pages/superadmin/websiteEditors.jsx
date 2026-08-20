@@ -1011,8 +1011,15 @@ export function SettingsEditor({ homepage, onSave }) {
     setUploadingLogo(true);
     const fd = new FormData();
     fd.append('logo', file);
-    try { const res = await uploadOrgLogo(fd); setSettings(res.data.homepage.settings); showSuccess('Logo uploaded'); } catch { showError('Upload failed'); }
-    setUploadingLogo(false);
+    try {
+      const res = await uploadOrgLogo(fd);
+      setSettings(res.data.homepage.settings);
+      showSuccess('Logo uploaded successfully');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploadingLogo(false);
+    }
   };
 
   const handleFaviconUpload = async (e) => {
@@ -1021,8 +1028,15 @@ export function SettingsEditor({ homepage, onSave }) {
     setUploadingFavicon(true);
     const fd = new FormData();
     fd.append('favicon', file);
-    try { const res = await uploadOrgFavicon(fd); setSettings(res.data.homepage.settings); showSuccess('Favicon uploaded'); } catch { showError('Upload failed'); }
-    setUploadingFavicon(false);
+    try {
+      const res = await uploadOrgFavicon(fd);
+      setSettings(res.data.homepage.settings);
+      showSuccess('Favicon uploaded successfully');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploadingFavicon(false);
+    }
   };
 
   return (
