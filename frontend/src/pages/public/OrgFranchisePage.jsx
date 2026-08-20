@@ -49,25 +49,10 @@ export default function OrgFranchisePage() {
   const [hp, setHp] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Carousel slider state
-  const partnerSlides = [
-    '/uploads/partner_handshake.png',
-    '/uploads/partner_collaboration.png',
-    '/uploads/partner_growth.png'
-  ];
-  const [currentSlide, setCurrentSlide] = useState(0);
-
   useEffect(() => {
     getOrgHomepagePublic()
       .then(res => { setHp(res.data.homepage); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % partnerSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
   }, []);
 
   if (loading) return (
@@ -88,21 +73,11 @@ export default function OrgFranchisePage() {
         <Navbar activePage="franchise" />
 
         {/* Hero Section */}
-        <section className="relative py-20 px-4 text-white overflow-hidden min-h-[55vh] flex items-center justify-center">
-          {/* Background Slideshow */}
-          <div className="absolute inset-0 z-0">
-            {partnerSlides.map((img, idx) => (
-              <div
-                key={idx}
-                className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out"
-                style={{
-                  backgroundImage: `url(${img})`,
-                  opacity: idx === currentSlide ? 0.95 : 0,
-                }}
-              />
-            ))}
-            <div className="absolute inset-0 bg-white/30 z-0" />
-          </div>
+        <section className="relative py-20 px-4 text-white overflow-hidden min-h-[55vh] flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+          {/* Decorative Pattern & Ambient Glow */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40"></div>
+          <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full mix-blend-screen filter blur-[100px] opacity-20" style={{ backgroundColor: themeColor }}></div>
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20"></div>
 
           <div className="max-w-4xl mx-auto text-center relative z-10 space-y-6">
             <Reveal>

@@ -30,7 +30,13 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  if (!this.password || !enteredPassword) return false;
+  try {
+    return await bcrypt.compare(String(enteredPassword), String(this.password));
+  } catch (err) {
+    console.error('Password compare error:', err.message);
+    return false;
+  }
 };
 
 module.exports = mongoose.model('User', userSchema);
