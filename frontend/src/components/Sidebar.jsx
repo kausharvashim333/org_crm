@@ -184,7 +184,16 @@ export default function Sidebar({ role, isOpen, onClose }) {
           <div className="flex items-center gap-3 min-w-0">
             {(() => {
               const logo = role === 'super_admin' ? orgSettings?.logo : user?.partner?.logo;
-              if (logo) return <img src={logo} alt="logo" className="w-10 h-10 rounded-xl object-cover flex-shrink-0" />;
+              if (logo && typeof logo === 'string' && logo.trim() !== '' && logo !== 'undefined') {
+                return (
+                  <img
+                    src={logo}
+                    alt="logo"
+                    className="w-10 h-10 rounded-xl object-cover flex-shrink-0"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                );
+              }
               return (
                 <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center flex-shrink-0">
                   <GraduationCap className="w-6 h-6 text-white" />

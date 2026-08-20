@@ -134,21 +134,33 @@ router.get('/me', protect, async (req, res) => {
 router.put('/change-password', protect, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Please provide both current and new password' });
+    if (!newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide a new password' });
     }
     if (newPassword.length < 6) {
       return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long' });
     }
+
     const user = await User.findById(req.user._id).select('+password');
-    const isMatch = await user.matchPassword(currentPassword);
-    if (!isMatch) {
-      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User account not found' });
     }
+
+    // Require current password verification only for regular manual password changes (not first-login setup)
+    if (!user.isFirstLogin && currentPassword) {
+      const isMatch = await user.matchPassword(currentPassword);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+      }
+    } else if (!user.isFirstLogin && !currentPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide your current password' });
+    }
+
     user.password = newPassword;
     user.isFirstLogin = false;
     user.lastPasswordChangedAt = new Date();
     await user.save();
+
     res.json({
       success: true,
       message: 'Password changed successfully',
