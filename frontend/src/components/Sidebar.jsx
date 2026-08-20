@@ -88,21 +88,10 @@ export default function Sidebar({ role, isOpen, onClose }) {
       ],
     },
     {
-      label: 'Frontend CMS & Pages',
+      label: 'Website CMS & Editor',
       icon: Globe,
       links: [
-        { to: '/admin/homepage', icon: Globe, label: 'Home & Landing Editor' },
-        { to: '/admin/homepage?section=about', icon: Info, label: 'About Us' },
-        { to: '/admin/homepage?section=courses', icon: BookOpen, label: 'Courses Section' },
-        { to: '/admin/homepage?section=services', icon: ClipboardList, label: 'Services' },
-        { to: '/admin/homepage?section=contact', icon: Contact, label: 'Contact Us' },
-        { to: '/admin/homepage?section=cta', icon: MousePointerClick, label: 'CTA Buttons' },
-        { to: '/admin/homepage?section=hero', icon: Image, label: 'Banner & Sliders' },
-        { to: '/admin/homepage?section=stats', icon: BarChart3, label: 'Impact Counter' },
-        { to: '/admin/homepage?section=certifications', icon: Award, label: 'Certifications' },
-        { to: '/admin/homepage?section=social_activities', icon: Camera, label: 'Social Activity' },
-        { to: '/admin/homepage?section=testimonials', icon: MessageCircle, label: 'Testimonials' },
-        { to: '/admin/homepage?section=settings', icon: Palette, label: 'Theme & Brand' },
+        { to: '/admin/homepage', icon: Globe, label: 'Website CMS & Editor' },
       ],
     },
   ];

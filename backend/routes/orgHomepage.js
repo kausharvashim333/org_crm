@@ -657,12 +657,14 @@ router.post('/upload-logo', protect, superAdminOnly, handleUpload('logo'), async
   try {
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded. Please select an image file.' });
     const logoUrl = `/uploads/${req.file.filename}`;
-    const homepage = await createDefaultIfMissing();
-    homepage.settings = homepage.settings || {};
-    homepage.settings.logo = logoUrl;
-    await homepage.save();
+    let homepage = await OrgHomepage.findOneAndUpdate(
+      {},
+      { $set: { 'settings.logo': logoUrl } },
+      { new: true, upsert: true }
+    );
     res.json({ success: true, logoUrl, homepage });
   } catch (error) {
+    console.error('[LOGO SAVE ERROR]', error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -671,12 +673,14 @@ router.post('/upload-favicon', protect, superAdminOnly, handleUpload('favicon'),
   try {
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded. Please select an icon file.' });
     const faviconUrl = `/uploads/${req.file.filename}`;
-    const homepage = await createDefaultIfMissing();
-    homepage.settings = homepage.settings || {};
-    homepage.settings.favicon = faviconUrl;
-    await homepage.save();
+    let homepage = await OrgHomepage.findOneAndUpdate(
+      {},
+      { $set: { 'settings.favicon': faviconUrl } },
+      { new: true, upsert: true }
+    );
     res.json({ success: true, faviconUrl, homepage });
   } catch (error) {
+    console.error('[FAVICON SAVE ERROR]', error.message);
     res.status(500).json({ success: false, message: error.message });
   }
 });
