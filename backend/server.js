@@ -102,9 +102,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
-// 8. Body Parser Payload Limits (Prevent Memory Exhaustion DoS)
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+// 8. Body Parser Payload Limits (Allows high-res logo and image uploads)
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Static uploads directory with security headers
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
