@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Save, Plus, Trash2, Globe, Upload, ArrowUp, ArrowDown, Edit, FileText } from 'lucide-react';
 import { uploadOrgImage, uploadOrgLogo, uploadOrgFavicon, uploadOrgPdf } from '../../api';
 import { useToast } from '../../context/ToastContext';
+import { refreshOrgSettings } from '../../hooks/useOrgSettings';
 
 function Field({ label, children }) {
   return <div><label className="block text-sm font-medium mb-1">{label}</label>{children}</div>;
@@ -1140,6 +1141,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
       const res = await uploadOrgLogo(fd);
       setSettings(res.data.homepage.settings);
       if (onHomepageUpdate) onHomepageUpdate(res.data.homepage);
+      refreshOrgSettings();
       showSuccess('Logo uploaded successfully');
     } catch (err) {
       showError(getUploadErrorMessage(err));
@@ -1160,6 +1162,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
       const res = await uploadOrgFavicon(fd);
       setSettings(res.data.homepage.settings);
       if (onHomepageUpdate) onHomepageUpdate(res.data.homepage);
+      refreshOrgSettings();
       showSuccess('Favicon uploaded successfully');
     } catch (err) {
       showError(getUploadErrorMessage(err));

@@ -59,8 +59,8 @@ export default function SuperAdminLogin() {
         {/* Branding Logo Block */}
         <div className="flex items-center gap-3 z-10">
           <div className="w-12 h-12 bg-primary-600/25 border border-primary-500/40 rounded-xl flex items-center justify-center backdrop-blur-md overflow-hidden">
-            {orgSettings?.logo && typeof orgSettings.logo === 'string' && orgSettings.logo !== 'undefined' ? (
-              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-xl" onError={(e) => { e.target.style.display = 'none'; }} />
+            {orgSettings?.logo && typeof orgSettings.logo === 'string' && orgSettings.logo.trim() !== '' && orgSettings.logo !== 'undefined' ? (
+              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-xl" onError={(e) => { if (!e.target.dataset.retried && orgSettings.logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${orgSettings.logo}`; } else { e.target.style.display = 'none'; } }} />
             ) : (
               <GraduationCap className="w-6 h-6 text-primary-400" />
             )}
@@ -106,8 +106,8 @@ export default function SuperAdminLogin() {
         {/* Mobile Logo & Organization Name (Hidden on Desktop) */}
         <div className="absolute top-8 left-8 md:hidden flex items-center gap-2">
           <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center overflow-hidden">
-            {orgSettings?.logo && typeof orgSettings.logo === 'string' && orgSettings.logo !== 'undefined' ? (
-              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-lg" onError={(e) => { e.target.style.display = 'none'; }} />
+            {orgSettings?.logo && typeof orgSettings.logo === 'string' && orgSettings.logo.trim() !== '' && orgSettings.logo !== 'undefined' ? (
+              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-lg" onError={(e) => { if (!e.target.dataset.retried && orgSettings.logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${orgSettings.logo}`; } else { e.target.style.display = 'none'; } }} />
             ) : (
               <GraduationCap className="w-4 h-4 text-white" />
             )}

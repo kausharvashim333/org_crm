@@ -211,8 +211,8 @@ export default function StudentLogin() {
         {/* Branding Logo Block */}
         <div className="flex items-center gap-3 z-10">
           <div className="w-12 h-12 bg-indigo-600/25 border border-indigo-500/40 rounded-xl flex items-center justify-center backdrop-blur-md overflow-hidden">
-            {logo ? (
-              <img src={logo} alt="logo" className="w-full h-full object-cover rounded-xl" />
+            {logo && typeof logo === 'string' && logo.trim() !== '' && logo !== 'undefined' ? (
+              <img src={logo} alt="logo" className="w-full h-full object-cover rounded-xl" onError={(e) => { if (!e.target.dataset.retried && logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${logo}`; } else { e.target.style.display = 'none'; } }} />
             ) : (
               <GraduationCap className="w-6 h-6 text-indigo-400" />
             )}
@@ -261,7 +261,7 @@ export default function StudentLogin() {
         {/* Mobile Logo & Organization Name (Hidden on Desktop) */}
         <div className="absolute top-8 left-8 md:hidden flex items-center gap-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center overflow-hidden">
-            {logo ? <img src={logo} alt="logo" className="w-full h-full object-cover rounded-lg" /> : <GraduationCap className="w-4 h-4 text-white" />}
+            {logo && typeof logo === 'string' && logo.trim() !== '' && logo !== 'undefined' ? <img src={logo} alt="logo" className="w-full h-full object-cover rounded-lg" onError={(e) => { if (!e.target.dataset.retried && logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${logo}`; } else { e.target.style.display = 'none'; } }} /> : <GraduationCap className="w-4 h-4 text-white" />}
           </div>
           <span className="font-extrabold text-sm text-slate-800 uppercase tracking-wide">{orgName}</span>
         </div>

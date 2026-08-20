@@ -37,7 +37,15 @@ export function useOrgSettings() {
       })
       .catch(() => {});
 
-    return () => { mounted = false; };
+    const listener = (s) => {
+      if (mounted) setSettings(s);
+    };
+    listeners.push(listener);
+
+    return () => {
+      mounted = false;
+      listeners = listeners.filter(fn => fn !== listener);
+    };
   }, []);
 
   return settings;
