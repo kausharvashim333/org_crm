@@ -78,6 +78,7 @@ export default function Footer({ homepageData }) {
               <Link to="/about" className="block text-sm text-slate-400 hover:text-white transition-colors">About Us</Link>
               <Link to="/contact" className="block text-sm text-slate-400 hover:text-white transition-colors">Contact Us</Link>
               <Link to="/franchises" className="block text-sm text-slate-400 hover:text-white transition-colors">Our Centers</Link>
+              <Link to="/notices" className="block text-sm text-slate-400 hover:text-white transition-colors">Notices</Link>
               <Link to="/verify-certificate" className="block text-sm text-slate-400 hover:text-white transition-colors">Verify Certificate</Link>
             </div>
           </div>

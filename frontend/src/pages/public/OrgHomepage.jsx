@@ -219,7 +219,7 @@ export default function OrgHomepage() {
   const themeColor = hp?.settings?.themeColor || '#2563eb';
   const orgName = hp?.settings?.orgName || 'Skill India Training Network';
   const layoutOrder = hp?.layoutOrder || [
-    'hero', 'categories', 'verticals', 'courses', 'stats', 'verifyWidget', 'about', 'franchise', 'certifications', 'testimonials', 'notices', 'cta', 'contact'
+    'hero', 'verticals', 'courses', 'services', 'stats', 'about', 'franchise', 'certifications', 'gallery', 'testimonials', 'contact'
   ];
 
   // Notice categories extraction
@@ -350,47 +350,23 @@ export default function OrgHomepage() {
                     </div>
                   </Reveal>
 
-                  {/* Social Proof & Rating Strip */}
-                  <Reveal delay={280}>
-                    <div className="flex items-center gap-3 pt-1">
-                      <div className="flex -space-x-2">
-                        {['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'].map((bg, i) => (
-                          <div key={i} className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-white text-[10px] font-black shadow-xs" style={{ backgroundColor: bg }}>
-                            {['A', 'R', 'P', 'S'][i]}
-                          </div>
-                        ))}
+                  {/* Real Stats Strip from DB */}
+                  {(hp.stats?.items || []).length > 0 && (
+                    <Reveal delay={280}>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-200/80 w-full">
+                        {(hp.stats?.items || []).slice(0, 4).map((s, i) => {
+                          const Icon = iconMap[s.icon] || Building;
+                          return (
+                            <div key={i} className="flex flex-col items-center text-center p-2.5 rounded-xl bg-white border border-slate-200/70 shadow-xs hover:border-indigo-200 transition-colors">
+                              <Icon className="w-4 h-4 mb-1" style={{ color: themeColor }} />
+                              <p className="text-base font-black text-slate-900 leading-tight">{s.value}</p>
+                              <p className="text-[10px] text-slate-500 font-semibold">{s.label}</p>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="text-left text-xs font-semibold text-slate-700">
-                        <div className="flex items-center gap-1">
-                          <div className="flex text-amber-400">
-                            {'★'.repeat(5)}
-                          </div>
-                          <span className="font-extrabold text-slate-900">4.9 / 5.0</span>
-                        </div>
-                        <span className="text-[11px] text-slate-500 font-normal">Trusted by 50,000+ Enrolled Students across India</span>
-                      </div>
-                    </div>
-                  </Reveal>
-
-                  {/* Trust Pillar Badges */}
-                  <Reveal delay={300}>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-200/80 w-full">
-                      {[
-                        { label: 'Govt Recognized', sub: 'Verified Certificates', icon: ShieldCheck },
-                        { label: '100% Practical', sub: 'Lab-Based Training', icon: Monitor },
-                        { label: '150+ Centers', sub: 'Pan-India Reach', icon: MapPin },
-                        { label: 'Placement Cell', sub: 'Career Guidance', icon: Briefcase },
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center gap-2.5 text-left p-2.5 rounded-xl bg-white border border-slate-200/70 shadow-xs hover:border-indigo-200 transition-colors">
-                          <item.icon className="w-4 h-4 text-indigo-600 shrink-0" />
-                          <div>
-                            <p className="text-xs font-bold text-slate-900 leading-tight">{item.label}</p>
-                            <p className="text-[10px] text-slate-500">{item.sub}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </Reveal>
+                    </Reveal>
+                  )}
 
                 </div>
 
@@ -851,60 +827,60 @@ export default function OrgHomepage() {
                 <SectionHeading
                   badge="Institutional Profile"
                   title={hp.about?.title || 'About Our Organization'}
+                  subtitle={hp.about?.description}
                   themeColor={themeColor}
                 />
               </Reveal>
 
-              <Reveal delay={100}>
-                <p className="text-center text-slate-600 max-w-3xl mx-auto mb-12 text-sm sm:text-base leading-relaxed">
-                  {hp.about?.description}
-                </p>
-              </Reveal>
-
-              {/* Mission & Vision Cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-                {hp.about?.mission && (
-                  <Reveal delay={150}>
-                    <div className="bg-white rounded-2xl p-7 border border-slate-200 shadow-xs">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-indigo-50 text-indigo-600">
-                        <Target className="w-6 h-6" />
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">Our Mission</h3>
-                      <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">{hp.about.mission}</p>
-                    </div>
-                  </Reveal>
-                )}
-
-                {hp.about?.vision && (
-                  <Reveal delay={250}>
-                    <div className="bg-white rounded-2xl p-7 border border-slate-200 shadow-xs">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-indigo-50 text-indigo-600">
-                        <Heart className="w-6 h-6" />
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">Our Vision</h3>
-                      <p className="text-slate-600 leading-relaxed text-xs sm:text-sm">{hp.about.vision}</p>
-                    </div>
-                  </Reveal>
-                )}
-              </div>
-
-              {/* Key Features Six Columns */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-                {(hp.about?.features || []).map((f, i) => {
-                  const Icon = iconMap[f.icon] || BookOpen;
-                  return (
-                    <Reveal key={i} delay={i * 60} className="h-full">
-                      <div className="h-full flex flex-col items-center justify-start text-center p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-slate-100 text-indigo-600">
-                          <Icon className="w-5 h-5" />
+              {/* Mission & Vision inline */}
+              {(hp.about?.mission || hp.about?.vision) && (
+                <Reveal delay={100}>
+                  <div className="flex flex-col sm:flex-row gap-4 max-w-4xl mx-auto mb-12">
+                    {hp.about?.mission && (
+                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50" style={{ color: themeColor }}>
+                          <Target className="w-5 h-5" />
                         </div>
-                        <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-1">{f.title}</h4>
-                        <p className="text-xs text-slate-500 leading-relaxed">{f.description}</p>
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-sm mb-1">Our Mission</h4>
+                          <p className="text-xs text-slate-600 leading-relaxed">{hp.about.mission}</p>
+                        </div>
                       </div>
-                    </Reveal>
-                  );
-                })}
-              </div>
+                    )}
+                    {hp.about?.vision && (
+                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50" style={{ color: themeColor }}>
+                          <Heart className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-sm mb-1">Our Vision</h4>
+                          <p className="text-xs text-slate-600 leading-relaxed">{hp.about.vision}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </Reveal>
+              )}
+
+              {/* Key Features */}
+              {(hp.about?.features || []).length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                  {(hp.about?.features || []).map((f, i) => {
+                    const Icon = iconMap[f.icon] || BookOpen;
+                    return (
+                      <Reveal key={i} delay={i * 60} className="h-full">
+                        <div className="h-full flex flex-col items-center justify-start text-center p-5 bg-white rounded-xl border border-slate-200 shadow-xs hover:shadow-sm transition-all">
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-slate-100" style={{ color: themeColor }}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-1">{f.title}</h4>
+                          <p className="text-xs text-slate-500 leading-relaxed">{f.description}</p>
+                        </div>
+                      </Reveal>
+                    );
+                  })}
+                </div>
+              )}
 
             </div>
           </section>
@@ -913,82 +889,42 @@ export default function OrgHomepage() {
       case 'franchise':
         if (hp.franchise?.show === false) return null;
         return (
-          <section key="franchise" id="franchise" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
-            <div className="max-w-7xl mx-auto">
-              
+          <section key="franchise" id="franchise" className="py-14 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-900 to-slate-800 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ backgroundColor: themeColor }} />
+            <div className="max-w-5xl mx-auto relative z-10">
               <Reveal>
-                <SectionHeading
-                  badge="Franchise Affiliation"
-                  title={hp.franchise?.title || 'Partner With Us (Start Your Center)'}
-                  subtitle={hp.franchise?.subtitle || 'Launch an authorized training academy in your area with our established brand, curriculum, ERP portal, and complete academic support.'}
-                  themeColor={themeColor}
-                />
-              </Reveal>
-
-              {/* Franchise Benefits Grid */}
-              {(hp.franchise?.benefits?.length > 0) && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                  {hp.franchise.benefits.map((b, i) => {
-                    const Icon = iconMap[b.icon] || Building;
-                    return (
-                      <Reveal key={i} delay={i * 70}>
-                        <div className="bg-slate-50 hover:bg-white rounded-2xl p-6 text-center border border-slate-200 shadow-xs hover:shadow-md transition-all h-full">
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 bg-indigo-50 text-indigo-600">
-                            <Icon className="w-6 h-6" />
-                          </div>
-                          <h4 className="font-bold text-slate-900 text-sm sm:text-base mb-1.5">{b.title}</h4>
-                          <p className="text-xs text-slate-600 leading-relaxed">{b.description}</p>
-                        </div>
-                      </Reveal>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Roadmap Steps */}
-              {(hp.franchise?.steps?.length > 0) && (
-                <Reveal delay={150}>
-                  <div className="bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200 mb-10">
-                    <h3 className="font-bold text-lg text-center mb-8 text-slate-900">
-                      4-Step Franchise Onboarding Process
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-                      {hp.franchise.steps.map((s, i) => (
-                        <div key={i} className="text-center p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 text-white font-black text-sm shadow-xs" style={{ backgroundColor: themeColor }}>
-                            {s.step || i + 1}
-                          </div>
-                          <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-1">{s.title}</h4>
-                          <p className="text-xs text-slate-500 leading-relaxed">{s.description}</p>
-                        </div>
-                      ))}
-                    </div>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+                  <div className="flex-1">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3" style={{ backgroundColor: `${themeColor}25`, color: themeColor }}>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Franchise Affiliation
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight">
+                      {hp.franchise?.title || 'Partner With Us'}
+                    </h2>
+                    <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
+                      {hp.franchise?.subtitle || 'Join our growing network of training institutes across India'}
+                    </p>
                   </div>
-                </Reveal>
-              )}
-
-              {/* CTA Action */}
-              <Reveal delay={200}>
-                <div className="text-center flex flex-wrap justify-center gap-3">
-                  <Link
-                    to="/franchise"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-sm hover:bg-indigo-700 transition-all"
-                    style={{ backgroundColor: themeColor }}
-                  >
-                    <span>{hp.franchise?.buttonText || 'Apply for Franchise Center'}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-
-                  <button
-                    onClick={() => window.dispatchEvent(new Event('open-partner-enquiry'))}
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 transition-all"
-                  >
-                    <Building className="w-4 h-4 text-slate-600" />
-                    <span>Talk to Franchise Coordinator</span>
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                    <Link
+                      to="/franchise"
+                      className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-lg transition-all hover:scale-105"
+                      style={{ backgroundColor: themeColor }}
+                    >
+                      <span>{hp.franchise?.buttonText || 'Apply for Franchise'}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <button
+                      onClick={() => window.dispatchEvent(new Event('open-partner-enquiry'))}
+                      className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all"
+                    >
+                      <Building className="w-4 h-4" />
+                      <span>Talk to Coordinator</span>
+                    </button>
+                  </div>
                 </div>
               </Reveal>
-
             </div>
           </section>
         );
@@ -1192,6 +1128,150 @@ export default function OrgHomepage() {
                   )}
                 </Reveal>
 
+              </div>
+            </div>
+          </section>
+        );
+
+      case 'services':
+        if (hp.services?.show === false || !hp.services?.items?.length) return null;
+        return (
+          <section key="services" id="services" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
+            <div className="max-w-7xl mx-auto">
+              <Reveal>
+                <SectionHeading
+                  badge="Training Programs"
+                  title={hp.services?.title || 'Our Training Services'}
+                  subtitle={hp.services?.subtitle || 'Explore our specialized vocational certification and coaching pathways'}
+                  themeColor={themeColor}
+                />
+              </Reveal>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(hp.services?.items || []).map((s, i) => {
+                  const Icon = iconMap[s.icon] || Briefcase;
+                  return (
+                    <Reveal key={i} delay={i * 70}>
+                      <div className="group bg-slate-50 hover:bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all h-full flex flex-col">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-50" style={{ color: themeColor }}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          {s.duration && (
+                            <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {s.duration}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">{s.title}</h3>
+                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">{s.desc}</p>
+                        {s.topics?.length > 0 && (
+                          <div className="mb-3">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Key Topics</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {s.topics.slice(0, 4).map((t, j) => (
+                                <span key={j} className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[11px] font-semibold text-slate-700">{t}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {s.careers?.length > 0 && (
+                          <div className="mt-auto pt-3 border-t border-slate-200/70">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Career Opportunities</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {s.careers.slice(0, 3).map((c, j) => (
+                                <span key={j} className="px-2 py-0.5 rounded-md text-[11px] font-semibold" style={{ backgroundColor: `${themeColor}10`, color: themeColor }}>{c}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Reveal>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        );
+
+      case 'gallery':
+        if (hp.gallery?.show === false || !hp.gallery?.photos?.length) return null;
+        return (
+          <section key="gallery" id="gallery" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-b border-slate-200/60">
+            <div className="max-w-7xl mx-auto">
+              <Reveal>
+                <SectionHeading
+                  badge="Campus Life"
+                  title={hp.gallery?.title || 'Gallery'}
+                  subtitle="Glimpses from our training centers, events, and student activities"
+                  themeColor={themeColor}
+                />
+              </Reveal>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {(hp.gallery?.photos || []).map((photo, i) => (
+                  <Reveal key={i} delay={i * 50}>
+                    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg transition-all aspect-square">
+                      <img
+                        src={photo.url}
+                        alt={photo.caption || 'Gallery image'}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          if (!e.target.dataset.retried && photo.url?.startsWith('/uploads/')) {
+                            e.target.dataset.retried = 'true';
+                            e.target.src = `/api${photo.url}`;
+                          } else {
+                            e.target.style.display = 'none';
+                          }
+                        }}
+                      />
+                      {photo.caption && (
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <p className="text-white text-xs font-semibold">{photo.caption}</p>
+                        </div>
+                      )}
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+
+      case 'notices':
+        if (hp.notices?.show === false || !hp.notices?.items?.length) return null;
+        return (
+          <section key="notices" id="notices" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
+            <div className="max-w-5xl mx-auto">
+              <Reveal>
+                <SectionHeading
+                  badge="Updates"
+                  title={hp.notices?.title || 'Notices & Announcements'}
+                  themeColor={themeColor}
+                />
+              </Reveal>
+              <div className="space-y-3">
+                {(hp.notices?.items || []).map((notice, i) => {
+                  const isNew = isNoticeNew(notice);
+                  return (
+                    <Reveal key={i} delay={i * 50}>
+                      <div
+                        onClick={() => notice.pdfUrl && window.open(notice.pdfUrl, '_blank')}
+                        className={`p-4 rounded-2xl bg-slate-50 hover:bg-indigo-50/40 border border-slate-200/70 hover:border-indigo-200 transition-all text-left ${notice.pdfUrl ? 'cursor-pointer group' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{notice.title}</h4>
+                          {isNew && <span className="shrink-0 px-2 py-0.5 rounded-md bg-red-600 text-white text-[9px] font-black uppercase tracking-wider">NEW</span>}
+                        </div>
+                        <p className="text-xs text-slate-600 mb-2 leading-relaxed">{notice.description}</p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-200/50">
+                          <span className="px-2 py-0.5 rounded bg-white text-indigo-700 font-semibold uppercase tracking-wider border border-slate-200/60">{notice.category || 'General'}</span>
+                          {notice.date && <span>{new Date(notice.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+                        </div>
+                      </div>
+                    </Reveal>
+                  );
+                })}
               </div>
             </div>
           </section>
