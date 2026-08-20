@@ -22,19 +22,25 @@ router.post('/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    const cleanEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
+    const cleanPassword = typeof password === 'string' ? password.trim() : password;
+
+    const user = await User.findOne({ email: cleanEmail }).select('+password');
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await user.matchPassword(cleanPassword);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
     if (!user.isActive) {
       return res.status(401).json({ success: false, message: 'Account is deactivated. Contact administrator.' });
     }
     if (role && user.role !== role) {
-      return res.status(401).json({ success: false, message: `This account is not a ${role} account` });
+      const isSuperAdminRole = user.role === 'super_admin' && (role === 'super_admin' || role === 'admin');
+      if (!isSuperAdminRole) {
+        return res.status(401).json({ success: false, message: `This account does not have ${role} permissions` });
+      }
     }
     user.lastLogin = new Date();
     await user.save();

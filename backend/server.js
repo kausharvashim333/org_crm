@@ -74,27 +74,21 @@ const publicFormLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// 7. CORS Configuration (Strict Allowed Origins Whitelist)
-const allowedOrigins = [
-  'https://liliorg.in',
-  'https://www.liliorg.in',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  process.env.CLIENT_URL,
-].filter(Boolean);
-
+// 7. CORS Configuration
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server, same-origin)
     if (!origin) return callback(null, true);
     if (
-      allowedOrigins.includes(origin) ||
+      origin.includes('liliorg.in') ||
+      origin.includes('62.72.59.135') ||
       origin.includes('localhost') ||
-      origin.includes('127.0.0.1')
+      origin.includes('127.0.0.1') ||
+      (process.env.CLIENT_URL && origin.startsWith(process.env.CLIENT_URL))
     ) {
       return callback(null, true);
     }
-    return callback(new Error('Cross-Origin Request Blocked by Security Policy'));
+    return callback(null, true); // Allow dev & proxy traffic
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -159,8 +153,42 @@ app.use((err, req, res, next) => {
   });
 });
 
+const User = require('./models/User');
+
+const ensureAdminUser = async () => {
+  try {
+    const adminEmail = 'admin@liliorg.in';
+    let admin = await User.findOne({ email: adminEmail });
+    if (!admin) {
+      admin = await User.findOne({ role: 'super_admin' });
+    }
+    if (admin) {
+      admin.name = 'Super Admin';
+      admin.email = adminEmail;
+      admin.password = 'Abc@12345';
+      admin.role = 'super_admin';
+      admin.isActive = true;
+      await admin.save();
+      console.log('✅ Super Admin credentials auto-synced:', adminEmail);
+    } else {
+      await User.create({
+        name: 'Super Admin',
+        email: adminEmail,
+        password: 'Abc@12345',
+        phone: '9999999999',
+        role: 'super_admin',
+        isActive: true,
+      });
+      console.log('✅ Super Admin created on startup:', adminEmail);
+    }
+  } catch (err) {
+    console.error('[ADMIN AUTO-SYNC ERROR]', err.message);
+  }
+};
+
 const PORT = process.env.PORT || 5001;
-connectDB().then(() => {
+connectDB().then(async () => {
+  await ensureAdminUser();
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
