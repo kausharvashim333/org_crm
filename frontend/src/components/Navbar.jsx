@@ -203,8 +203,8 @@ export default function Navbar({ activePage }) {
         
         {/* Left: Brand Logo & Title */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          {logo ? (
-            <img src={logo} alt="logo" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-slate-100 shadow-xs" />
+          {logo && typeof logo === 'string' && logo !== 'undefined' ? (
+            <img src={logo} alt="logo" className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-slate-100 shadow-xs" onError={(e) => { e.target.style.display = 'none'; }} />
           ) : (
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shadow-md text-white font-bold" style={{ backgroundColor: themeColor }}>
               <GraduationCap className="w-5 h-5" />

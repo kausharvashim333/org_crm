@@ -187,11 +187,23 @@ const ensureAdminUser = async () => {
 };
 
 const PORT = process.env.PORT || 5001;
-connectDB().then(async () => {
-  await ensureAdminUser();
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    try {
+      await ensureAdminUser();
+    } catch (adminErr) {
+      console.error('[ADMIN AUTO-SYNC WARNING]', adminErr.message);
+    }
+  } catch (dbErr) {
+    console.error('[DATABASE CONNECT WARNING]', dbErr.message);
+  }
+
+  // Always bind port 5001 to 0.0.0.0 to guarantee Nginx proxy never hits 502 Bad Gateway
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Franchise CRM Server running on port ${PORT}`);
   });
-}).catch((err) => {
-  console.error('[DATABASE CONNECT ERROR]', err.message);
-});
+};
+
+startServer();
