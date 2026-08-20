@@ -1,0 +1,81 @@
+import { createContext, useContext, useState, useEffect } from 'react';
+import { getMe } from '../api';
+
+const AuthContext = createContext();
+
+export const useAuth = () => useContext(AuthContext);
+
+const getRoleKeysForPath = (path = window.location.pathname) => {
+  if (path.startsWith('/admin')) {
+    return { tokenKey: 'admin_token', userKey: 'admin_user', role: 'super_admin' };
+  }
+  if (path.startsWith('/partner')) {
+    return { tokenKey: 'partner_token', userKey: 'partner_user', role: 'partner' };
+  }
+  if (path.startsWith('/student')) {
+    return { tokenKey: 'student_token', userKey: 'student_user', role: 'student' };
+  }
+  return { tokenKey: 'admin_token', userKey: 'admin_user', role: 'super_admin' };
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const { tokenKey, userKey } = getRoleKeysForPath();
+    const token = localStorage.getItem(tokenKey);
+    const cachedUserStr = localStorage.getItem(userKey);
+
+    if (cachedUserStr) {
+      try {
+        setUser(JSON.parse(cachedUserStr));
+      } catch (e) {}
+    }
+
+    if (token) {
+      getMe()
+        .then((res) => {
+          setUser(res.data.user);
+          localStorage.setItem(userKey, JSON.stringify(res.data.user));
+        })
+        .catch(() => {
+          localStorage.removeItem(tokenKey);
+          localStorage.removeItem(userKey);
+          setUser(null);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setUser(null);
+      setLoading(false);
+    }
+  }, []);
+
+  const login = (userData) => {
+    const role = userData.user?.role;
+    let tokenKey = 'admin_token';
+    let userKey = 'admin_user';
+
+    if (role === 'partner') {
+      tokenKey = 'partner_token';
+      userKey = 'partner_user';
+    } else if (role === 'student') {
+      tokenKey = 'student_token';
+      userKey = 'student_user';
+    }
+
+    localStorage.setItem(tokenKey, userData.token);
+    localStorage.setItem(userKey, JSON.stringify(userData.user));
+    setUser(userData.user);
+  };
+
+  const logout = () => {
+    const { tokenKey, userKey } = getRoleKeysForPath();
+    localStorage.removeItem(tokenKey);
+    localStorage.removeItem(userKey);
+    setUser(null);
+  };
+
+  const value = { user, loading, login, logout, setUser };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

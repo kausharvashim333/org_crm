@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+**/node_modules/
+node_modules 2/
+**/node_modules 2/
+
+# Production builds
+dist/
+**/dist/
+
+# Environment variables (Credentials)
+.env
+.env.local
+.env.*.local
+**/.env
+
+# Uploads & User generated files
+uploads/
+**/uploads/
+
+# Logs
+*.log
+**/*.log
+
+# OS generated files
+.DS_Store
+**/.DS_Store
+Thumbs.db
