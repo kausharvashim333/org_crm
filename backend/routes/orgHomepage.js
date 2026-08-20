@@ -642,10 +642,20 @@ router.delete('/certifications/:index', protect, superAdminOnly, async (req, res
   }
 });
 
-// File uploads
-router.post('/upload-logo', protect, superAdminOnly, upload.single('logo'), async (req, res) => {
+// File uploads with robust error handling
+const handleUpload = (field) => (req, res, next) => {
+  upload.single(field)(req, res, (err) => {
+    if (err) {
+      console.error(`[UPLOAD ERROR: ${field}]`, err.message);
+      return res.status(400).json({ success: false, message: err.message || 'File upload failed' });
+    }
+    next();
+  });
+};
+
+router.post('/upload-logo', protect, superAdminOnly, handleUpload('logo'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded. Please select an image file.' });
     const logoUrl = `/uploads/${req.file.filename}`;
     const homepage = await createDefaultIfMissing();
     homepage.settings = homepage.settings || {};
@@ -657,9 +667,9 @@ router.post('/upload-logo', protect, superAdminOnly, upload.single('logo'), asyn
   }
 });
 
-router.post('/upload-favicon', protect, superAdminOnly, upload.single('favicon'), async (req, res) => {
+router.post('/upload-favicon', protect, superAdminOnly, handleUpload('favicon'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded. Please select an icon file.' });
     const faviconUrl = `/uploads/${req.file.filename}`;
     const homepage = await createDefaultIfMissing();
     homepage.settings = homepage.settings || {};
@@ -671,9 +681,9 @@ router.post('/upload-favicon', protect, superAdminOnly, upload.single('favicon')
   }
 });
 
-router.post('/upload-image', protect, superAdminOnly, upload.single('image'), async (req, res) => {
+router.post('/upload-image', protect, superAdminOnly, handleUpload('image'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded. Please select an image file.' });
     const imageUrl = `/uploads/${req.file.filename}`;
     res.json({ success: true, imageUrl });
   } catch (error) {
@@ -681,9 +691,9 @@ router.post('/upload-image', protect, superAdminOnly, upload.single('image'), as
   }
 });
 
-router.post('/upload-pdf', protect, superAdminOnly, upload.single('pdf'), async (req, res) => {
+router.post('/upload-pdf', protect, superAdminOnly, handleUpload('pdf'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
+    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded. Please select a PDF file.' });
     const pdfUrl = `/uploads/${req.file.filename}`;
     res.json({ success: true, pdfUrl });
   } catch (error) {
