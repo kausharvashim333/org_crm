@@ -177,6 +177,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
                 return (
                   <img
                     src={logo}
+                    className="w-10 h-10 rounded-xl object-cover border border-slate-700 flex-shrink-0"
                     onError={(e) => {
                       if (!e.target.dataset.retried && logo.startsWith('/uploads/')) {
                         e.target.dataset.retried = 'true';

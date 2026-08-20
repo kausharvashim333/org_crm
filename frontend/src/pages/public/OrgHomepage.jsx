@@ -1109,7 +1109,18 @@ export default function OrgHomepage() {
                 {/* Map or Direct Form Link */}
                 <Reveal delay={100} className="lg:col-span-6">
                   {hp.contact?.mapEmbed ? (
-                    <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xs h-full min-h-[280px] [&>iframe]:h-full [&>iframe]:w-full [&>iframe]:border-none" dangerouslySetInnerHTML={{ __html: hp.contact.mapEmbed }} />
+                    <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xs h-full min-h-[280px]">
+                      {hp.contact.mapEmbed.includes('<iframe') ? (
+                        <div className="h-full min-h-[280px] [&>iframe]:h-full [&>iframe]:w-full [&>iframe]:border-none" dangerouslySetInnerHTML={{ __html: hp.contact.mapEmbed }} />
+                      ) : (
+                        <iframe
+                          src={hp.contact.mapEmbed}
+                          className="w-full h-full min-h-[280px] border-none"
+                          title="Organization Location"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
                   ) : (
                     <div className="bg-white rounded-2xl p-7 border border-slate-200 shadow-xs h-full min-h-[280px] flex flex-col items-center justify-center text-center">
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 bg-indigo-50 text-indigo-600">

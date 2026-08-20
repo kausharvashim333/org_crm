@@ -1090,7 +1090,30 @@ export function ContactEditor({ homepage, onSave }) {
         <Field label="Phone"><input type="text" value={data.phone || ''} onChange={(e) => setData({ ...data, phone: e.target.value })} className="input-field" /></Field>
       </div>
       <Field label="Address"><input type="text" value={data.address || ''} onChange={(e) => setData({ ...data, address: e.target.value })} className="input-field" /></Field>
-      <Field label="Google Maps Embed URL"><input type="text" value={data.mapEmbed || ''} onChange={(e) => setData({ ...data, mapEmbed: e.target.value })} className="input-field" /></Field>
+      <div className="border-t pt-3">
+        <h4 className="font-medium text-sm mb-1">Google Map Embed</h4>
+        <p className="text-xs text-gray-500 mb-2">Go to <a href="https://www.google.com/maps" target="_blank" rel="noreferrer" className="text-blue-600 underline">Google Maps</a> → search your location → click "Share" → "Embed a map" → copy the <code className="bg-gray-100 px-1 rounded text-xs">src="..."</code> URL and paste it below.</p>
+        <textarea
+          value={data.mapEmbed || ''}
+          onChange={(e) => setData({ ...data, mapEmbed: e.target.value })}
+          className="input-field min-h-[80px] text-xs font-mono"
+          placeholder='https://www.google.com/maps/embed?pb=...'
+        />
+        {data.mapEmbed && (
+          <div className="mt-3 rounded-xl overflow-hidden border border-gray-200">
+            <div className="bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-600 flex items-center justify-between">
+              <span>Live Preview</span>
+              <button onClick={() => setData({ ...data, mapEmbed: '' })} className="text-red-600 text-xs hover:underline">Remove Map</button>
+            </div>
+            <iframe
+              src={data.mapEmbed}
+              className="w-full h-[200px] border-none"
+              title="Map Preview"
+              loading="lazy"
+            />
+          </div>
+        )}
+      </div>
       <div className="border-t pt-3">
         <h4 className="font-medium text-sm mb-2">Social Links</h4>
         <div className="grid grid-cols-2 gap-3">
