@@ -259,8 +259,8 @@ export default function PartnerLogin() {
         {/* Branding Logo Block */}
         <div className="flex items-center gap-3 z-10">
           <div className="w-12 h-12 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center backdrop-blur-md overflow-hidden">
-            {orgLogo ? (
-              <img src={orgLogo} alt="logo" className="w-full h-full object-cover rounded-xl" />
+            {orgLogo && typeof orgLogo === 'string' && orgLogo.trim() !== '' && orgLogo !== 'undefined' ? (
+              <img src={orgLogo} alt="logo" className="w-full h-full object-cover rounded-xl" onError={(e) => { if (!e.target.dataset.retried && orgLogo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${orgLogo}`; } else { e.target.style.display = 'none'; } }} />
             ) : (
               <GraduationCap className="w-6 h-6 text-white" />
             )}
@@ -307,7 +307,7 @@ export default function PartnerLogin() {
         {/* Mobile Logo & Organization Name (Hidden on Desktop) */}
         <div className="absolute top-8 left-8 md:hidden flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden bg-white border border-slate-100 shadow-sm">
-            {orgLogo ? <img src={orgLogo} alt="logo" className="w-full h-full object-cover" /> : <GraduationCap className="w-4 h-4 text-slate-700" />}
+            {orgLogo && typeof orgLogo === 'string' && orgLogo.trim() !== '' && orgLogo !== 'undefined' ? <img src={orgLogo} alt="logo" className="w-full h-full object-cover" onError={(e) => { if (!e.target.dataset.retried && orgLogo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${orgLogo}`; } else { e.target.style.display = 'none'; } }} /> : <GraduationCap className="w-4 h-4 text-slate-700" />}
           </div>
           <span className="font-extrabold text-sm text-slate-800 uppercase tracking-wide truncate max-w-[150px]">
             {orgName}
@@ -332,8 +332,8 @@ export default function PartnerLogin() {
           {partner && (
             <div className="mb-6 bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 shadow-md flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white overflow-hidden flex-shrink-0">
-                {partner.logo ? (
-                  <img src={partner.logo} alt="logo" className="w-full h-full object-cover" />
+                {partner.logo && typeof partner.logo === 'string' && partner.logo.trim() !== '' && partner.logo !== 'undefined' ? (
+                  <img src={partner.logo} alt="logo" className="w-full h-full object-cover" onError={(e) => { if (!e.target.dataset.retried && partner.logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${partner.logo}`; } else { e.target.style.display = 'none'; } }} />
                 ) : (
                   <Building2 className="w-6 h-6 text-blue-400" />
                 )}
