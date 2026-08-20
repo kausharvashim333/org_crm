@@ -10,6 +10,7 @@ import {
   addOrgNotice, deleteOrgNotice, updateOrgNotice,
   addOrgCertification, deleteOrgCertification,
   addOrgService, deleteOrgService,
+  addOrgVertical, deleteOrgVertical,
 } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { ExternalLink } from 'lucide-react';
@@ -18,12 +19,13 @@ import {
   CertificationsEditor, GalleryEditor, TestimonialsEditor,
   NoticesEditor, CtaEditor, ContactEditor, SettingsEditor,
   ServicesEditor, AnnouncementEditor, EnquiryConfigEditor,
-  CodeSeriesEditor,
+  CodeSeriesEditor, VerticalsEditor,
 } from './websiteEditors';
 
 const tabs = [
   { key: 'hero', label: 'Hero & CTA' },
   { key: 'content', label: 'About & Stats' },
+  { key: 'verticals', label: 'Verticals' },
   { key: 'franchise', label: '⭐ Franchise & Partnership Plans' },
   { key: 'services', label: 'Services' },
   { key: 'media', label: 'Media' },
@@ -34,6 +36,7 @@ const tabs = [
 const sectionToTab = {
   hero: 'hero', cta: 'hero',
   about: 'content', stats: 'content', certifications: 'content',
+  verticals: 'verticals',
   franchise: 'franchise',
   services: 'services',
   gallery: 'media', testimonials: 'media', notices: 'media',
@@ -125,6 +128,10 @@ export default function OrgHomepageEditor() {
           <CertificationsEditor homepage={homepage} onSave={(d) => save('certifications', d)} onAdd={(d) => add(addOrgCertification, d, 'Certification added')} onDelete={(i) => del(deleteOrgCertification, i, 'Deleted')} />
         </>}
 
+        {activeTab === 'verticals' && (
+          <VerticalsEditor homepage={homepage} onSave={(d) => save('verticals', d)} onAdd={(d) => add(addOrgVertical, d, 'Vertical added')} onDelete={(i) => del(deleteOrgVertical, i, 'Deleted')} />
+        )}
+
         {activeTab === 'franchise' && (
           <FranchiseEditor homepage={homepage} onSave={(d) => save('franchise', d)} />
         )}
@@ -144,7 +151,7 @@ export default function OrgHomepageEditor() {
           <AnnouncementEditor homepage={homepage} onSave={(d) => save('announcement', d)} />
           <EnquiryConfigEditor homepage={homepage} onSave={(d) => save('enquiryConfig', d)} />
           <ContactEditor homepage={homepage} onSave={(d) => save('contact', d)} />
-          <SettingsEditor homepage={homepage} onSave={async (d) => { try { const res = await updateOrgHomepage({ settings: d }); setHomepage(res.data.homepage); showSuccess('Settings saved'); } catch { showError('Failed'); } }} />
+          <SettingsEditor homepage={homepage} onSave={async (d) => { try { const res = await updateOrgHomepage({ settings: d }); setHomepage(res.data.homepage); showSuccess('Settings saved'); } catch { showError('Failed'); } }} onHomepageUpdate={(hp) => setHomepage(hp)} />
         </>}
       </div>
     </div>

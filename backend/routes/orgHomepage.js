@@ -422,7 +422,9 @@ router.get('/', protect, superAdminOnly, async (req, res) => {
 router.put('/', protect, superAdminOnly, async (req, res) => {
   try {
     const homepage = await createDefaultIfMissing();
-    Object.assign(homepage, req.body);
+    Object.keys(req.body).forEach(key => {
+      homepage.set(key, req.body[key]);
+    });
     await homepage.save();
     res.json({ success: true, homepage });
   } catch (error) {

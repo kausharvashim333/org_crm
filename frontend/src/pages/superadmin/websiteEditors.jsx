@@ -245,6 +245,48 @@ export function StatsEditor({ homepage, onSave, onAdd, onDelete }) {
   );
 }
 
+export function VerticalsEditor({ homepage, onSave, onAdd, onDelete }) {
+  const [data, setData] = useState(homepage.verticals || { items: [] });
+  const [newItem, setNewItem] = useState({ icon: 'book', title: '', shortDesc: '', description: '', coursesCount: '', link: '' });
+  return (
+    <div className="card space-y-4">
+      <h3 className="font-semibold">Verticals / Fields</h3>
+      <Field label="Section Title"><input type="text" value={data.title || ''} onChange={(e) => setData({ ...data, title: e.target.value })} className="input-field" /></Field>
+      <Field label="Section Subtitle"><input type="text" value={data.subtitle || ''} onChange={(e) => setData({ ...data, subtitle: e.target.value })} className="input-field" /></Field>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={data.show !== false} onChange={(e) => setData({ ...data, show: e.target.checked })} /> Show this section</label>
+      <div className="border-t pt-4">
+        <h4 className="font-medium text-sm mb-3">Vertical Items</h4>
+        <div className="space-y-2 mb-4">
+          {(data.items || []).map((v, i) => (
+            <div key={i} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+              <div><p className="text-sm font-medium">{v.title}</p><p className="text-xs text-gray-500">{v.shortDesc} - {v.coursesCount}</p></div>
+              <button onClick={() => onDelete(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          ))}
+        </div>
+        <form onSubmit={(e) => { e.preventDefault(); onAdd(newItem); setNewItem({ icon: 'book', title: '', shortDesc: '', description: '', coursesCount: '', link: '' }); }} className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <select value={newItem.icon} onChange={(e) => setNewItem({ ...newItem, icon: e.target.value })} className="input-field">
+              <option value="book">Book</option><option value="briefcase">Briefcase</option><option value="users">Users</option>
+              <option value="award">Award</option><option value="monitor">Monitor</option><option value="building">Building</option>
+              <option value="wifi">WiFi</option><option value="target">Target</option><option value="heart">Heart</option><option value="trending">Trending</option>
+            </select>
+            <input type="text" required placeholder="Title (e.g. Paramedical)" value={newItem.title} onChange={(e) => setNewItem({ ...newItem, title: e.target.value })} className="input-field" />
+          </div>
+          <input type="text" placeholder="Short Description" value={newItem.shortDesc} onChange={(e) => setNewItem({ ...newItem, shortDesc: e.target.value })} className="input-field" />
+          <textarea rows="2" placeholder="Full Description" value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="input-field" />
+          <div className="grid grid-cols-2 gap-2">
+            <input type="text" placeholder="Courses Count (e.g. 15+ Courses)" value={newItem.coursesCount} onChange={(e) => setNewItem({ ...newItem, coursesCount: e.target.value })} className="input-field" />
+            <input type="text" placeholder="Link (e.g. /#courses)" value={newItem.link} onChange={(e) => setNewItem({ ...newItem, link: e.target.value })} className="input-field" />
+          </div>
+          <button type="submit" className="btn-primary flex items-center justify-center gap-2 w-full"><Plus className="w-4 h-4" /> Add Vertical</button>
+        </form>
+      </div>
+      <button onClick={() => onSave(data)} className="btn-primary flex items-center gap-2"><Save className="w-4 h-4" /> Save Section</button>
+    </div>
+  );
+}
+
 export function FranchiseEditor({ homepage, onSave }) {
   const [data, setData] = useState(homepage.franchise || { benefits: [], steps: [], plans: [] });
   const [editingPlanIndex, setEditingPlanIndex] = useState(null);
@@ -729,6 +771,27 @@ export function FranchiseEditor({ homepage, onSave }) {
 export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
   const [data, setData] = useState(homepage.certifications || { items: [] });
   const [newItem, setNewItem] = useState({ name: '', logo: '', description: '' });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const { showSuccess, showError } = useToast();
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await uploadOrgImage(fd);
+      setNewItem(prev => ({ ...prev, logo: res.data.imageUrl }));
+      showSuccess('Certification logo uploaded');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploadingLogo(false);
+      e.target.value = '';
+    }
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Certifications & Affiliations</h3>
@@ -739,14 +802,24 @@ export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
         <div className="space-y-2 mb-4">
           {(data.items || []).map((c, i) => (
             <div key={i} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-              <div><p className="text-sm font-medium">{c.name}</p><p className="text-xs text-gray-500">{c.description}</p></div>
+              <div className="flex items-center gap-3">
+                {c.logo && <img src={c.logo} alt={c.name} className="w-10 h-10 rounded object-cover border" />}
+                <div><p className="text-sm font-medium">{c.name}</p><p className="text-xs text-gray-500">{c.description}</p></div>
+              </div>
               <button onClick={() => onDelete(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
             </div>
           ))}
         </div>
         <form onSubmit={(e) => { e.preventDefault(); onAdd(newItem); setNewItem({ name: '', logo: '', description: '' }); }} className="space-y-2">
           <input type="text" required placeholder="Certification Name" value={newItem.name} onChange={(e) => setNewItem({ ...newItem, name: e.target.value })} className="input-field" />
-          <input type="text" placeholder="Logo URL (optional)" value={newItem.logo} onChange={(e) => setNewItem({ ...newItem, logo: e.target.value })} className="input-field" />
+          <div className="flex gap-2 items-center">
+            <input type="text" placeholder="Logo URL (optional)" value={newItem.logo} onChange={(e) => setNewItem({ ...newItem, logo: e.target.value })} className="input-field flex-1" />
+            <label className="btn-secondary flex items-center gap-2 cursor-pointer whitespace-nowrap">
+              <Upload className="w-4 h-4" /> {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploadingLogo} />
+            </label>
+          </div>
+          {newItem.logo && <img src={newItem.logo} alt="preview" className="w-12 h-12 rounded object-cover border" />}
           <input type="text" placeholder="Description" value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} className="input-field" />
           <button type="submit" className="btn-primary flex items-center justify-center gap-2 w-full"><Plus className="w-4 h-4" /> Add Certification</button>
         </form>
@@ -758,6 +831,27 @@ export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
 
 export function GalleryEditor({ homepage, onAdd, onDelete }) {
   const [newPhoto, setNewPhoto] = useState({ url: '', caption: '' });
+  const [uploading, setUploading] = useState(false);
+  const { showSuccess, showError } = useToast();
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await uploadOrgImage(fd);
+      onAdd({ url: res.data.imageUrl, caption: '' });
+      showSuccess('Photo uploaded successfully');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Gallery</h3>
@@ -773,7 +867,13 @@ export function GalleryEditor({ homepage, onAdd, onDelete }) {
       <form onSubmit={(e) => { e.preventDefault(); onAdd(newPhoto); setNewPhoto({ url: '', caption: '' }); }} className="space-y-2">
         <input type="text" required placeholder="Photo URL" value={newPhoto.url} onChange={(e) => setNewPhoto({ ...newPhoto, url: e.target.value })} className="input-field" />
         <input type="text" placeholder="Caption" value={newPhoto.caption} onChange={(e) => setNewPhoto({ ...newPhoto, caption: e.target.value })} className="input-field" />
-        <button type="submit" className="btn-primary flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Add Photo</button>
+        <div className="flex gap-2">
+          <button type="submit" className="btn-primary flex items-center justify-center gap-2 flex-1"><Plus className="w-4 h-4" /> Add Photo by URL</button>
+          <label className="btn-secondary flex items-center gap-2 cursor-pointer">
+            <Upload className="w-4 h-4" /> {uploading ? 'Uploading...' : 'Upload File'}
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} disabled={uploading} />
+          </label>
+        </div>
       </form>
     </div>
   );
@@ -999,7 +1099,7 @@ export function ContactEditor({ homepage, onSave }) {
   );
 }
 
-export function SettingsEditor({ homepage, onSave }) {
+export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
   const [settings, setSettings] = useState(homepage.settings || {});
   const { showSuccess, showError } = useToast();
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -1014,11 +1114,13 @@ export function SettingsEditor({ homepage, onSave }) {
     try {
       const res = await uploadOrgLogo(fd);
       setSettings(res.data.homepage.settings);
+      if (onHomepageUpdate) onHomepageUpdate(res.data.homepage);
       showSuccess('Logo uploaded successfully');
     } catch (err) {
       showError(err.response?.data?.message || 'Upload failed');
     } finally {
       setUploadingLogo(false);
+      e.target.value = '';
     }
   };
 
@@ -1031,11 +1133,13 @@ export function SettingsEditor({ homepage, onSave }) {
     try {
       const res = await uploadOrgFavicon(fd);
       setSettings(res.data.homepage.settings);
+      if (onHomepageUpdate) onHomepageUpdate(res.data.homepage);
       showSuccess('Favicon uploaded successfully');
     } catch (err) {
       showError(err.response?.data?.message || 'Upload failed');
     } finally {
       setUploadingFavicon(false);
+      e.target.value = '';
     }
   };
 

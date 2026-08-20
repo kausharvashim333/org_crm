@@ -39,11 +39,6 @@ app.use(helmet({
   dnsPrefetchControl: { allow: false },
 }));
 
-// 2. NoSQL Injection Sanitization (Removes $ and . in keys)
-app.use(mongoSanitize({
-  replaceWith: '_',
-}));
-
 // 3. Global API Rate Limiter (DoS / Flood Protection)
 const globalApiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -105,6 +100,11 @@ app.use(cors({
 // 8. Body Parser Payload Limits (Allows high-res logo and image uploads)
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// 9. NoSQL Injection Sanitization (AFTER body parsers so req.body is actually sanitized)
+app.use(mongoSanitize({
+  replaceWith: '_',
+}));
 
 // Static uploads directory with security headers
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
