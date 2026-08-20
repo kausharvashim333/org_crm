@@ -8,14 +8,14 @@ API.interceptors.request.use((config) => {
   const path = window.location.pathname;
   let token = null;
 
-  if (path.startsWith('/admin')) {
+  if (path.startsWith('/admin') && !path.includes('/login')) {
     token = localStorage.getItem('admin_token');
-  } else if (path.startsWith('/partner')) {
+  } else if (path.startsWith('/partner') && !path.includes('/login')) {
     token = localStorage.getItem('partner_token');
-  } else if (path.startsWith('/student')) {
+  } else if (path.startsWith('/student') && !path.includes('/login')) {
     token = localStorage.getItem('student_token');
   } else {
-    // On public routes, do not send portal tokens to prevent auth errors on public endpoints
+    // On public and login routes, do not send stale portal tokens
     token = null;
   }
 
