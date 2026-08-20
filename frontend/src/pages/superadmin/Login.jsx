@@ -134,7 +134,7 @@ export default function SuperAdminLogin() {
                   onChange={(e) => setEmail(e.target.value)} 
                   required 
                   className="w-full px-4 py-3 pl-10 border border-slate-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 transition-all text-sm bg-slate-50 hover:bg-slate-100/50 focus:bg-white text-slate-850" 
-                  placeholder="admin@skillindia.com" 
+                  placeholder="Enter administrator email" 
                 />
               </div>
             </div>
@@ -166,14 +166,6 @@ export default function SuperAdminLogin() {
               )}
             </button>
           </form>
-
-          {/* Credentials Info Alert Box */}
-          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col items-center">
-            <div className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3.5 text-center text-xs text-slate-500">
-              <span className="font-bold text-slate-700">Default Credentials:</span>
-              <p className="mt-1 font-mono text-[11px] text-primary-750">admin@skillindia.com / admin123</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

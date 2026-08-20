@@ -363,18 +363,6 @@ export default function StudentLogin() {
               )}
             </button>
           </div>
-
-          {/* Credentials Info Alert Box */}
-          <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col items-center">
-            <div className="w-full bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 text-center text-xs text-indigo-900 space-y-1">
-              <p className="font-extrabold flex items-center justify-center gap-1.5 text-indigo-800">
-                <CheckCircle2 className="w-4 h-4 text-indigo-600" /> Student Credentials Info
-              </p>
-              <p className="text-[11px] text-slate-600">
-                Your Default Password is your <strong>Registered Mobile Number</strong>. Contact your partner center if you need assistance.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
