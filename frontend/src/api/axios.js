@@ -29,19 +29,40 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const path = window.location.pathname;
-      if (path.startsWith('/admin') && !path.includes('/login')) {
-        localStorage.removeItem('admin_token');
-        localStorage.removeItem('admin_user');
-        window.location.href = '/admin/login';
-      } else if (path.startsWith('/partner') && !path.includes('/login')) {
-        localStorage.removeItem('partner_token');
-        localStorage.removeItem('partner_user');
-        window.location.href = '/partner/login';
-      } else if (path.startsWith('/student') && !path.includes('/login')) {
-        localStorage.removeItem('student_token');
-        localStorage.removeItem('student_user');
-        window.location.href = '/student/login';
+      const msg = error.response?.data?.message || '';
+      const isTokenInvalid = msg.includes('token') || msg.includes('no token') || msg.includes('authorized');
+      const isUserGone = msg.includes('User not found') || msg.includes('deactivated');
+      
+      if (isTokenInvalid) {
+        const path = window.location.pathname;
+        if (path.startsWith('/admin') && !path.includes('/login')) {
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('admin_user');
+          window.location.href = '/admin/login';
+        } else if (path.startsWith('/partner') && !path.includes('/login')) {
+          localStorage.removeItem('partner_token');
+          localStorage.removeItem('partner_user');
+          window.location.href = '/partner/login';
+        } else if (path.startsWith('/student') && !path.includes('/login')) {
+          localStorage.removeItem('student_token');
+          localStorage.removeItem('student_user');
+          window.location.href = '/student/login';
+        }
+      } else if (isUserGone) {
+        const path = window.location.pathname;
+        if (path.startsWith('/admin') && !path.includes('/login')) {
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('admin_user');
+          window.location.href = '/admin/login';
+        } else if (path.startsWith('/partner') && !path.includes('/login')) {
+          localStorage.removeItem('partner_token');
+          localStorage.removeItem('partner_user');
+          window.location.href = '/partner/login';
+        } else if (path.startsWith('/student') && !path.includes('/login')) {
+          localStorage.removeItem('student_token');
+          localStorage.removeItem('student_user');
+          window.location.href = '/student/login';
+        }
       }
     }
     return Promise.reject(error);

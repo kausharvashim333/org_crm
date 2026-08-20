@@ -21,7 +21,10 @@ exports.protect = async (req, res, next) => {
     }
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({ success: false, message: 'Not authorized, token expired or invalid' });
+    }
+    return res.status(500).json({ success: false, message: 'Server error during authentication' });
   }
 };
 
