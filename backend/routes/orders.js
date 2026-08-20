@@ -14,6 +14,7 @@ const fs = require('fs');
 const OrgHomepage = require('../models/OrgHomepage');
 const sendEmail = require('../utils/sendEmail');
 const { protect, authorize } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
 
 const router = express.Router();
 
@@ -203,8 +204,15 @@ router.post('/verify', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    // Verify Razorpay HMAC Signature if present
-    if (razorpay_order_id && razorpay_payment_id && razorpay_signature) {
+    // Verify Payment Signature for Paid Orders (Prevent payment bypass attacks)
+    if (order.finalAmount > 0) {
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        return res.status(400).json({
+          success: false,
+          message: 'Payment verification failed: Valid Razorpay transaction signature is required.',
+        });
+      }
+
       const generatedSignature = crypto
         .createHmac('sha256', razorpayKeySecret)
         .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -226,7 +234,9 @@ router.post('/verify', async (req, res) => {
         verifiedAt: new Date(),
       };
     } else {
-      order.transactionId = transactionId || `TXN-${Date.now()}`;
+      // 100% Free course enrollment (final amount = 0)
+      order.transactionId = transactionId || `FREE-${Date.now()}`;
+      order.paymentGateway = 'free';
       if (paymentDetails) order.paymentDetails = paymentDetails;
     }
 
@@ -629,13 +639,14 @@ router.get('/admin/all', protect, authorize('super_admin', 'admin', 'staff'), as
     const filter = {};
     if (status) filter.paymentStatus = status;
     if (paymentGateway) filter.paymentGateway = paymentGateway;
-    if (search) {
+    if (search && typeof search === 'string') {
+      const sanitizedSearch = escapeRegex(search.trim());
       filter.$or = [
-        { orderNumber: { $regex: search, $options: 'i' } },
-        { invoiceNumber: { $regex: search, $options: 'i' } },
-        { customerName: { $regex: search, $options: 'i' } },
-        { customerEmail: { $regex: search, $options: 'i' } },
-        { customerPhone: { $regex: search, $options: 'i' } },
+        { orderNumber: { $regex: sanitizedSearch, $options: 'i' } },
+        { invoiceNumber: { $regex: sanitizedSearch, $options: 'i' } },
+        { customerName: { $regex: sanitizedSearch, $options: 'i' } },
+        { customerEmail: { $regex: sanitizedSearch, $options: 'i' } },
+        { customerPhone: { $regex: sanitizedSearch, $options: 'i' } },
       ];
     }
 

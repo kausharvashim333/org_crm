@@ -20,42 +20,90 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const app = express();
 
-// Security Headers (Helmet)
+// Enable Trust Proxy for accurate client IP detection behind Nginx reverse proxy
+app.set('trust proxy', 1);
+
+// 1. Security Headers (Helmet)
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  contentSecurityPolicy: false, // Allows inline images/favicons
+  contentSecurityPolicy: false, // Allows inline fonts/images
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  xContentTypeOptions: true,
+  dnsPrefetchControl: { allow: false },
 }));
 
-// NoSQL Injection Sanitization
-app.use(mongoSanitize());
+// 2. NoSQL Injection Sanitization (Removes $ and . in keys)
+app.use(mongoSanitize({
+  replaceWith: '_',
+}));
 
-// Rate Limiting for Auth Endpoints
+// 3. Global API Rate Limiter (DoS / Flood Protection)
+const globalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 600, // Limit each IP to 600 requests per 15 minutes window
+  message: { success: false, message: 'Too many requests from this IP. Please slow down.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', globalApiLimiter);
+
+// 4. Strict Rate Limiting for Auth & Sensitive Endpoints (Brute-force Protection)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // Limit each IP to 30 login attempts per window
-  message: { success: false, message: 'Too many login attempts from this IP. Please try again after 15 minutes.' },
+  max: 20, // Limit each IP to 20 auth attempts per window
+  message: { success: false, message: 'Too many authentication attempts from this IP. Please try again after 15 minutes.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// CORS Configuration
+// 5. Strict Rate Limiting for Forgot Password / OTP (Email Bombing / Spam Protection)
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit to 5 password reset requests per 15 minutes
+  message: { success: false, message: 'Too many password reset requests. Please wait 15 minutes before requesting again.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// 6. Public Forms Rate Limiter (Inquiries & Spam Protection)
+const publicFormLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // Limit to 15 inquiries per 15 minutes per IP
+  message: { success: false, message: 'Too many inquiry submissions from this IP. Please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// 7. CORS Configuration (Strict Allowed Origins Whitelist)
+const allowedOrigins = [
+  'https://liliorg.in',
+  'https://www.liliorg.in',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
     if (
+      allowedOrigins.includes(origin) ||
       origin.includes('localhost') ||
-      origin.includes('127.0.0.1') ||
-      origin === process.env.CLIENT_URL
+      origin.includes('127.0.0.1')
     ) {
       return callback(null, true);
     }
-    return callback(null, true); // Allow dev traffic
+    return callback(new Error('Cross-Origin Request Blocked by Security Policy'));
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// 8. Body Parser Payload Limits (Prevent Memory Exhaustion DoS)
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Static uploads directory with security headers
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
@@ -65,14 +113,18 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 }));
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Franchise CRM API is running' });
+  res.json({ status: 'ok', message: 'Franchise CRM API is running securely' });
 });
 
-// Auth Routes with Rate Limiting
+// Sensitive Route Protection
 app.use('/api/auth/login', authLimiter);
-app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth/google-login', authLimiter);
+app.use('/api/auth/reset-password', authLimiter);
+app.use('/api/auth/forgot-password', forgotPasswordLimiter);
+app.use('/api/inquiries/public', publicFormLimiter);
 
-// Module Routes
+// Auth & Module Routes
+app.use('/api/auth', require('./routes/auth'));
 app.use('/api/partners', require('./routes/partners'));
 app.use('/api/students', require('./routes/students'));
 app.use('/api/courses', require('./routes/courses'));
@@ -95,8 +147,11 @@ app.use('/api/rbac', require('./routes/rbac'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/coupons', require('./routes/coupons'));
 
-// Centralized Error Handler
+// Centralized Error Handler (Prevent Stack Trace Leakage)
 app.use((err, req, res, next) => {
+  if (err.message && err.message.includes('CORS')) {
+    return res.status(403).json({ success: false, message: 'Access forbidden: CORS policy violation' });
+  }
   console.error('[SERVER ERROR]', err.stack || err.message);
   res.status(err.statusCode || 500).json({
     success: false,

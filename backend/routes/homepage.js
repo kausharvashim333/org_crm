@@ -1,22 +1,13 @@
 const express = require('express');
 const Homepage = require('../models/Homepage');
 const Partner = require('../models/Partner');
-const multer = require('multer');
 const path = require('path');
 const { protect, partnerOrAdmin, superAdminOnly } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
 const OrgHomepage = require('../models/OrgHomepage');
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, '..', 'uploads')),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'banner-' + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 // Banner File Upload Endpoint
 router.post('/upload-banner', protect, partnerOrAdmin, upload.single('banner'), async (req, res) => {

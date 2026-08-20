@@ -1,6 +1,7 @@
 const express = require('express');
 const Course = require('../models/Course');
 const { protect, partnerOrAdmin, superAdminOnly } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
 
 const router = express.Router();
 
@@ -15,12 +16,13 @@ router.get('/store', async (req, res) => {
     if (level && level !== 'All') {
       filter.level = level;
     }
-    if (search) {
+    if (search && typeof search === 'string') {
+      const sanitizedSearch = escapeRegex(search.trim());
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
+        { name: { $regex: sanitizedSearch, $options: 'i' } },
+        { code: { $regex: sanitizedSearch, $options: 'i' } },
+        { description: { $regex: sanitizedSearch, $options: 'i' } },
+        { category: { $regex: sanitizedSearch, $options: 'i' } },
       ];
     }
 

@@ -6,6 +6,7 @@ const Course = require('../models/Course');
 const User = require('../models/User');
 const upload = require('../middleware/upload');
 const { protect, partnerOrAdmin } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
 
 const router = express.Router();
 
@@ -53,13 +54,14 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
       filter.partnerId = req.query.partnerId;
     }
     if (req.query.status) filter.status = req.query.status;
-    if (req.query.search) {
+    if (req.query.search && typeof req.query.search === 'string') {
+      const sanitizedSearch = escapeRegex(req.query.search.trim());
       filter.$or = [
-        { fullName: { $regex: req.query.search, $options: 'i' } },
-        { phone: { $regex: req.query.search, $options: 'i' } },
-        { email: { $regex: req.query.search, $options: 'i' } },
-        { studentIdNo: { $regex: req.query.search, $options: 'i' } },
-        { applicationNo: { $regex: req.query.search, $options: 'i' } },
+        { fullName: { $regex: sanitizedSearch, $options: 'i' } },
+        { phone: { $regex: sanitizedSearch, $options: 'i' } },
+        { email: { $regex: sanitizedSearch, $options: 'i' } },
+        { studentIdNo: { $regex: sanitizedSearch, $options: 'i' } },
+        { applicationNo: { $regex: sanitizedSearch, $options: 'i' } },
       ];
     }
     const page = parseInt(req.query.page) || 1;
