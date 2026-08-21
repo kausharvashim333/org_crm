@@ -219,9 +219,9 @@ export default function OrgHomepage() {
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
   const orgName = hp?.settings?.orgName || 'Skill India Training Network';
-  const hiddenSections = ['courses', 'franchise', 'notices', 'cta'];
+  const hiddenSections = ['courses', 'franchise', 'notices', 'cta', 'stats'];
   const layoutOrder = (hp?.layoutOrder || [
-    'hero', 'verticals', 'services', 'stats', 'about', 'certifications', 'gallery', 'testimonials', 'contact'
+    'hero', 'verticals', 'services', 'about', 'certifications', 'gallery', 'testimonials', 'contact'
   ]).filter(s => !hiddenSections.includes(s));
 
   // Notice categories extraction
@@ -860,6 +860,30 @@ export default function OrgHomepage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                </Reveal>
+              )}
+
+              {/* Stats Cards (Students, Placements, etc.) */}
+              {(hp.stats?.items || []).length > 0 && (
+                <Reveal delay={150}>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mb-12">
+                    {(hp.stats?.items || []).map((s, i) => {
+                      const Icon = iconMap[s.icon] || Building;
+                      return (
+                        <div key={i} className="p-4 rounded-xl bg-white border border-slate-200/80 text-center shadow-xs">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-2.5">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <p className="text-xl sm:text-2xl font-black text-slate-900 mb-0.5">
+                            {s.value}
+                          </p>
+                          <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            {s.label}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </Reveal>
               )}
