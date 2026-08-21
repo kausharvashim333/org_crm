@@ -320,7 +320,7 @@ export default function OrgHomepage() {
                   {/* Main Hero Headline */}
                   <Reveal delay={100}>
                     <div className="space-y-1">
-                      <h1 className="font-black tracking-tight leading-[1.18]" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: `${(hp.hero?.headingFontSize || 48) * 0.6}px` }}>
+                      <h1 className="font-black tracking-tight leading-[1.18] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: ['number'].includes(typeof hp.hero?.headingFontSize) ? `${hp.hero.headingFontSize}px` : undefined }}>
                         {(() => {
                           const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
                           const words = title.split(' ');
@@ -339,7 +339,7 @@ export default function OrgHomepage() {
                         })()}
                       </h1>
                       {hp?.settings?.shortName && (
-                        <p className="font-bold text-slate-400 tracking-wide" style={{ fontSize: `${(hp.hero?.headingFontSize || 48) * 0.4}px` }}>
+                        <p className="font-bold text-slate-400 tracking-wide text-lg sm:text-xl lg:text-2xl" style={{ fontSize: typeof hp.hero?.headingFontSize === 'number' ? `${Math.round(hp.hero.headingFontSize * 0.4)}px` : undefined }}>
                           {hp.settings.shortName}
                         </p>
                       )}
@@ -348,7 +348,7 @@ export default function OrgHomepage() {
 
                   {/* Hero Description */}
                   <Reveal delay={150}>
-                    <p className="text-slate-600 max-w-2xl leading-relaxed font-normal" style={{ fontSize: `${hp.hero?.descriptionFontSize || 16}px` }}>
+                    <p className="text-slate-600 max-w-2xl leading-relaxed font-normal text-sm sm:text-base" style={{ fontSize: typeof hp.hero?.descriptionFontSize === 'number' ? `${hp.hero.descriptionFontSize}px` : undefined }}>
                       {hp.hero?.description || 'Government-aligned vocational curriculum, hands-on practical lab modules, standardized student certificates, and dedicated career guidance.'}
                     </p>
                   </Reveal>
