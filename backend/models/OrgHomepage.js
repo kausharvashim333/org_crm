@@ -8,6 +8,8 @@ const orgHomepageSchema = new mongoose.Schema({
     sliderImages: [{ type: String }],
     showCarousel: { type: Boolean, default: true },
     heading: { type: String, default: 'Building Careers in Paramedical, IT, Finance & Skills' },
+    heading2: { type: String, default: '' },
+    heading2Color: { type: String, default: '#4f46e5' },
     subheading: { type: String, default: 'Paramedical | Computer Training | Skill Development | Stock Market Training' },
     description: { type: String, default: 'Empowering India through quality education and practical training across multiple fields' },
     points: { type: [String], default: [] },

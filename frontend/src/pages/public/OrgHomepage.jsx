@@ -282,6 +282,11 @@ export default function OrgHomepage() {
                           return title;
                         })()}
                       </h1>
+                      {hp.hero?.heading2 && (
+                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight" style={{ color: hp.hero.heading2Color || '#4f46e5' }}>
+                          {hp.hero.heading2}
+                        </h2>
+                      )}
                       {hp?.settings?.shortName && (
                         <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-400 tracking-wide">
                           {hp.settings.shortName}
