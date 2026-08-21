@@ -65,12 +65,12 @@ export default function OrgAboutPage() {
         <Navbar />
 
         {/* Hero Banner Section */}
-        <section className="py-20 px-6 relative overflow-hidden text-center bg-slate-900 text-white">
+        <section className="py-20 px-6 relative overflow-hidden text-center text-white" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${themeColor}40 50%, #0f172a 100%)` }}>
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, white 2px, transparent 2px)', backgroundSize: '32px 32px' }} />
           <div className="max-w-4xl mx-auto relative z-10 space-y-6">
             <Reveal>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/10 text-indigo-250 border border-white/10 backdrop-blur-md">
-                <ShieldCheck className="w-4 h-4 text-indigo-300" />
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/10 border border-white/10 backdrop-blur-md" style={{ color: themeColor }}>
+                <ShieldCheck className="w-4 h-4" style={{ color: themeColor }} />
                 <span>Established Education Networks</span>
               </div>
             </Reveal>

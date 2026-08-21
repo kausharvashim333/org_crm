@@ -557,7 +557,7 @@ export default function OrgHomepage() {
                       <div className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-lg hover:border-indigo-300 transition-all duration-200 h-full flex flex-col justify-between">
                         
                         <div>
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-indigo-50 border border-indigo-100 group-hover:scale-105 transition-transform" style={{ color: themeColor }}>
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 border group-hover:scale-105 transition-transform" style={{ color: themeColor, backgroundColor: `${themeColor}12`, borderColor: `${themeColor}20` }}>
                             <Icon className="w-6 h-6" />
                           </div>
 
@@ -567,12 +567,12 @@ export default function OrgHomepage() {
                             </span>
                           </div>
 
-                          <h3 className="text-lg font-bold text-slate-900 mb-1.5 group-hover:text-indigo-600 transition-colors">
+                          <h3 className="text-lg font-bold text-slate-900 mb-1.5 group-hover:text-indigo-600 transition-colors" style={{ '--hover-color': themeColor }}>
                             {v.title}
                           </h3>
 
                           {v.shortDesc && (
-                            <p className="text-xs font-bold text-indigo-600 mb-2.5">
+                            <p className="text-xs font-bold mb-2.5" style={{ color: themeColor }}>
                               {v.shortDesc}
                             </p>
                           )}
@@ -585,7 +585,8 @@ export default function OrgHomepage() {
                         <div className="pt-3.5 border-t border-slate-100 flex items-center justify-between">
                           <Link
                             to={v.link || '/courses'}
-                            className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                            className="inline-flex items-center gap-1 text-xs font-bold transition-colors"
+                            style={{ color: themeColor }}
                           >
                             Explore Courses <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                           </Link>
@@ -752,7 +753,7 @@ export default function OrgHomepage() {
             <div className="max-w-4xl mx-auto bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                 <div className="md:col-span-5 text-left">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200/60 inline-block mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md inline-block mb-2" style={{ color: themeColor, backgroundColor: `${themeColor}15`, borderColor: `${themeColor}30` }}>
                     Online Verification
                   </span>
                   <h3 className="text-xl font-bold text-slate-900 leading-snug mb-1.5">
@@ -982,7 +983,7 @@ export default function OrgHomepage() {
       case 'cta':
         if (hp.cta?.show === false) return null;
         return (
-          <section key="cta" id="cta" className="py-14 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-blue-600 text-white relative overflow-hidden">
+          <section key="cta" id="cta" className="py-14 sm:py-16 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(to right, ${themeColor}, ${themeColor}dd)` }}>
             <div className="max-w-4xl mx-auto text-center relative z-10">
               <Reveal>
                 <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 tracking-tight">
@@ -994,13 +995,14 @@ export default function OrgHomepage() {
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link
                     to="/admission"
-                    className="px-6 py-3 bg-white text-indigo-700 hover:bg-slate-50 rounded-xl font-bold text-xs sm:text-sm shadow-md transition-all"
+                    className="px-6 py-3 bg-white hover:bg-slate-50 rounded-xl font-bold text-xs sm:text-sm shadow-md transition-all"
+                    style={{ color: themeColor }}
                   >
                     Apply for Admission 2026-27
                   </Link>
                   <button
                     onClick={() => window.dispatchEvent(new Event('open-enquiry'))}
-                    className="px-6 py-3 bg-indigo-700/80 hover:bg-indigo-700 border border-white/30 rounded-xl font-bold text-xs sm:text-sm text-white transition-all"
+                    className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-xl font-bold text-xs sm:text-sm text-white transition-all"
                   >
                     Instant Inquiry Form
                   </button>
@@ -1134,7 +1136,7 @@ export default function OrgHomepage() {
                     <Reveal key={i} delay={i * 70} className="w-full max-w-[380px]">
                       <div className="group bg-slate-50 hover:bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all h-full flex flex-col">
                         <div className="flex items-center justify-between mb-4">
-                          <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-50" style={{ color: themeColor }}>
+                          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
                             <Icon className="w-5 h-5" />
                           </div>
                           {s.duration && (
@@ -1143,7 +1145,7 @@ export default function OrgHomepage() {
                             </span>
                           )}
                         </div>
-                        <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">{s.title}</h3>
+                        <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors" style={{ '--hover-color': themeColor }}>{s.title}</h3>
                         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">{s.desc}</p>
                         {s.topics?.length > 0 && (
                           <div className="mb-3">

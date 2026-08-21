@@ -95,7 +95,7 @@ export default function OrgCoursesPage() {
       <Navbar activePage="courses" />
 
       {/* Hero Banner with Modern Gradient */}
-      <section className="relative pt-16 pb-20 px-4 bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white overflow-hidden">
+      <section className="relative pt-16 pb-20 px-4 text-white overflow-hidden" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${themeColor}30 50%, #0f172a 100%)` }}>
         {/* Ambient Glows */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-indigo-500/20 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-0 right-10 w-72 h-72 bg-blue-500/15 rounded-full blur-[90px] pointer-events-none" />
@@ -106,9 +106,9 @@ export default function OrgCoursesPage() {
             <span className="font-medium">Govt. Recognized & ISO 9001:2015 Certified Programs</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-white">
             Upgrade Your Career with <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400">
+            <span style={{ color: themeColor }}>
               Industry-Ready Certifications
             </span>
           </h1>

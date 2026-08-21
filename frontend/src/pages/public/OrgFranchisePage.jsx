@@ -83,12 +83,12 @@ export default function OrgFranchisePage() {
 
           <div className="max-w-4xl mx-auto text-center relative z-10 space-y-6">
             <Reveal>
-              <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight text-slate-900" style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(255, 255, 255, 0.5)' }}>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight text-white">
                 {franchise.title || 'Partner With Us'}
               </h1>
             </Reveal>
             <Reveal delay={200}>
-              <p className="text-lg md:text-xl font-semibold text-slate-800 max-w-3xl mx-auto leading-relaxed" style={{ textShadow: '0 0 8px rgba(255, 255, 255, 0.9), 0 0 15px rgba(255, 255, 255, 0.7)' }}>
+              <p className="text-lg md:text-xl font-semibold text-white/90 max-w-3xl mx-auto leading-relaxed">
                 {franchise.subtitle || 'Join our growing network of partner centers and build a successful education business.'}
               </p>
             </Reveal>
@@ -117,7 +117,7 @@ export default function OrgFranchisePage() {
                         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center mb-3 transition-transform group-hover:scale-110 border border-slate-100">
                           <Icon className="w-5 h-5" style={{ color: themeColor }} />
                         </div>
-                        <p className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-1 bg-gradient-to-r from-slate-900 to-indigo-650 bg-clip-text text-transparent">{s.value}</p>
+                        <p className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-1">{s.value}</p>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{s.label}</p>
                       </div>
                     </Reveal>
