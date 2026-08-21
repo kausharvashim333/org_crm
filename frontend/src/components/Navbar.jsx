@@ -409,13 +409,21 @@ export default function Navbar({ activePage }) {
                 >
                   {center.logo ? (
                     <img
-                      src={center.logo}
+                      src={center.logo.startsWith('/uploads/') ? `/api${center.logo}` : center.logo}
                       alt={center.name}
                       className="w-7 h-7 rounded-md object-cover border border-slate-200 shrink-0"
                       onError={(e) => {
-                        e.target.style.display = 'none';
-                        const fallback = e.target.nextElementSibling;
-                        if (fallback) fallback.style.display = 'block';
+                        if (!e.target.dataset.retried && center.logo.startsWith('/uploads/')) {
+                          e.target.dataset.retried = 'true';
+                          e.target.src = center.logo;
+                        } else if (!e.target.dataset.retried2 && !center.logo.startsWith('/uploads/')) {
+                          e.target.dataset.retried2 = 'true';
+                          e.target.src = `/api${center.logo}`;
+                        } else {
+                          e.target.style.display = 'none';
+                          const fallback = e.target.nextElementSibling;
+                          if (fallback) fallback.style.display = 'block';
+                        }
                       }}
                     />
                   ) : null}

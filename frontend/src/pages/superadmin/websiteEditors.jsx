@@ -1822,7 +1822,7 @@ export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCe
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center gap-2">
                     {center.logo ? (
-                      <img src={center.logo} alt={center.name} className="w-10 h-10 rounded-lg object-cover border border-slate-200" onError={(e) => { e.target.style.display = 'none'; }} />
+                      <img src={center.logo.startsWith('/uploads/') ? `/api${center.logo}` : center.logo} alt={center.name} className="w-10 h-10 rounded-lg object-cover border border-slate-200" onError={(e) => { e.target.style.display = 'none'; }} />
                     ) : (
                       <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">
                         <Globe className="w-5 h-5 text-slate-400" />
