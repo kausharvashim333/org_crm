@@ -405,13 +405,22 @@ export default function Navbar({ activePage }) {
                   href={center.link || '#'}
                   target={center.link ? '_blank' : undefined}
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 transition-all shrink-0 group"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 transition-all shrink-0 group"
                 >
                   {center.logo ? (
-                    <img src={center.logo} alt={center.name} className="w-5 h-5 rounded object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
-                  ) : (
-                    <Building2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600" />
-                  )}
+                    <img
+                      src={center.logo}
+                      alt={center.name}
+                      className="w-7 h-7 rounded-md object-cover border border-slate-200 shrink-0"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        const fallback = e.target.nextElementSibling;
+                        if (fallback) fallback.style.display = 'block';
+                      }}
+                    />
+                  ) : null}
+                  {center.logo && <Building2 className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 shrink-0" style={{ display: 'none' }} />}
+                  {!center.logo && <Building2 className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 shrink-0" />}
                   <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-600 whitespace-nowrap">{center.name}</span>
                 </a>
               ))}
