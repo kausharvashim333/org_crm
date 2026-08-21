@@ -264,14 +264,24 @@ export default function OrgHomepage() {
                   {/* Main Hero Headline */}
                   <Reveal delay={100}>
                     <div className="space-y-1">
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.18]" style={{ color: hp.hero?.headingColor || '#0f172a' }}>
-                        {hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance'}
+                      <h1 className={`${hp.hero?.headingFontSize || 'text-3xl sm:text-4xl lg:text-5xl'} font-black tracking-tight leading-[1.18]`} style={{ color: hp.hero?.headingColor || '#0f172a' }}>
+                        {(() => {
+                          const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
+                          const words = title.split(' ');
+                          if (words.length > 2) {
+                            const lastWords = words.splice(-2).join(' ');
+                            return (
+                              <>
+                                {words.join(' ')}{' '}
+                                <span style={{ color: '#2563eb' }}>
+                                  {lastWords}
+                                </span>
+                              </>
+                            );
+                          }
+                          return title;
+                        })()}
                       </h1>
-                      {hp.hero?.heading2 && (
-                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight" style={{ color: hp.hero.heading2Color || '#4f46e5' }}>
-                          {hp.hero.heading2}
-                        </h2>
-                      )}
                       {hp?.settings?.shortName && (
                         <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-400 tracking-wide">
                           {hp.settings.shortName}
@@ -282,7 +292,7 @@ export default function OrgHomepage() {
 
                   {/* Hero Description */}
                   <Reveal delay={150}>
-                    <p className="text-slate-600 text-sm sm:text-base max-w-2xl leading-relaxed font-normal">
+                    <p className={`text-slate-600 ${hp.hero?.descriptionFontSize || 'text-sm sm:text-base'} max-w-2xl leading-relaxed font-normal`}>
                       {hp.hero?.description || 'Government-aligned vocational curriculum, hands-on practical lab modules, standardized student certificates, and dedicated career guidance.'}
                     </p>
                   </Reveal>
