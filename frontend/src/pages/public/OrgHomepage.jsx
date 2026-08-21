@@ -843,11 +843,11 @@ export default function OrgHomepage() {
 
               {/* Key Features */}
               {(hp.about?.features || []).length > 0 && (
-                <div className="flex flex-wrap justify-center gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                   {(hp.about?.features || []).map((f, i) => {
                     const Icon = iconMap[f.icon] || BookOpen;
                     return (
-                      <Reveal key={i} delay={i * 60} className="h-full w-full max-w-[180px]">
+                      <Reveal key={i} delay={i * 60} className="h-full">
                         <div className="h-full flex flex-col items-center justify-start text-center p-5 bg-white rounded-xl border border-slate-200 shadow-xs hover:shadow-sm transition-all">
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-slate-100" style={{ color: themeColor }}>
                             <Icon className="w-5 h-5" />
