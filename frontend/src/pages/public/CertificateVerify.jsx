@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { verifyCertificate, getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import SEO from '../../components/SEO';
 import { GraduationCap, Award, Search, CheckCircle, XCircle, Menu, X } from 'lucide-react';
 
 export default function CertificateVerify() {
@@ -39,6 +40,7 @@ export default function CertificateVerify() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO title="Verify Certificate - Training Institute" description="Verify the authenticity of your certificate online" />
       <Navbar />
 
       <div className="max-w-2xl mx-auto py-16 px-4">

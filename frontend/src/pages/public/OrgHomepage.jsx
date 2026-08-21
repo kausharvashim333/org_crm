@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import SEO from '../../components/SEO';
 import {
   GraduationCap, BookOpen, Users, Award, Briefcase, ArrowRight, Building,
   Phone, Mail, MapPin, Star, Target, Heart, TrendingUp, Monitor, Check,
@@ -1295,6 +1296,12 @@ export default function OrgHomepage() {
 
   return (
     <div className="bg-slate-50 text-slate-900 min-h-screen selection:bg-indigo-600 selection:text-white relative">
+      <SEO
+        title={hp?.settings?.browserTitle || `${orgName} - Training Institute Management`}
+        description={hp?.about?.description || 'Empowering India through quality education and practical training across multiple fields'}
+        image={hp?.settings?.logo}
+        keywords="paramedical training, computer training, skill development, stock market training, franchise, certification, vocational courses, India"
+      />
       <Navbar />
       <main>
         {layoutOrder.map(section => renderSection(section))}

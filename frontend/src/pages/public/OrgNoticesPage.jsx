@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import SEO from '../../components/SEO';
 import { Calendar, Bell, Info, FileText, Search, X } from 'lucide-react';
 
 function useInView() {
@@ -81,6 +82,7 @@ export default function OrgNoticesPage() {
   return (
     <div className="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
       <div>
+        <SEO title="Notices & Announcements - Training Institute" description="Stay updated with latest notices, announcements, and events" />
         <Navbar />
 
         {/* Hero Section */}

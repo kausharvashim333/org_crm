@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import SEO from '../../components/SEO';
 import {
   GraduationCap, BookOpen, Users, Award, Briefcase, Building,
   Target, Heart, TrendingUp, Monitor, ArrowRight, ShieldCheck, Sparkles
@@ -60,6 +61,7 @@ export default function OrgAboutPage() {
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col justify-between">
       <div>
+        <SEO title="About Us - Training Institute" description="Learn about our mission, vision, and commitment to quality education across India" />
         <Navbar />
 
         {/* Hero Banner Section */}

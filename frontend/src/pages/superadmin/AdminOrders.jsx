@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAdminOrders, updateAdminOrderStatus } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { Table, TableRow, TableCell } from '../../components/Table';
+import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import {
   ShoppingBag, IndianRupee, Search, Filter, CheckCircle2, Clock,
@@ -16,6 +17,8 @@ export default function AdminOrders() {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { showSuccess, showError } = useToast();
 
   const fetchOrders = () => {
@@ -35,6 +38,8 @@ export default function AdminOrders() {
   useEffect(() => {
     fetchOrders();
   }, [statusFilter]);
+
+  useEffect(() => { setCurrentPage(1); }, [search, statusFilter]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -197,7 +202,7 @@ export default function AdminOrders() {
         ) : (
           <div className="overflow-x-auto">
             <Table headers={['Order & Invoice', 'Customer', 'Course', 'Amount', 'Date', 'Status', 'Actions']}>
-              {orders.map((o) => (
+              {orders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((o) => (
                 <TableRow key={o._id}>
                   <TableCell>
                     <div className="font-mono font-bold text-xs text-indigo-900">{o.orderNumber}</div>
@@ -259,6 +264,17 @@ export default function AdminOrders() {
                 </TableRow>
               ))}
             </Table>
+          </div>
+        )}
+        {!loading && orders.length > itemsPerPage && (
+          <div className="p-4 border-t border-slate-200/60">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(orders.length / itemsPerPage)}
+              onPageChange={setCurrentPage}
+              totalItems={orders.length}
+              itemsPerPage={itemsPerPage}
+            />
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getStudents, getPartners, deleteStudent } from '../../api';
 import { Table, TableRow, TableCell } from '../../components/Table';
+import Pagination from '../../components/Pagination';
 import Modal from '../../components/Modal';
 import { Search, Building2, FileText, ExternalLink, Printer, Upload, CheckCircle2, FileCheck, Trash2 } from 'lucide-react';
 
@@ -12,6 +13,8 @@ export default function AllStudents() {
   const [partnerFilter, setPartnerFilter] = useState('');
   const [selectedStudentForDoc, setSelectedStudentForDoc] = useState(null);
   const [showDocModal, setShowDocModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const fetchStudents = () => {
     setLoading(true);
@@ -27,6 +30,8 @@ export default function AllStudents() {
   useEffect(() => {
     fetchStudents();
   }, [search, partnerFilter]);
+
+  useEffect(() => { setCurrentPage(1); }, [search, partnerFilter]);
 
   const handleDeleteStudent = async (student) => {
     if (window.confirm(`Kya aap student "${student.fullName}" ko permanently delete karna chahte hain?`)) {
@@ -112,9 +117,14 @@ export default function AllStudents() {
 
         {loading ? (
           <div className="text-center py-8 text-gray-400">Loading students...</div>
+        ) : students.length === 0 ? (
+          <div className="text-center py-12 text-gray-400 flex flex-col items-center gap-2">
+            <Search className="w-8 h-8 opacity-40" />
+            <span>No students found</span>
+          </div>
         ) : (
           <Table headers={['Student Name', 'Phone / Email', 'Partner Center', 'Enrolled Courses', 'Docs', 'Admission Slip', 'Actions']}>
-            {students.map(s => (
+            {students.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map(s => (
               <TableRow key={s._id}>
                 <TableCell>
                   <div>
@@ -186,6 +196,15 @@ export default function AllStudents() {
               </TableRow>
             ))}
           </Table>
+        )}
+        {!loading && students.length > itemsPerPage && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(students.length / itemsPerPage)}
+            onPageChange={setCurrentPage}
+            totalItems={students.length}
+            itemsPerPage={itemsPerPage}
+          />
         )}
       </div>
 

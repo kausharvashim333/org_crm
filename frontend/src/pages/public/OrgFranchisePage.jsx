@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import SEO from '../../components/SEO';
 import {
   GraduationCap, ArrowRight, Building, BookOpen, Users, Award, Monitor,
   Target, Heart, TrendingUp, Check, Briefcase, Sparkles, Star, ShieldCheck,
@@ -70,6 +71,7 @@ export default function OrgFranchisePage() {
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col justify-between">
       <div>
+        <SEO title="Franchise Partnership - Start Your Training Center" description="Join our franchise network and start your own training institute with established brand, curriculum, and ongoing support" />
         <Navbar activePage="franchise" />
 
         {/* Hero Section */}

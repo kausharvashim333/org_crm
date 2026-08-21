@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { SuperAdminRoute, PartnerRoute } from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Public Pages (Lazy)
 const PublicHomepage = lazy(() => import('./pages/public/Homepage'));
@@ -107,6 +108,7 @@ export default function App() {
   }, []);
 
   return (
+    <ErrorBoundary>
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public Routes */}
@@ -202,5 +204,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Suspense>
+    </ErrorBoundary>
   );
 }

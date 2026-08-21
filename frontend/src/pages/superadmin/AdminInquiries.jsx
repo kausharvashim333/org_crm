@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { getInquiries, updateInquiryStatus, addFollowUp } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
+import Pagination from '../../components/Pagination';
 import { Table, TableRow, TableCell } from '../../components/Table';
 import { Bell, Phone, Mail, MessageSquare, Search, BookOpen, Building, MapPin, Calendar, Layers } from 'lucide-react';
 
 export default function AdminInquiries() {
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('student'); // 'student' or 'partner'
+  const [activeTab, setActiveTab] = useState('student');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showFollowUp, setShowFollowUp] = useState(null);
   const [followUpNote, setFollowUpNote] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { showSuccess, showError } = useToast();
 
   const load = () => {
@@ -88,6 +91,11 @@ export default function AdminInquiries() {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => { setCurrentPage(1); }, [activeTab, search, statusFilter]);
 
   return (
     <div className="space-y-6">
@@ -169,7 +177,7 @@ export default function AdminInquiries() {
         ) : activeTab === 'student' ? (
           /* Student Enquiries Table */
           <Table headers={['Candidate Info', 'Program of Interest', 'Date Submitted', 'Status', 'Actions']}>
-            {filtered.map(i => (
+            {paginated.map(i => (
               <TableRow key={i._id}>
                 <TableCell>
                   <div className="space-y-1 py-1">
@@ -227,7 +235,7 @@ export default function AdminInquiries() {
         ) : (
           /* Partner Enquiries Table */
           <Table headers={['Institute & Location', 'Contact Person', 'Details', 'Status', 'Actions']}>
-            {filtered.map(i => (
+            {paginated.map(i => (
               <TableRow key={i._id}>
                 <TableCell>
                   <div className="space-y-1 py-1">
@@ -287,6 +295,15 @@ export default function AdminInquiries() {
               </TableRow>
             ))}
           </Table>
+        )}
+        {!loading && filtered.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filtered.length}
+            itemsPerPage={itemsPerPage}
+          />
         )}
       </div>
 

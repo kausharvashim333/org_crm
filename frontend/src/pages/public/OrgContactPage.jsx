@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import SEO from '../../components/SEO';
 import {
   Phone, Mail, MapPin, ArrowRight, X, Map as MapIcon,
   Facebook, Instagram, Youtube, MessageCircle, Award, Sparkles, Send
@@ -64,6 +65,7 @@ export default function OrgContactPage() {
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col justify-between">
       <div>
+        <SEO title="Contact Us - Training Institute" description="Get in touch with us for admissions, franchise inquiries, and course information" />
         <Navbar />
 
         {/* Hero Section */}

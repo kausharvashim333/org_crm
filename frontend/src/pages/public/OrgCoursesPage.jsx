@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getOrgHomepagePublic, getStoreCourses } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import SEO from '../../components/SEO';
 import {
   GraduationCap, BookOpen, Calendar, ArrowRight, Star, Clock, Users,
   Search, CheckCircle2, Award, Sparkles, Filter, PlayCircle, ShieldCheck,
@@ -90,6 +91,7 @@ export default function OrgCoursesPage() {
 
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
+      <SEO title="Courses - Training Institute" description="Explore our certified courses in paramedical, computer training, skill development, and stock market training" />
       <Navbar activePage="courses" />
 
       {/* Hero Banner with Modern Gradient */}
