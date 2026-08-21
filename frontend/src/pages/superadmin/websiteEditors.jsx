@@ -1737,7 +1737,30 @@ export function CustomSectionsEditor({ homepage, onAddSection, onUpdateSection, 
 }
 
 export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCenter }) {
+  const { showSuccess, showError } = useToast();
+  const [uploadingIndex, setUploadingIndex] = useState(null);
   const strip = homepage.centersStrip || { show: false, title: 'Our Centers', centers: [] };
+
+  const handleLogoUpload = async (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
+    setUploadingIndex(index);
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await uploadOrgImage(fd);
+      const updated = [...strip.centers];
+      updated[index] = { ...updated[index], logo: res.data.imageUrl };
+      onUpdate({ centers: updated });
+      showSuccess('Center logo uploaded');
+    } catch (err) {
+      showError(getUploadErrorMessage(err));
+    } finally {
+      setUploadingIndex(null);
+      e.target.value = '';
+    }
+  };
 
   return (
     <div className="card space-y-4">
@@ -1762,22 +1785,37 @@ export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCe
           <div className="space-y-2 mb-3">
             {strip.centers.map((center, i) => (
               <div key={i} className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <input type="text" value={center.name} onChange={(e) => {
-                    const updated = [...strip.centers];
-                    updated[i] = { ...center, name: e.target.value };
-                    onUpdate({ centers: updated });
-                  }} className="input-field text-xs" placeholder="Center name" />
-                  <input type="text" value={center.logo || ''} onChange={(e) => {
-                    const updated = [...strip.centers];
-                    updated[i] = { ...center, logo: e.target.value };
-                    onUpdate({ centers: updated });
-                  }} className="input-field text-xs" placeholder="Logo URL (optional)" />
-                  <input type="text" value={center.link || ''} onChange={(e) => {
-                    const updated = [...strip.centers];
-                    updated[i] = { ...center, link: e.target.value };
-                    onUpdate({ centers: updated });
-                  }} className="input-field text-xs" placeholder="Link URL (e.g. /center/1)" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    {center.logo ? (
+                      <img src={center.logo} alt={center.name} className="w-8 h-8 rounded-lg object-cover border border-slate-200" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-slate-200 flex items-center justify-center">
+                        <Globe className="w-4 h-4 text-slate-400" />
+                      </div>
+                    )}
+                    <label className="btn-secondary flex items-center gap-1 cursor-pointer text-xs px-2.5 py-1.5">
+                      <Upload className="w-3.5 h-3.5" /> {uploadingIndex === i ? 'Uploading...' : 'Upload'}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, i)} disabled={uploadingIndex === i} />
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input type="text" value={center.name} onChange={(e) => {
+                      const updated = [...strip.centers];
+                      updated[i] = { ...center, name: e.target.value };
+                      onUpdate({ centers: updated });
+                    }} className="input-field text-xs" placeholder="Center name" />
+                    <input type="text" value={center.logo || ''} onChange={(e) => {
+                      const updated = [...strip.centers];
+                      updated[i] = { ...center, logo: e.target.value };
+                      onUpdate({ centers: updated });
+                    }} className="input-field text-xs" placeholder="Logo URL (optional)" />
+                    <input type="text" value={center.link || ''} onChange={(e) => {
+                      const updated = [...strip.centers];
+                      updated[i] = { ...center, link: e.target.value };
+                      onUpdate({ centers: updated });
+                    }} className="input-field text-xs" placeholder="Link URL (e.g. /center/1)" />
+                  </div>
                 </div>
                 <button onClick={() => onDeleteCenter(i)} className="text-rose-500 hover:text-rose-700 p-1 rounded">
                   <Trash2 className="w-4 h-4" />
