@@ -736,7 +736,7 @@ router.put('/centers-strip', protect, superAdminOnly, async (req, res) => {
   try {
     const homepage = await createDefaultIfMissing();
     if (!homepage.centersStrip) homepage.centersStrip = { show: false, title: 'Our Centers', centers: [] };
-    ['show', 'title'].forEach(field => {
+    ['show', 'title', 'centers'].forEach(field => {
       if (req.body[field] !== undefined) homepage.centersStrip[field] = req.body[field];
     });
     await homepage.save();

@@ -148,9 +148,7 @@ export default function OrgHomepageEditor() {
         {activeTab === 'custom' && <>
           <CentersStripEditor
             homepage={homepage}
-            onUpdate={(d) => add(updateOrgCentersStrip, d, 'Centers strip updated')}
-            onAddCenter={(d) => add(addOrgCenter, d, 'Center added')}
-            onDeleteCenter={(i) => del(deleteOrgCenter, i, 'Center deleted')}
+            onUpdate={(d) => add(updateOrgCentersStrip, d, 'Centers strip saved')}
           />
           <CustomSectionsEditor
             homepage={homepage}

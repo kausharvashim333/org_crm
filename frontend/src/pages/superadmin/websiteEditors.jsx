@@ -90,6 +90,7 @@ export function HeroEditor({ homepage, onSave }) {
             (data.sliderImages || []).map((url, i) => (
               <div key={i} className="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
                 <span className="text-xs font-bold text-slate-400 px-1.5">{i + 1}</span>
+                {url && <img src={url} alt={`slider ${i + 1}`} className="w-10 h-10 rounded object-cover border border-slate-200 shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
                 <input
                   type="text"
                   value={url}
@@ -870,7 +871,10 @@ export function GalleryEditor({ homepage, onAdd, onDelete }) {
         ))}
       </div>
       <form onSubmit={(e) => { e.preventDefault(); onAdd(newPhoto); setNewPhoto({ url: '', caption: '' }); }} className="space-y-2">
-        <input type="text" required placeholder="Photo URL" value={newPhoto.url} onChange={(e) => setNewPhoto({ ...newPhoto, url: e.target.value })} className="input-field" />
+        <div className="flex items-center gap-3">
+          {newPhoto.url ? <img src={newPhoto.url} alt="preview" className="w-12 h-12 rounded object-cover border" onError={(e) => { e.target.style.display = 'none'; }} /> : null}
+          <input type="text" required placeholder="Photo URL" value={newPhoto.url} onChange={(e) => setNewPhoto({ ...newPhoto, url: e.target.value })} className="input-field flex-1" />
+        </div>
         <input type="text" placeholder="Caption" value={newPhoto.caption} onChange={(e) => setNewPhoto({ ...newPhoto, caption: e.target.value })} className="input-field" />
         <div className="flex gap-2">
           <button type="submit" className="btn-primary flex items-center justify-center gap-2 flex-1"><Plus className="w-4 h-4" /> Add Photo by URL</button>
@@ -1704,11 +1708,14 @@ export function CustomSectionsEditor({ homepage, onAddSection, onUpdateSection, 
                           updated[cIdx] = { ...card, link: e.target.value };
                           onUpdateSection(section.id, { cards: updated });
                         }} className="input-field text-xs" placeholder="Link URL (optional)" />
-                        <input type="text" value={card.image || ''} onChange={(e) => {
-                          const updated = [...section.cards];
-                          updated[cIdx] = { ...card, image: e.target.value };
-                          onUpdateSection(section.id, { cards: updated });
-                        }} className="input-field text-xs" placeholder="Image URL (optional, overrides icon)" />
+                        <div className="flex items-center gap-2">
+                          {card.image && <img src={card.image} alt="card" className="w-8 h-8 rounded object-cover border border-slate-200 shrink-0" onError={(e) => { e.target.style.display = 'none'; }} />}
+                          <input type="text" value={card.image || ''} onChange={(e) => {
+                            const updated = [...section.cards];
+                            updated[cIdx] = { ...card, image: e.target.value };
+                            onUpdateSection(section.id, { cards: updated });
+                          }} className="input-field text-xs flex-1" placeholder="Image URL (optional, overrides icon)" />
+                        </div>
                         <input type="text" value={card.linkText || ''} onChange={(e) => {
                           const updated = [...section.cards];
                           updated[cIdx] = { ...card, linkText: e.target.value };
@@ -1739,7 +1746,23 @@ export function CustomSectionsEditor({ homepage, onAddSection, onUpdateSection, 
 export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCenter }) {
   const { showSuccess, showError } = useToast();
   const [uploadingIndex, setUploadingIndex] = useState(null);
-  const strip = homepage.centersStrip || { show: false, title: 'Our Centers', centers: [] };
+  const [local, setLocal] = useState(homepage.centersStrip || { show: false, title: 'Our Centers', centers: [] });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setLocal(homepage.centersStrip || { show: false, title: 'Our Centers', centers: [] });
+  }, [homepage.centersStrip]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await onUpdate(local);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateLocal = (patch) => setLocal(prev => ({ ...prev, ...patch }));
 
   const handleLogoUpload = async (e, index) => {
     const file = e.target.files[0];
@@ -1750,16 +1773,27 @@ export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCe
     fd.append('image', file);
     try {
       const res = await uploadOrgImage(fd);
-      const updated = [...strip.centers];
+      const updated = [...(local.centers || [])];
       updated[index] = { ...updated[index], logo: res.data.imageUrl };
-      onUpdate({ centers: updated });
-      showSuccess('Center logo uploaded');
+      updateLocal({ centers: updated });
+      showSuccess('Center logo uploaded. Click Save to apply.');
     } catch (err) {
       showError(getUploadErrorMessage(err));
     } finally {
       setUploadingIndex(null);
       e.target.value = '';
     }
+  };
+
+  const addLocalCenter = () => {
+    const updated = [...(local.centers || []), { name: 'New Center', logo: '', link: '' }];
+    updateLocal({ centers: updated });
+  };
+
+  const removeLocalCenter = (index) => {
+    const updated = [...(local.centers || [])];
+    updated.splice(index, 1);
+    updateLocal({ centers: updated });
   };
 
   return (
@@ -1770,54 +1804,49 @@ export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCe
           <p className="text-xs text-slate-500">Shows a strip of organization-owned centers below the navbar. Clicking a center opens its page.</p>
         </div>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={strip.show !== false} onChange={(e) => onUpdate({ show: e.target.checked })} className="rounded" />
+          <input type="checkbox" checked={local.show !== false} onChange={(e) => updateLocal({ show: e.target.checked })} className="rounded" />
           Show Strip
         </label>
       </div>
 
       <Field label="Strip Title">
-        <input type="text" value={strip.title || ''} onChange={(e) => onUpdate({ title: e.target.value })} className="input-field" placeholder="e.g. Our Centers" />
+        <input type="text" value={local.title || ''} onChange={(e) => updateLocal({ title: e.target.value })} className="input-field" placeholder="e.g. Our Centers" />
       </Field>
 
       <div className="border-t pt-3">
-        <p className="text-xs font-bold text-slate-600 mb-2">Centers ({strip.centers?.length || 0})</p>
-        {strip.centers?.length > 0 && (
+        <p className="text-xs font-bold text-slate-600 mb-2">Centers ({local.centers?.length || 0})</p>
+        {local.centers?.length > 0 && (
           <div className="space-y-2 mb-3">
-            {strip.centers.map((center, i) => (
+            {local.centers.map((center, i) => (
               <div key={i} className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200/60">
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center gap-2">
                     {center.logo ? (
-                      <img src={center.logo} alt={center.name} className="w-8 h-8 rounded-lg object-cover border border-slate-200" />
+                      <img src={center.logo} alt={center.name} className="w-10 h-10 rounded-lg object-cover border border-slate-200" onError={(e) => { e.target.style.display = 'none'; }} />
                     ) : (
-                      <div className="w-8 h-8 rounded-lg bg-slate-200 flex items-center justify-center">
-                        <Globe className="w-4 h-4 text-slate-400" />
+                      <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-slate-400" />
                       </div>
                     )}
                     <label className="btn-secondary flex items-center gap-1 cursor-pointer text-xs px-2.5 py-1.5">
-                      <Upload className="w-3.5 h-3.5" /> {uploadingIndex === i ? 'Uploading...' : 'Upload'}
+                      <Upload className="w-3.5 h-3.5" /> {uploadingIndex === i ? 'Uploading...' : 'Upload Logo'}
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLogoUpload(e, i)} disabled={uploadingIndex === i} />
                     </label>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input type="text" value={center.name} onChange={(e) => {
-                      const updated = [...strip.centers];
+                      const updated = [...local.centers];
                       updated[i] = { ...center, name: e.target.value };
-                      onUpdate({ centers: updated });
+                      updateLocal({ centers: updated });
                     }} className="input-field text-xs" placeholder="Center name" />
-                    <input type="text" value={center.logo || ''} onChange={(e) => {
-                      const updated = [...strip.centers];
-                      updated[i] = { ...center, logo: e.target.value };
-                      onUpdate({ centers: updated });
-                    }} className="input-field text-xs" placeholder="Logo URL (optional)" />
                     <input type="text" value={center.link || ''} onChange={(e) => {
-                      const updated = [...strip.centers];
+                      const updated = [...local.centers];
                       updated[i] = { ...center, link: e.target.value };
-                      onUpdate({ centers: updated });
+                      updateLocal({ centers: updated });
                     }} className="input-field text-xs" placeholder="Link URL (e.g. /center/1)" />
                   </div>
                 </div>
-                <button onClick={() => onDeleteCenter(i)} className="text-rose-500 hover:text-rose-700 p-1 rounded">
+                <button onClick={() => removeLocalCenter(i)} className="text-rose-500 hover:text-rose-700 p-1 rounded">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -1825,12 +1854,16 @@ export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCe
           </div>
         )}
         <button
-          onClick={() => onAddCenter({ name: 'New Center', logo: '', link: '' })}
+          onClick={addLocalCenter}
           className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
         >
           <Plus className="w-3.5 h-3.5" /> Add Center
         </button>
       </div>
+
+      <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2 w-full justify-center">
+        <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Centers Strip'}
+      </button>
     </div>
   );
 }
