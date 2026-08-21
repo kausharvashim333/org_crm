@@ -379,9 +379,9 @@ export default function OrgHomepage() {
                       </div>
                     </form>
 
-                    {/* Quick Course Keyword Chips */}
-                    <div className="flex items-center gap-1.5 flex-wrap pt-2 text-[11px]">
-                      <span className="font-semibold text-slate-400 flex items-center gap-0.5">
+                    {/* Quick Course Keyword Chips - Single Line */}
+                    <div className="flex items-center gap-1.5 pt-2 text-[11px] overflow-x-auto scrollbar-hide whitespace-nowrap">
+                      <span className="font-semibold text-slate-400 flex items-center gap-0.5 shrink-0">
                         <Sparkles className="w-2.5 h-2.5" style={{ color: themeColor }} />
                         Trending
                       </span>
@@ -393,7 +393,7 @@ export default function OrgHomepage() {
                             setHeroSearch(term);
                             navigate(`/courses?search=${encodeURIComponent(term)}`);
                           }}
-                          className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-slate-300 text-slate-500 hover:text-slate-800 font-medium transition-all"
+                          className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-slate-300 text-slate-500 hover:text-slate-800 font-medium transition-all shrink-0"
                         >
                           {term}
                         </button>
