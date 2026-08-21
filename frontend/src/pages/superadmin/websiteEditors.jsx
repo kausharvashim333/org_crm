@@ -903,30 +903,81 @@ export function GalleryEditor({ homepage, onAdd, onDelete, onToggleFeatured }) {
   );
 }
 
-export function TestimonialsEditor({ homepage, onSave, onAdd, onDelete }) {
+export function TestimonialsEditor({ homepage, onSave, onAdd, onDelete, onUpdate }) {
   const [newT, setNewT] = useState({ name: '', role: '', field: '', rating: 5, review: '' });
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editT, setEditT] = useState({ name: '', role: '', field: '', rating: 5, review: '' });
+
+  const startEdit = (index, t) => {
+    setEditingIndex(index);
+    setEditT({ name: t.name || '', role: t.role || '', field: t.field || '', rating: t.rating || 5, review: t.review || '' });
+  };
+
+  const cancelEdit = () => {
+    setEditingIndex(null);
+    setEditT({ name: '', role: '', field: '', rating: 5, review: '' });
+  };
+
+  const saveEdit = (e) => {
+    e.preventDefault();
+    onUpdate(editingIndex, editT);
+    cancelEdit();
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Testimonials</h3>
       <Field label="Title"><input type="text" value={homepage.testimonials?.title || ''} onChange={(e) => onSave({ ...homepage.testimonials, title: e.target.value })} className="input-field" /></Field>
       <Field label="Subtitle"><input type="text" value={homepage.testimonials?.subtitle || ''} onChange={(e) => onSave({ ...homepage.testimonials, subtitle: e.target.value })} className="input-field" /></Field>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={homepage.testimonials?.show !== false} onChange={(e) => onSave({ ...homepage.testimonials, show: e.target.checked })} /> Show this section</label>
-      <div className="space-y-2">
+
+      {/* Existing testimonials list with edit/delete */}
+      <div className="space-y-3">
         {(homepage.testimonials?.items || []).map((t, i) => (
-          <div key={i} className="flex items-start justify-between bg-gray-50 p-3 rounded-lg">
-            <div><p className="text-sm font-medium">{t.name} - {t.role} {t.field ? `(${t.field})` : ''}</p><p className="text-xs text-gray-500">{'★'.repeat(t.rating)} {t.review}</p></div>
-            <button onClick={() => onDelete(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+          <div key={i} className="bg-gray-50 p-3 rounded-lg border border-slate-200">
+            {editingIndex === i ? (
+              <form onSubmit={saveEdit} className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="text" required placeholder="Name" value={editT.name} onChange={(e) => setEditT({ ...editT, name: e.target.value })} className="input-field" />
+                  <input type="text" placeholder="Role / Designation" value={editT.role} onChange={(e) => setEditT({ ...editT, role: e.target.value })} className="input-field" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="text" placeholder="Field (e.g. Computer Training)" value={editT.field} onChange={(e) => setEditT({ ...editT, field: e.target.value })} className="input-field" />
+                  <select value={editT.rating} onChange={(e) => setEditT({ ...editT, rating: +e.target.value })} className="input-field"><option value={5}>★★★★★</option><option value={4}>★★★★</option><option value={3}>★★★</option><option value={2}>★★</option><option value={1}>★</option></select>
+                </div>
+                <textarea rows="2" required placeholder="Review" value={editT.review} onChange={(e) => setEditT({ ...editT, review: e.target.value })} className="input-field" />
+                <div className="flex gap-2">
+                  <button type="submit" className="btn-primary flex items-center gap-1 text-sm px-3 py-1.5"><Save className="w-3.5 h-3.5" /> Save</button>
+                  <button type="button" onClick={cancelEdit} className="btn-secondary text-sm px-3 py-1.5">Cancel</button>
+                </div>
+              </form>
+            ) : (
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{t.name} - {t.role} {t.field ? `(${t.field})` : ''}</p>
+                  <p className="text-xs text-amber-500">{'★'.repeat(t.rating)}</p>
+                  <p className="text-xs text-gray-500 mt-1">{t.review}</p>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <button onClick={() => startEdit(i, t)} className="text-blue-600 hover:text-blue-800 p-1"><Edit className="w-4 h-4" /></button>
+                  <button onClick={() => onDelete(i)} className="text-red-600 hover:text-red-800 p-1"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
-      <form onSubmit={(e) => { e.preventDefault(); onAdd(newT); setNewT({ name: '', role: '', field: '', rating: 5, review: '' }); }} className="space-y-2">
+
+      {/* Add new testimonial form */}
+      <form onSubmit={(e) => { e.preventDefault(); onAdd(newT); setNewT({ name: '', role: '', field: '', rating: 5, review: '' }); }} className="space-y-2 border-t border-slate-200 pt-4">
+        <h4 className="font-semibold text-sm text-slate-700">Add New Testimonial</h4>
         <div className="grid grid-cols-2 gap-2">
           <input type="text" required placeholder="Name" value={newT.name} onChange={(e) => setNewT({ ...newT, name: e.target.value })} className="input-field" />
           <input type="text" placeholder="Role / Designation" value={newT.role} onChange={(e) => setNewT({ ...newT, role: e.target.value })} className="input-field" />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <input type="text" placeholder="Field (e.g. Computer Training)" value={newT.field} onChange={(e) => setNewT({ ...newT, field: e.target.value })} className="input-field" />
-          <select value={newT.rating} onChange={(e) => setNewT({ ...newT, rating: +e.target.value })} className="input-field"><option value={5}>★★★★★</option><option value={4}>★★★★</option><option value={3}>★★★</option></select>
+          <select value={newT.rating} onChange={(e) => setNewT({ ...newT, rating: +e.target.value })} className="input-field"><option value={5}>★★★★★</option><option value={4}>★★★★</option><option value={3}>★★★</option><option value={2}>★★</option><option value={1}>★</option></select>
         </div>
         <textarea rows="2" required placeholder="Review" value={newT.review} onChange={(e) => setNewT({ ...newT, review: e.target.value })} className="input-field" />
         <button type="submit" className="btn-primary flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Add Testimonial</button>

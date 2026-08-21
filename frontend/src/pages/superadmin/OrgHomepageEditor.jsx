@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   getOrgHomepage, updateOrgHomepageSection, publishOrgHomepage,
-  addOrgTestimonial, deleteOrgTestimonial,
+  addOrgTestimonial, deleteOrgTestimonial, updateOrgTestimonial,
   addOrgGalleryPhoto, deleteOrgGalleryPhoto, toggleOrgGalleryFeatured,
   addOrgStat, deleteOrgStat,
   addOrgFeature, deleteOrgFeature,
@@ -162,7 +162,7 @@ export default function OrgHomepageEditor() {
 
         {activeTab === 'media' && <>
           <GalleryEditor homepage={homepage} onAdd={(d) => add(addOrgGalleryPhoto, d, 'Photo added')} onDelete={(i) => del(deleteOrgGalleryPhoto, i, 'Deleted')} onToggleFeatured={(i) => update(toggleOrgGalleryFeatured, i, null, 'Featured status updated')} />
-          <TestimonialsEditor homepage={homepage} onSave={(d) => save('testimonials', d)} onAdd={(d) => add(addOrgTestimonial, d, 'Testimonial added')} onDelete={(i) => del(deleteOrgTestimonial, i, 'Deleted')} />
+          <TestimonialsEditor homepage={homepage} onSave={(d) => save('testimonials', d)} onAdd={(d) => add(addOrgTestimonial, d, 'Testimonial added')} onDelete={(i) => del(deleteOrgTestimonial, i, 'Deleted')} onUpdate={(i, d) => update(updateOrgTestimonial, i, d, 'Testimonial updated')} />
           <NoticesEditor homepage={homepage} onSave={(d) => save('notices', d)} onAdd={(d) => add(addOrgNotice, d, 'Notice added')} onDelete={(i) => del(deleteOrgNotice, i, 'Deleted')} onUpdate={(i, d) => update(updateOrgNotice, i, d, 'Notice updated')} />
         </>}
 

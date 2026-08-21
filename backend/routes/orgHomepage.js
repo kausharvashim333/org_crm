@@ -510,6 +510,21 @@ router.post('/testimonials', protect, superAdminOnly, async (req, res) => {
   }
 });
 
+router.put('/testimonials/:index', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { name, role, field, rating, review } = req.body;
+    const homepage = await createDefaultIfMissing();
+    const idx = parseInt(req.params.index);
+    if (homepage.testimonials.items[idx]) {
+      homepage.testimonials.items[idx] = { name, role, field, rating, review };
+      await homepage.save();
+    }
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.delete('/testimonials/:index', protect, superAdminOnly, async (req, res) => {
   try {
     const homepage = await createDefaultIfMissing();

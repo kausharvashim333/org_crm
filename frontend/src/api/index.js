@@ -169,6 +169,7 @@ export const addOrgGalleryPhoto = (data) => API.post('/org-homepage/gallery', da
 export const deleteOrgGalleryPhoto = (index) => API.delete(`/org-homepage/gallery/${index}`);
 export const toggleOrgGalleryFeatured = (index) => API.put(`/org-homepage/gallery/${index}/featured`);
 export const addOrgTestimonial = (data) => API.post('/org-homepage/testimonials', data);
+export const updateOrgTestimonial = (index, data) => API.put(`/org-homepage/testimonials/${index}`, data);
 export const deleteOrgTestimonial = (index) => API.delete(`/org-homepage/testimonials/${index}`);
 export const addOrgStat = (data) => API.post('/org-homepage/stats', data);
 export const deleteOrgStat = (index) => API.delete(`/org-homepage/stats/${index}`);
