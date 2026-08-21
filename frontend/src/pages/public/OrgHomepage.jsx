@@ -219,9 +219,10 @@ export default function OrgHomepage() {
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
   const orgName = hp?.settings?.orgName || 'Skill India Training Network';
-  const layoutOrder = hp?.layoutOrder || [
-    'hero', 'verticals', 'courses', 'services', 'stats', 'about', 'franchise', 'certifications', 'gallery', 'testimonials', 'contact'
-  ];
+  const hiddenSections = ['courses', 'franchise', 'notices', 'cta'];
+  const layoutOrder = (hp?.layoutOrder || [
+    'hero', 'verticals', 'services', 'stats', 'about', 'certifications', 'gallery', 'testimonials', 'contact'
+  ]).filter(s => !hiddenSections.includes(s));
 
   // Notice categories extraction
   const rawNotices = hp?.notices?.items || [];
