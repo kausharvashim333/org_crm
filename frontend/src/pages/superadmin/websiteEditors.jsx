@@ -148,11 +148,11 @@ export function HeroEditor({ homepage, onSave }) {
       <Field label="Single Banner Image URL (Fallback)"><input type="text" value={data.bannerImage || ''} onChange={(e) => setData({ ...data, bannerImage: e.target.value })} className="input-field" placeholder="Used if background image slider is empty" /></Field>
       <Field label="Heading"><input type="text" value={data.heading || ''} onChange={(e) => setData({ ...data, heading: e.target.value })} className="input-field" /></Field>
       <Field label="Heading Text Color"><div className="flex items-center gap-2"><input type="color" value={data.headingColor || '#0f172a'} onChange={(e) => setData({ ...data, headingColor: e.target.value })} className="w-12 h-10 rounded border border-slate-200 cursor-pointer" /><input type="text" value={data.headingColor || '#0f172a'} onChange={(e) => setData({ ...data, headingColor: e.target.value })} className="input-field flex-1" /></div></Field>
-      <Field label="Heading Font Size (px)"><input type="number" min="20" max="80" value={typeof data.headingFontSize === 'number' ? data.headingFontSize : 48} onChange={(e) => setData({ ...data, headingFontSize: parseInt(e.target.value) || 48 })} className="input-field" /></Field>
+      <Field label="Heading Font Size (px)"><input type="number" min="20" max="80" value={data.headingFontSize === '' ? '' : (typeof data.headingFontSize === 'number' ? data.headingFontSize : 48)} onChange={(e) => { const v = e.target.value; setData({ ...data, headingFontSize: v === '' ? '' : (parseInt(v) || 48) }); }} className="input-field" /></Field>
       <Field label="Subheading"><input type="text" value={data.subheading || ''} onChange={(e) => setData({ ...data, subheading: e.target.value })} className="input-field" /></Field>
-      <Field label="Subheading Font Size (px)"><input type="number" min="10" max="30" value={typeof data.subheadingFontSize === 'number' ? data.subheadingFontSize : 14} onChange={(e) => setData({ ...data, subheadingFontSize: parseInt(e.target.value) || 14 })} className="input-field" /></Field>
+      <Field label="Subheading Font Size (px)"><input type="number" min="10" max="30" value={data.subheadingFontSize === '' ? '' : (typeof data.subheadingFontSize === 'number' ? data.subheadingFontSize : 14)} onChange={(e) => { const v = e.target.value; setData({ ...data, subheadingFontSize: v === '' ? '' : (parseInt(v) || 14) }); }} className="input-field" /></Field>
       <Field label="Description"><input type="text" value={data.description || ''} onChange={(e) => setData({ ...data, description: e.target.value })} className="input-field" /></Field>
-      <Field label="Description Font Size (px)"><input type="number" min="10" max="30" value={typeof data.descriptionFontSize === 'number' ? data.descriptionFontSize : 16} onChange={(e) => setData({ ...data, descriptionFontSize: parseInt(e.target.value) || 16 })} className="input-field" /></Field>
+      <Field label="Description Font Size (px)"><input type="number" min="10" max="30" value={data.descriptionFontSize === '' ? '' : (typeof data.descriptionFontSize === 'number' ? data.descriptionFontSize : 16)} onChange={(e) => { const v = e.target.value; setData({ ...data, descriptionFontSize: v === '' ? '' : (parseInt(v) || 16) }); }} className="input-field" /></Field>
 
       <div className="border border-slate-200 p-4 rounded-xl space-y-4 bg-slate-50/50">
         <h4 className="font-semibold text-sm text-slate-700">Hero Section Bullet Points (Exactly 4)</h4>
@@ -178,7 +178,12 @@ export function HeroEditor({ homepage, onSave }) {
         </div>
       </div>
 
-      <button onClick={() => onSave(data)} className="btn-primary flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2"><Save className="w-4 h-4" /> Save</button>
+      <button onClick={() => onSave({
+        ...data,
+        headingFontSize: typeof data.headingFontSize === 'number' ? data.headingFontSize : 48,
+        subheadingFontSize: typeof data.subheadingFontSize === 'number' ? data.subheadingFontSize : 14,
+        descriptionFontSize: typeof data.descriptionFontSize === 'number' ? data.descriptionFontSize : 16,
+      })} className="btn-primary flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2"><Save className="w-4 h-4" /> Save</button>
     </div>
   );
 }
