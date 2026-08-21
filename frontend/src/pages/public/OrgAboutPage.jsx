@@ -126,11 +126,11 @@ export default function OrgAboutPage() {
                 </div>
               </Reveal>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {about.features.map((f, i) => {
                   const Icon = iconMap[f.icon] || BookOpen;
                   return (
-                    <Reveal key={i} delay={i * 100} className="h-full">
+                    <Reveal key={i} delay={i * 100} className="h-full w-full max-w-[200px]">
                       <div className="h-full flex flex-col items-center justify-start text-center group p-6 bg-slate-50/50 hover:bg-slate-50/20 hover:border-slate-300 rounded-2xl transition-all border border-slate-100 shadow-sm">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-110" style={{ backgroundColor: `${themeColor}12` }}>
                           <Icon className="w-6 h-6" style={{ color: themeColor }} />
@@ -157,11 +157,11 @@ export default function OrgAboutPage() {
                 </div>
               </Reveal>
               
-              <div className="grid grid-cols-6 gap-1 md:gap-4 lg:gap-6">
+              <div className="flex flex-wrap justify-center gap-4 lg:gap-6">
                 {stats.items.map((s, i) => {
                   const Icon = iconMap[s.icon] || Building;
                   return (
-                    <Reveal key={i} delay={i * 100} className="h-full">
+                    <Reveal key={i} delay={i * 100} className="h-full w-full max-w-[160px]">
                       <div className="bg-white border border-slate-200 rounded-2xl p-2 md:p-5 hover:border-slate-350 hover:shadow-md transition-all text-center h-full flex flex-col justify-between shadow-sm group">
                         <div className="w-7 h-7 md:w-11 md:h-11 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform" style={{ backgroundColor: `${themeColor}12` }}>
                           <Icon className="w-3.5 h-3.5 md:w-5.5 md:h-5.5" style={{ color: themeColor }} />
@@ -188,9 +188,9 @@ export default function OrgAboutPage() {
                 <p className="text-sm text-slate-500 mt-2">{certifications.subtitle || 'Recognized by national standards agencies and boards'}</p>
               </div>
             </Reveal>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
               {certifications.items.map((c, i) => (
-                <Reveal key={i} delay={i * 100}>
+                <Reveal key={i} delay={i * 100} className="w-full max-w-[280px]">
                   <div className="bg-white rounded-3xl p-6 text-center border border-slate-200/60 shadow-md hover:shadow-lg transition-shadow flex flex-col items-center justify-between h-full">
                     {c.logo ? <img src={c.logo} alt={c.name} className="w-16 h-16 object-contain mb-4 bg-white" /> : <Award className="w-12 h-12 mb-4" style={{ color: themeColor }} />}
                     <div className="space-y-1">

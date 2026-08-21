@@ -108,11 +108,11 @@ export default function OrgFranchisePage() {
         {stats.items?.length > 0 && (
           <section className="py-16 px-4 max-w-6xl mx-auto -mt-10 relative z-10">
             <div className="bg-white/70 backdrop-blur-md p-6 rounded-3xl border border-slate-200/50 shadow-xl">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {stats.items.map((s, i) => {
                   const Icon = iconMap[s.icon] || Building;
                   return (
-                    <Reveal key={i} delay={i * 100}>
+                    <Reveal key={i} delay={i * 100} className="w-full max-w-[160px]">
                       <div className="text-center group flex flex-col items-center p-2">
                         <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center mb-3 transition-transform group-hover:scale-110 border border-slate-100">
                           <Icon className="w-5 h-5" style={{ color: themeColor }} />
@@ -133,11 +133,11 @@ export default function OrgFranchisePage() {
           <section className="py-20 px-4">
             <div className="max-w-6xl mx-auto">
               <Reveal><SectionHeading title="Why Partner With Us?" subtitle="Discover the advantages of joining our partner network" themeColor={themeColor} /></Reveal>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {franchise.benefits.map((b, i) => {
                   const Icon = iconMap[b.icon] || Building;
                   return (
-                    <Reveal key={i} delay={i * 100}>
+                    <Reveal key={i} delay={i * 100} className="w-full max-w-[280px]">
                       <div className="group bg-white rounded-2xl p-7 border border-slate-200/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 h-full relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: themeColor }} />
                         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-transform group-hover:scale-110" style={{ backgroundColor: `${themeColor}12` }}>
@@ -172,7 +172,7 @@ export default function OrgFranchisePage() {
                 </div>
               </Reveal>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+              <div className="flex flex-wrap justify-center gap-8 items-stretch">
                 {plans.map((plan, idx) => {
                   const isPopular = plan.popular;
                   const discountPercent = plan.originalFee && plan.originalFee > plan.fee
@@ -180,7 +180,7 @@ export default function OrgFranchisePage() {
                     : null;
 
                   return (
-                    <Reveal key={idx} delay={idx * 120} className="h-full">
+                    <Reveal key={idx} delay={idx * 120} className="h-full w-full max-w-[380px]">
                       <div
                         className={`h-full flex flex-col justify-between rounded-3xl bg-white transition-all duration-300 relative overflow-hidden border ${
                           isPopular

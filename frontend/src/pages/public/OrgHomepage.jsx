@@ -582,11 +582,11 @@ export default function OrgHomepage() {
                 />
               </Reveal>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {(hp.verticals?.items || []).map((v, i) => {
                   const Icon = iconMap[v.icon] || BookOpen;
                   return (
-                    <Reveal key={i} delay={i * 80}>
+                    <Reveal key={i} delay={i * 80} className="w-full max-w-[300px]">
                       <div className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-lg hover:border-indigo-300 transition-all duration-200 h-full flex flex-col justify-between">
                         
                         <div>
@@ -866,11 +866,11 @@ export default function OrgHomepage() {
 
               {/* Key Features */}
               {(hp.about?.features || []).length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div className="flex flex-wrap justify-center gap-4">
                   {(hp.about?.features || []).map((f, i) => {
                     const Icon = iconMap[f.icon] || BookOpen;
                     return (
-                      <Reveal key={i} delay={i * 60} className="h-full">
+                      <Reveal key={i} delay={i * 60} className="h-full w-full max-w-[180px]">
                         <div className="h-full flex flex-col items-center justify-start text-center p-5 bg-white rounded-xl border border-slate-200 shadow-xs hover:shadow-sm transition-all">
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-slate-100" style={{ color: themeColor }}>
                             <Icon className="w-5 h-5" />
@@ -945,9 +945,9 @@ export default function OrgHomepage() {
                 />
               </Reveal>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              <div className="flex flex-wrap justify-center gap-5">
                 {hp.certifications.items.map((c, i) => (
-                  <Reveal key={i} delay={i * 60}>
+                  <Reveal key={i} delay={i * 60} className="w-full max-w-[260px]">
                     <div className="bg-white rounded-2xl p-5 text-center border border-slate-200 shadow-xs hover:shadow-sm transition-all flex flex-col items-center justify-center min-h-[140px]">
                       {c.logo ? (
                         <img src={c.logo} alt={c.name} className="w-14 h-14 object-contain mb-2.5" />
@@ -980,9 +980,9 @@ export default function OrgHomepage() {
                 />
               </Reveal>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {hp.testimonials.items.map((t, i) => (
-                  <Reveal key={i} delay={i * 70}>
+                  <Reveal key={i} delay={i * 70} className="w-full max-w-[380px]">
                     <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6 shadow-xs h-full flex flex-col justify-between">
                       <div>
                         <div className="flex items-center gap-1 mb-3">
@@ -1160,11 +1160,11 @@ export default function OrgHomepage() {
                 />
               </Reveal>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {(hp.services?.items || []).map((s, i) => {
                   const Icon = iconMap[s.icon] || Briefcase;
                   return (
-                    <Reveal key={i} delay={i * 70}>
+                    <Reveal key={i} delay={i * 70} className="w-full max-w-[380px]">
                       <div className="group bg-slate-50 hover:bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all h-full flex flex-col">
                         <div className="flex items-center justify-between mb-4">
                           <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-50" style={{ color: themeColor }}>
@@ -1221,9 +1221,9 @@ export default function OrgHomepage() {
                 />
               </Reveal>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
                 {(hp.gallery?.photos || []).map((photo, i) => (
-                  <Reveal key={i} delay={i * 50}>
+                  <Reveal key={i} delay={i * 50} className="w-full max-w-[260px]">
                     <div className="group relative overflow-hidden rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg transition-all aspect-square">
                       <img
                         src={photo.url}
@@ -1291,6 +1291,51 @@ export default function OrgHomepage() {
         );
 
       default:
+        if (section.startsWith('custom_')) {
+          const cs = (hp.customSections || []).find(s => s.id === section);
+          if (!cs || cs.show === false || !cs.cards?.length) return null;
+          const bgClass = cs.bgStyle === 'dark' ? 'bg-slate-900 text-white' : cs.bgStyle === 'slate' ? 'bg-slate-50/70' : 'bg-white';
+          const isDark = cs.bgStyle === 'dark';
+          return (
+            <section key={cs.id} id={cs.id} className={`py-16 sm:py-20 px-4 sm:px-6 lg:px-8 ${bgClass} border-b border-slate-200/60`}>
+              <div className="max-w-7xl mx-auto">
+                <Reveal>
+                  <SectionHeading
+                    badge={cs.badge || 'Info'}
+                    title={cs.title}
+                    subtitle={cs.subtitle}
+                    themeColor={themeColor}
+                  />
+                </Reveal>
+                <div className="flex flex-wrap justify-center gap-5">
+                  {cs.cards.map((card, i) => {
+                    const Icon = iconMap[card.icon] || BookOpen;
+                    return (
+                      <Reveal key={i} delay={i * 60} className="w-full max-w-[260px]">
+                        <div className={`h-full flex flex-col items-center justify-start text-center p-5 rounded-2xl border transition-all ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-white border-slate-200 shadow-xs hover:shadow-sm'}`}>
+                          {card.image ? (
+                            <img src={card.image} alt={card.title} className="w-14 h-14 object-contain mb-3 rounded-xl" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-indigo-50" style={{ color: themeColor }}>
+                              <Icon className="w-5 h-5" />
+                            </div>
+                          )}
+                          <h4 className={`font-bold text-xs sm:text-sm mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{card.title}</h4>
+                          <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{card.description}</p>
+                          {card.link && (
+                            <a href={card.link} target="_blank" rel="noreferrer" className="mt-3 text-xs font-bold hover:underline" style={{ color: themeColor }}>
+                              {card.linkText || 'Learn More'}
+                            </a>
+                          )}
+                        </div>
+                      </Reveal>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          );
+        }
         return null;
     }
   };

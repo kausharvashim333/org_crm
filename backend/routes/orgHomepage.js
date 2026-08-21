@@ -731,4 +731,89 @@ router.delete('/services/:index', protect, superAdminOnly, async (req, res) => {
   }
 });
 
+// Custom Sections
+router.post('/custom-sections', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    const id = 'custom_' + Date.now();
+    homepage.customSections.push({
+      id,
+      title: req.body.title || 'New Section',
+      subtitle: req.body.subtitle || '',
+      badge: req.body.badge || '',
+      bgStyle: req.body.bgStyle || 'white',
+      columns: req.body.columns || 4,
+      show: true,
+      cards: [],
+    });
+    if (!homepage.layoutOrder.includes(id)) {
+      homepage.layoutOrder.push(id);
+    }
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/custom-sections/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    const section = homepage.customSections.find(s => s.id === req.params.id);
+    if (!section) return res.status(404).json({ success: false, message: 'Section not found' });
+    ['title', 'subtitle', 'badge', 'bgStyle', 'columns', 'show'].forEach(field => {
+      if (req.body[field] !== undefined) section[field] = req.body[field];
+    });
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/custom-sections/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    homepage.customSections = homepage.customSections.filter(s => s.id !== req.params.id);
+    homepage.layoutOrder = homepage.layoutOrder.filter(s => s !== req.params.id);
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/custom-sections/:id/cards', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    const section = homepage.customSections.find(s => s.id === req.params.id);
+    if (!section) return res.status(404).json({ success: false, message: 'Section not found' });
+    section.cards.push({
+      icon: req.body.icon || 'book',
+      title: req.body.title || 'New Card',
+      description: req.body.description || '',
+      image: req.body.image || '',
+      link: req.body.link || '',
+      linkText: req.body.linkText || 'Learn More',
+    });
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/custom-sections/:id/cards/:cardIndex', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    const section = homepage.customSections.find(s => s.id === req.params.id);
+    if (!section) return res.status(404).json({ success: false, message: 'Section not found' });
+    section.cards.splice(parseInt(req.params.cardIndex), 1);
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

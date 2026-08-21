@@ -1618,3 +1618,119 @@ export function CodeSeriesEditor({ homepage, onSave }) {
     </div>
   );
 }
+
+export function CustomSectionsEditor({ homepage, onAddSection, onUpdateSection, onDeleteSection, onAddCard, onDeleteCard }) {
+  const sections = homepage.customSections || [];
+  const iconOptions = ['book', 'briefcase', 'users', 'award', 'monitor', 'building', 'target', 'heart', 'trending', 'wifi'];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800">Custom Card Sections</h3>
+          <p className="text-xs text-slate-500">Create new card blocks to display on the homepage. Add cards with icons, images, descriptions, and links.</p>
+        </div>
+        <button onClick={() => onAddSection({ title: 'New Section', subtitle: '', badge: '', bgStyle: 'white', columns: 4 })} className="btn-primary flex items-center gap-2 text-xs">
+          <Plus className="w-4 h-4" /> Add Section
+        </button>
+      </div>
+
+      {sections.length === 0 ? (
+        <div className="card text-center py-12 text-slate-400">
+          <p className="text-sm">No custom sections yet. Click "Add Section" to create one.</p>
+        </div>
+      ) : (
+        sections.map((section) => (
+          <div key={section.id} className="card space-y-4 border-l-4 border-l-indigo-500">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg">{section.id}</span>
+                <label className="flex items-center gap-1.5 text-xs">
+                  <input type="checkbox" checked={section.show !== false} onChange={(e) => onUpdateSection(section.id, { show: e.target.checked })} className="rounded" />
+                  Visible
+                </label>
+              </div>
+              <button onClick={() => onDeleteSection(section.id)} className="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 transition-colors">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Section Title">
+                <input type="text" value={section.title} onChange={(e) => onUpdateSection(section.id, { title: e.target.value })} className="input-field" placeholder="e.g. Our Facilities" />
+              </Field>
+              <Field label="Badge Label">
+                <input type="text" value={section.badge || ''} onChange={(e) => onUpdateSection(section.id, { badge: e.target.value })} className="input-field" placeholder="e.g. Highlights" />
+              </Field>
+              <Field label="Subtitle">
+                <input type="text" value={section.subtitle || ''} onChange={(e) => onUpdateSection(section.id, { subtitle: e.target.value })} className="input-field" placeholder="Short description" />
+              </Field>
+              <Field label="Background Style">
+                <select value={section.bgStyle || 'white'} onChange={(e) => onUpdateSection(section.id, { bgStyle: e.target.value })} className="input-field">
+                  <option value="white">White</option>
+                  <option value="slate">Light Slate</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </Field>
+            </div>
+
+            <div className="border-t pt-3">
+              <p className="text-xs font-bold text-slate-600 mb-2">Cards ({section.cards?.length || 0})</p>
+              {section.cards?.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {section.cards.map((card, cIdx) => (
+                    <div key={cIdx} className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200/60">
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" value={card.title} onChange={(e) => {
+                          const updated = [...section.cards];
+                          updated[cIdx] = { ...card, title: e.target.value };
+                          onUpdateSection(section.id, { cards: updated });
+                        }} className="input-field text-xs" placeholder="Card title" />
+                        <select value={card.icon} onChange={(e) => {
+                          const updated = [...section.cards];
+                          updated[cIdx] = { ...card, icon: e.target.value };
+                          onUpdateSection(section.id, { cards: updated });
+                        }} className="input-field text-xs">
+                          {iconOptions.map(ic => <option key={ic} value={ic}>{ic}</option>)}
+                        </select>
+                        <input type="text" value={card.description} onChange={(e) => {
+                          const updated = [...section.cards];
+                          updated[cIdx] = { ...card, description: e.target.value };
+                          onUpdateSection(section.id, { cards: updated });
+                        }} className="input-field text-xs" placeholder="Description" />
+                        <input type="text" value={card.link || ''} onChange={(e) => {
+                          const updated = [...section.cards];
+                          updated[cIdx] = { ...card, link: e.target.value };
+                          onUpdateSection(section.id, { cards: updated });
+                        }} className="input-field text-xs" placeholder="Link URL (optional)" />
+                        <input type="text" value={card.image || ''} onChange={(e) => {
+                          const updated = [...section.cards];
+                          updated[cIdx] = { ...card, image: e.target.value };
+                          onUpdateSection(section.id, { cards: updated });
+                        }} className="input-field text-xs" placeholder="Image URL (optional, overrides icon)" />
+                        <input type="text" value={card.linkText || ''} onChange={(e) => {
+                          const updated = [...section.cards];
+                          updated[cIdx] = { ...card, linkText: e.target.value };
+                          onUpdateSection(section.id, { cards: updated });
+                        }} className="input-field text-xs" placeholder="Link text (e.g. Learn More)" />
+                      </div>
+                      <button onClick={() => onDeleteCard(section.id, cIdx)} className="text-rose-500 hover:text-rose-700 p-1 rounded">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={() => onAddCard(section.id, { icon: 'book', title: 'New Card', description: '', link: '', linkText: 'Learn More' })}
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Card
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}

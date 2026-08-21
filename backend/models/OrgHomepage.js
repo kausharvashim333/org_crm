@@ -222,6 +222,24 @@ const orgHomepageSchema = new mongoose.Schema({
   },
 
   layoutOrder: [{ type: String }],
+
+  customSections: [{
+    id: { type: String, required: true },
+    title: { type: String, required: true },
+    subtitle: { type: String, default: '' },
+    badge: { type: String, default: '' },
+    bgStyle: { type: String, enum: ['white', 'slate', 'dark'], default: 'white' },
+    columns: { type: Number, default: 4 },
+    show: { type: Boolean, default: true },
+    cards: [{
+      icon: { type: String, default: 'book' },
+      title: { type: String, required: true },
+      description: { type: String, default: '' },
+      image: { type: String },
+      link: { type: String },
+      linkText: { type: String, default: 'Learn More' },
+    }],
+  }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('OrgHomepage', orgHomepageSchema);

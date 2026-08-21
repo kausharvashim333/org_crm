@@ -11,6 +11,8 @@ import {
   addOrgCertification, deleteOrgCertification,
   addOrgService, deleteOrgService,
   addOrgVertical, deleteOrgVertical,
+  addOrgCustomSection, updateOrgCustomSection, deleteOrgCustomSection,
+  addOrgCustomCard, deleteOrgCustomCard,
 } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { ExternalLink } from 'lucide-react';
@@ -19,7 +21,7 @@ import {
   CertificationsEditor, GalleryEditor, TestimonialsEditor,
   NoticesEditor, CtaEditor, ContactEditor, SettingsEditor,
   ServicesEditor, AnnouncementEditor, EnquiryConfigEditor,
-  CodeSeriesEditor, VerticalsEditor,
+  CodeSeriesEditor, VerticalsEditor, CustomSectionsEditor,
 } from './websiteEditors';
 
 const tabs = [
@@ -28,6 +30,7 @@ const tabs = [
   { key: 'verticals', label: 'Verticals' },
   { key: 'franchise', label: '⭐ Franchise & Partnership Plans' },
   { key: 'services', label: 'Services' },
+  { key: 'custom', label: 'Custom Sections' },
   { key: 'media', label: 'Media' },
   { key: 'settings', label: 'Settings' },
 ];
@@ -39,6 +42,7 @@ const sectionToTab = {
   verticals: 'verticals',
   franchise: 'franchise',
   services: 'services',
+  custom: 'custom',
   gallery: 'media', testimonials: 'media', notices: 'media',
   announcement: 'settings', enquiryConfig: 'settings', contact: 'settings', settings: 'settings',
 };
@@ -138,6 +142,17 @@ export default function OrgHomepageEditor() {
 
         {activeTab === 'services' && (
           <ServicesEditor homepage={homepage} onSave={(d) => save('services', d)} onAdd={(d) => add(addOrgService, d, 'Service added')} onDelete={(i) => del(deleteOrgService, i, 'Deleted')} />
+        )}
+
+        {activeTab === 'custom' && (
+          <CustomSectionsEditor
+            homepage={homepage}
+            onAddSection={(d) => add(addOrgCustomSection, d, 'Section created')}
+            onUpdateSection={(id, d) => add(updateOrgCustomSection.bind(null, id), d, 'Section updated')}
+            onDeleteSection={(id) => del(deleteOrgCustomSection.bind(null, id), null, 'Section deleted')}
+            onAddCard={(sectionId, d) => add(addOrgCustomCard.bind(null, sectionId), d, 'Card added')}
+            onDeleteCard={(sectionId, cardIndex) => del(deleteOrgCustomCard.bind(null, sectionId), cardIndex, 'Card deleted')}
+          />
         )}
 
         {activeTab === 'media' && <>

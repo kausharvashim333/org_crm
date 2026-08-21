@@ -262,7 +262,7 @@ export default function OrgCoursesPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="flex flex-wrap justify-center gap-8">
             {filteredCourses.map((c, i) => {
               const original = c.originalPrice || c.fee || 0;
               const sale = c.salePrice || c.fee || 0;
@@ -270,7 +270,7 @@ export default function OrgCoursesPage() {
               const isBestseller = c.badge === 'Bestseller' || c.badge === 'Hot & New' || c.enrolledCount > 1000;
 
               return (
-                <Reveal key={c._id || i} delay={i * 60}>
+                <Reveal key={c._id || i} delay={i * 60} className="w-full max-w-[380px]">
                   <div className="group bg-white rounded-2xl border border-slate-200/80 hover:border-indigo-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full overflow-hidden relative">
                     {/* Top Banner Image / Gradient */}
                     <div className="h-44 relative bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800 p-5 flex flex-col justify-between overflow-hidden">
