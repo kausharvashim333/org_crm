@@ -264,23 +264,8 @@ export default function OrgHomepage() {
                   {/* Main Hero Headline */}
                   <Reveal delay={100}>
                     <div className="space-y-1">
-                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.18] text-slate-900">
-                        {(() => {
-                          const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
-                          const words = title.split(' ');
-                          if (words.length > 2) {
-                            const lastWords = words.splice(-2).join(' ');
-                            return (
-                              <>
-                                {words.join(' ')}{' '}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
-                                  {lastWords}
-                                </span>
-                              </>
-                            );
-                          }
-                          return title;
-                        })()}
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.18]" style={{ color: hp.hero?.headingColor || '#0f172a' }}>
+                        {hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance'}
                       </h1>
                       {hp.hero?.heading2 && (
                         <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight" style={{ color: hp.hero.heading2Color || '#4f46e5' }}>
