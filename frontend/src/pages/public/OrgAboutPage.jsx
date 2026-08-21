@@ -47,7 +47,7 @@ export default function OrgAboutPage() {
   }, []);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-slate-900">
+    <div className="flex items-center justify-center h-screen" style={{ backgroundColor: '#0f172a' }}>
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
     </div>
   );
@@ -65,12 +65,12 @@ export default function OrgAboutPage() {
         <Navbar />
 
         {/* Hero Banner Section */}
-        <section className="py-20 px-6 relative overflow-hidden text-center text-white" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${themeColor}40 50%, #0f172a 100%)` }}>
+        <section className="py-20 px-6 relative overflow-hidden text-center text-white" style={{ background: `linear-gradient(135deg, #0f172a 0%, ${themeColor} 100%)` }}>
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, white 2px, transparent 2px)', backgroundSize: '32px 32px' }} />
           <div className="max-w-4xl mx-auto relative z-10 space-y-6">
             <Reveal>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/10 border border-white/10 backdrop-blur-md" style={{ color: themeColor }}>
-                <ShieldCheck className="w-4 h-4" style={{ color: themeColor }} />
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/15 border border-white/20 backdrop-blur-md text-white">
+                <ShieldCheck className="w-4 h-4" />
                 <span>Established Education Networks</span>
               </div>
             </Reveal>
@@ -78,7 +78,7 @@ export default function OrgAboutPage() {
               <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">{about.title || 'About Our Mission'}</h1>
             </Reveal>
             <Reveal delay={200}>
-              <p className="text-sm md:text-base text-slate-300 max-w-3xl mx-auto font-light leading-relaxed">
+              <p className="text-sm md:text-lg text-white/80 max-w-3xl mx-auto font-light leading-relaxed">
                 {about.description || 'Dedicated to providing high-quality skill benchmarks, standard curricula, and national vocational certifications.'}
               </p>
             </Reveal>
@@ -90,25 +90,25 @@ export default function OrgAboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {about.mission && (
               <Reveal delay={100}>
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-md relative overflow-hidden group hover:border-slate-300 transition-colors h-full">
+                <div className="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-md relative overflow-hidden group hover:shadow-lg transition-all h-full">
                   <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-5 group-hover:opacity-10 transition-opacity" style={{ backgroundColor: themeColor }} />
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: `${themeColor}12` }}>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: `${themeColor}15` }}>
                     <Target className="w-7 h-7" style={{ color: themeColor }} />
                   </div>
                   <h3 className="font-extrabold text-2xl mb-3 text-slate-800">Our Mission</h3>
-                  <p className="text-slate-500 leading-relaxed text-sm md:text-base font-light">{about.mission}</p>
+                  <p className="text-slate-600 leading-relaxed text-sm md:text-base">{about.mission}</p>
                 </div>
               </Reveal>
             )}
             {about.vision && (
               <Reveal delay={200}>
-                <div className="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-md relative overflow-hidden group hover:border-slate-300 transition-colors h-full">
+                <div className="bg-white rounded-3xl p-8 border border-slate-200/60 shadow-md relative overflow-hidden group hover:shadow-lg transition-all h-full">
                   <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-5 group-hover:opacity-10 transition-opacity" style={{ backgroundColor: themeColor }} />
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: `${themeColor}12` }}>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6" style={{ backgroundColor: `${themeColor}15` }}>
                     <Heart className="w-7 h-7" style={{ color: themeColor }} />
                   </div>
                   <h3 className="font-extrabold text-2xl mb-3 text-slate-800">Our Vision</h3>
-                  <p className="text-slate-500 leading-relaxed text-sm md:text-base font-light">{about.vision}</p>
+                  <p className="text-slate-600 leading-relaxed text-sm md:text-base">{about.vision}</p>
                 </div>
               </Reveal>
             )}
@@ -121,21 +121,24 @@ export default function OrgAboutPage() {
             <div className="max-w-6xl mx-auto">
               <Reveal>
                 <div className="text-center mb-12">
-                  <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Why Choose Our Ecosystem</h2>
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
+                    Why Choose Us
+                  </span>
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Our Key Features</h2>
                   <p className="text-sm text-slate-500 mt-2">National standards and student-centric support resources</p>
                 </div>
               </Reveal>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 {about.features.map((f, i) => {
                   const Icon = iconMap[f.icon] || BookOpen;
                   return (
-                    <Reveal key={i} delay={i * 100} className="h-full">
-                      <div className="h-full flex flex-col items-center justify-start text-center group p-6 bg-slate-50/50 hover:bg-slate-50/20 hover:border-slate-300 rounded-2xl transition-all border border-slate-100 shadow-sm">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-110" style={{ backgroundColor: `${themeColor}12` }}>
+                    <Reveal key={i} delay={i * 80} className="h-full">
+                      <div className="h-full flex flex-col items-center justify-start text-center group p-5 rounded-2xl transition-all border border-slate-100 shadow-sm hover:shadow-md" style={{ backgroundColor: `${themeColor}05` }}>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-110" style={{ backgroundColor: `${themeColor}15` }}>
                           <Icon className="w-6 h-6" style={{ color: themeColor }} />
                         </div>
-                        <h3 className="font-bold text-sm text-slate-800 mb-2 leading-snug group-hover:text-slate-950">{f.title}</h3>
+                        <h3 className="font-bold text-sm text-slate-800 mb-2 leading-snug">{f.title}</h3>
                         <p className="text-[11px] text-slate-500 leading-relaxed">{f.description}</p>
                       </div>
                     </Reveal>
@@ -148,10 +151,13 @@ export default function OrgAboutPage() {
 
         {/* Dynamic Impact Stats Section */}
         {(stats.items?.length > 0) && (
-          <section className="py-20 px-6 bg-slate-50 border-t border-b border-slate-200/40">
+          <section className="py-20 px-6 border-t border-b border-slate-200/40" style={{ backgroundColor: `${themeColor}08` }}>
             <div className="max-w-5xl mx-auto">
               <Reveal>
                 <div className="text-center mb-12">
+                  <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
+                    Our Impact
+                  </span>
                   <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">{stats.title || 'Our Impact in Numbers'}</h2>
                   <p className="text-sm text-slate-500 mt-2">Connecting training expertise with direct student achievements</p>
                 </div>
@@ -162,13 +168,13 @@ export default function OrgAboutPage() {
                   const Icon = iconMap[s.icon] || Building;
                   return (
                     <Reveal key={i} delay={i * 100} className="h-full w-full max-w-[160px]">
-                      <div className="bg-white border border-slate-200 rounded-2xl p-2 md:p-5 hover:border-slate-350 hover:shadow-md transition-all text-center h-full flex flex-col justify-between shadow-sm group">
-                        <div className="w-7 h-7 md:w-11 md:h-11 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform" style={{ backgroundColor: `${themeColor}12` }}>
-                          <Icon className="w-3.5 h-3.5 md:w-5.5 md:h-5.5" style={{ color: themeColor }} />
+                      <div className="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg transition-all text-center h-full flex flex-col justify-between shadow-sm group">
+                        <div className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform" style={{ backgroundColor: `${themeColor}15` }}>
+                          <Icon className="w-5 h-5" style={{ color: themeColor }} />
                         </div>
                         <div>
-                          <p className="text-[9px] sm:text-sm md:text-xl lg:text-2xl font-black text-slate-800 mb-0.5 leading-none">{s.value}</p>
-                          <p className="text-[5.5px] sm:text-[7.5px] md:text-[9px] lg:text-[10px] font-semibold text-slate-450 uppercase tracking-wider">{s.label}</p>
+                          <p className="text-xl md:text-2xl font-black mb-1 leading-none" style={{ color: themeColor }}>{s.value}</p>
+                          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{s.label}</p>
                         </div>
                       </div>
                     </Reveal>
@@ -184,6 +190,9 @@ export default function OrgAboutPage() {
           <section className="py-20 px-6 max-w-6xl mx-auto">
             <Reveal>
               <div className="text-center mb-12">
+                <span className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
+                  Recognition
+                </span>
                 <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">{certifications.title || 'Certifications & Affiliations'}</h2>
                 <p className="text-sm text-slate-500 mt-2">{certifications.subtitle || 'Recognized by national standards agencies and boards'}</p>
               </div>
@@ -192,7 +201,7 @@ export default function OrgAboutPage() {
               {certifications.items.map((c, i) => (
                 <Reveal key={i} delay={i * 100} className="w-full max-w-[280px]">
                   <div className="bg-white rounded-3xl p-6 text-center border border-slate-200/60 shadow-md hover:shadow-lg transition-shadow flex flex-col items-center justify-between h-full">
-                    {c.logo ? <img src={c.logo} alt={c.name} className="w-16 h-16 object-contain mb-4 bg-white" /> : <Award className="w-12 h-12 mb-4" style={{ color: themeColor }} />}
+                    {c.logo ? <img src={c.logo} alt={c.name} className="w-16 h-16 object-contain mb-4 bg-white" onError={(e) => { if (!e.target.dataset.retried && c.logo?.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${c.logo}`; } }} /> : <Award className="w-12 h-12 mb-4" style={{ color: themeColor }} />}
                     <div className="space-y-1">
                       <h3 className="font-extrabold text-slate-800 text-sm">{c.name}</h3>
                       <p className="text-xs text-slate-500 leading-relaxed">{c.description}</p>
@@ -205,7 +214,7 @@ export default function OrgAboutPage() {
         )}
 
         {/* Interactive CTA */}
-        <section className="py-16 text-white relative overflow-hidden" style={{ backgroundColor: themeColor }}>
+        <section className="py-16 text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${themeColor} 0%, #0f172a 100%)` }}>
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, white 2px, transparent 2px)', backgroundSize: '40px 40px' }} />
           <div className="max-w-4xl mx-auto text-center px-6 relative z-10 space-y-6">
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Want to Explore Our Services?</h2>
@@ -213,11 +222,11 @@ export default function OrgAboutPage() {
               Browse detailed subject modules or submit an admission inquiry to our advisors.
             </p>
             <div className="flex gap-4 justify-center flex-wrap pt-2">
-              <Link to="/services" className="inline-flex items-center gap-2 px-8 py-4 bg-white/20 hover:bg-white/30 border border-white/30 rounded-xl font-bold text-white shadow-xl backdrop-blur-md transition-all hover:scale-105 mirror-shine">
-                Explore Services <ArrowRight className="w-4.5 h-4.5" />
+              <Link to="/services" className="inline-flex items-center gap-2 px-8 py-4 bg-white/15 hover:bg-white/25 border border-white/30 rounded-xl font-bold text-white shadow-xl backdrop-blur-md transition-all hover:scale-105">
+                Explore Services <ArrowRight className="w-5 h-5" />
               </Link>
-              <button onClick={() => window.dispatchEvent(new Event('open-partner-enquiry'))} className="inline-flex items-center gap-2 px-8 py-4 bg-white/20 hover:bg-white/30 border border-white/30 rounded-xl font-bold text-white shadow-xl backdrop-blur-md transition-all hover:scale-105 mirror-shine">
-                Send Enquiry <ArrowRight className="w-4.5 h-4.5" />
+              <button onClick={() => window.dispatchEvent(new Event('open-partner-enquiry'))} className="inline-flex items-center gap-2 px-8 py-4 bg-white/15 hover:bg-white/25 border border-white/30 rounded-xl font-bold text-white shadow-xl backdrop-blur-md transition-all hover:scale-105">
+                Send Enquiry <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>

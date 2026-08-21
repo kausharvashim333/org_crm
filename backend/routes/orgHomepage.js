@@ -462,11 +462,25 @@ router.put('/publish', protect, superAdminOnly, async (req, res) => {
 // Gallery
 router.post('/gallery', protect, superAdminOnly, async (req, res) => {
   try {
-    const { url, caption } = req.body;
+    const { url, caption, featured } = req.body;
     const homepage = await createDefaultIfMissing();
-    homepage.gallery.photos.push({ url, caption });
+    homepage.gallery.photos.push({ url, caption, featured: !!featured });
     await homepage.save();
     res.status(201).json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/gallery/:index/featured', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    const idx = parseInt(req.params.index);
+    if (homepage.gallery.photos[idx]) {
+      homepage.gallery.photos[idx].featured = !homepage.gallery.photos[idx].featured;
+      await homepage.save();
+    }
+    res.json({ success: true, homepage });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

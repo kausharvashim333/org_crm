@@ -10,7 +10,7 @@ import {
   Calendar, ChevronRight, Facebook, Instagram, Youtube, MessageCircle,
   Sparkles, Zap, Shield, Rocket, FileText, Bell, Search, ExternalLink,
   Clock, ShieldCheck, CheckCircle2, Layers, Compass, HelpCircle, UserCheck,
-  CheckCircle, ArrowUpRight, ChevronDown
+  CheckCircle, ArrowUpRight, ChevronDown, Image as ImageIcon
 } from 'lucide-react';
 
 const iconMap = {
@@ -72,6 +72,62 @@ function SectionHeading({ badge = 'Explore', title, subtitle, themeColor }) {
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
           {subtitle}
         </p>
+      )}
+    </div>
+  );
+}
+
+function GallerySlider({ photos }) {
+  const [current, setCurrent] = useState(0);
+  const photosCount = photos.length;
+
+  useEffect(() => {
+    if (photosCount <= 1) return;
+    const timer = setInterval(() => {
+      setCurrent(prev => (prev + 1) % photosCount);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [photosCount]);
+
+  if (photosCount === 0) return null;
+
+  const fixUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('/uploads/')) return `/api${url}`;
+    return url;
+  };
+
+  return (
+    <div className="relative h-[300px] sm:h-[400px] lg:h-[500px]">
+      {photos.map((photo, i) => (
+        <div
+          key={i}
+          className="absolute inset-0 transition-opacity duration-700"
+          style={{ opacity: i === current ? 1 : 0 }}
+        >
+          <img
+            src={fixUrl(photo.url)}
+            alt={photo.caption || `Gallery ${i + 1}`}
+            className="w-full h-full object-cover"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+          {photo.caption && (
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+              <p className="text-white text-sm font-semibold">{photo.caption}</p>
+            </div>
+          )}
+        </div>
+      ))}
+      {photosCount > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {photos.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={`w-2 h-2 rounded-full transition-all ${i === current ? 'bg-white w-6' : 'bg-white/50'}`}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
@@ -264,7 +320,7 @@ export default function OrgHomepage() {
                   {/* Main Hero Headline */}
                   <Reveal delay={100}>
                     <div className="space-y-1">
-                      <h1 className={`${hp.hero?.headingFontSize || 'text-3xl sm:text-4xl lg:text-5xl'} font-black tracking-tight leading-[1.18]`} style={{ color: hp.hero?.headingColor || '#0f172a' }}>
+                      <h1 className="font-black tracking-tight leading-[1.18]" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: `${(hp.hero?.headingFontSize || 48) * 0.6}px` }}>
                         {(() => {
                           const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
                           const words = title.split(' ');
@@ -283,7 +339,7 @@ export default function OrgHomepage() {
                         })()}
                       </h1>
                       {hp?.settings?.shortName && (
-                        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-400 tracking-wide">
+                        <p className="font-bold text-slate-400 tracking-wide" style={{ fontSize: `${(hp.hero?.headingFontSize || 48) * 0.4}px` }}>
                           {hp.settings.shortName}
                         </p>
                       )}
@@ -292,7 +348,7 @@ export default function OrgHomepage() {
 
                   {/* Hero Description */}
                   <Reveal delay={150}>
-                    <p className={`text-slate-600 ${hp.hero?.descriptionFontSize || 'text-sm sm:text-base'} max-w-2xl leading-relaxed font-normal`}>
+                    <p className="text-slate-600 max-w-2xl leading-relaxed font-normal" style={{ fontSize: `${hp.hero?.descriptionFontSize || 16}px` }}>
                       {hp.hero?.description || 'Government-aligned vocational curriculum, hands-on practical lab modules, standardized student certificates, and dedicated career guidance.'}
                     </p>
                   </Reveal>
@@ -1188,6 +1244,8 @@ export default function OrgHomepage() {
 
       case 'gallery':
         if (hp.gallery?.show === false || !hp.gallery?.photos?.length) return null;
+        const featuredPhotos = (hp.gallery?.photos || []).filter(p => p.featured);
+        const galleryPhotos = featuredPhotos.length > 0 ? featuredPhotos : (hp.gallery?.photos || []).slice(0, 8);
         return (
           <section key="gallery" id="gallery" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-b border-slate-200/60">
             <div className="max-w-7xl mx-auto">
@@ -1200,31 +1258,21 @@ export default function OrgHomepage() {
                 />
               </Reveal>
 
-              <div className="flex flex-wrap justify-center gap-4">
-                {(hp.gallery?.photos || []).map((photo, i) => (
-                  <Reveal key={i} delay={i * 50} className="w-full max-w-[260px]">
-                    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg transition-all aspect-square">
-                      <img
-                        src={photo.url}
-                        alt={photo.caption || 'Gallery image'}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        onError={(e) => {
-                          if (!e.target.dataset.retried && photo.url?.startsWith('/uploads/')) {
-                            e.target.dataset.retried = 'true';
-                            e.target.src = `/api${photo.url}`;
-                          } else {
-                            e.target.style.display = 'none';
-                          }
-                        }}
-                      />
-                      {photo.caption && (
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <p className="text-white text-xs font-semibold">{photo.caption}</p>
-                        </div>
-                      )}
-                    </div>
-                  </Reveal>
-                ))}
+              <Reveal delay={100}>
+                <div className="relative overflow-hidden rounded-2xl shadow-lg">
+                  <GallerySlider photos={galleryPhotos} />
+                </div>
+              </Reveal>
+
+              <div className="text-center mt-8">
+                <Link
+                  to="/gallery"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white shadow-md transition-all hover:scale-105"
+                  style={{ backgroundColor: themeColor }}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  View More Photos
+                </Link>
               </div>
             </div>
           </section>

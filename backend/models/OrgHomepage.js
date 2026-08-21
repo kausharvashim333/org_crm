@@ -9,10 +9,11 @@ const orgHomepageSchema = new mongoose.Schema({
     showCarousel: { type: Boolean, default: true },
     heading: { type: String, default: 'Building Careers in Paramedical, IT, Finance & Skills' },
     headingColor: { type: String, default: '#0f172a' },
-    headingFontSize: { type: String, default: 'text-3xl sm:text-4xl lg:text-5xl' },
+    headingFontSize: { type: Number, default: 48 },
     subheading: { type: String, default: 'Paramedical | Computer Training | Skill Development | Stock Market Training' },
+    subheadingFontSize: { type: Number, default: 14 },
     description: { type: String, default: 'Empowering India through quality education and practical training across multiple fields' },
-    descriptionFontSize: { type: String, default: 'text-sm sm:text-base' },
+    descriptionFontSize: { type: Number, default: 16 },
     points: { type: [String], default: [] },
     ctaButtonText: { type: String, default: 'Explore Courses' },
     ctaButtonLink: { type: String, default: '/#verticals' },
@@ -129,7 +130,7 @@ const orgHomepageSchema = new mongoose.Schema({
   gallery: {
     title: { type: String, default: 'Gallery' },
     show: { type: Boolean, default: true },
-    photos: [{ url: { type: String }, caption: { type: String } }],
+    photos: [{ url: { type: String }, caption: { type: String }, featured: { type: Boolean, default: false } }],
   },
 
   testimonials: {

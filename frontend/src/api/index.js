@@ -167,6 +167,7 @@ export const updateOrgHomepageSection = (section, data) => API.put(`/org-homepag
 export const publishOrgHomepage = (isPublished) => API.put('/org-homepage/publish', { isPublished });
 export const addOrgGalleryPhoto = (data) => API.post('/org-homepage/gallery', data);
 export const deleteOrgGalleryPhoto = (index) => API.delete(`/org-homepage/gallery/${index}`);
+export const toggleOrgGalleryFeatured = (index) => API.put(`/org-homepage/gallery/${index}/featured`);
 export const addOrgTestimonial = (data) => API.post('/org-homepage/testimonials', data);
 export const deleteOrgTestimonial = (index) => API.delete(`/org-homepage/testimonials/${index}`);
 export const addOrgStat = (data) => API.post('/org-homepage/stats', data);

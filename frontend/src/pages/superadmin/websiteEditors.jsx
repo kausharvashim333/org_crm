@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, Globe, Upload, ArrowUp, ArrowDown, Edit, FileText } from 'lucide-react';
+import { Save, Plus, Trash2, Globe, Upload, ArrowUp, ArrowDown, Edit, FileText, Star } from 'lucide-react';
 import { uploadOrgImage, uploadOrgLogo, uploadOrgFavicon, uploadOrgPdf } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { refreshOrgSettings } from '../../hooks/useOrgSettings';
@@ -148,10 +148,11 @@ export function HeroEditor({ homepage, onSave }) {
       <Field label="Single Banner Image URL (Fallback)"><input type="text" value={data.bannerImage || ''} onChange={(e) => setData({ ...data, bannerImage: e.target.value })} className="input-field" placeholder="Used if background image slider is empty" /></Field>
       <Field label="Heading"><input type="text" value={data.heading || ''} onChange={(e) => setData({ ...data, heading: e.target.value })} className="input-field" /></Field>
       <Field label="Heading Text Color"><div className="flex items-center gap-2"><input type="color" value={data.headingColor || '#0f172a'} onChange={(e) => setData({ ...data, headingColor: e.target.value })} className="w-12 h-10 rounded border border-slate-200 cursor-pointer" /><input type="text" value={data.headingColor || '#0f172a'} onChange={(e) => setData({ ...data, headingColor: e.target.value })} className="input-field flex-1" /></div></Field>
-      <Field label="Heading Font Size"><select value={data.headingFontSize || 'text-3xl sm:text-4xl lg:text-5xl'} onChange={(e) => setData({ ...data, headingFontSize: e.target.value })} className="input-field"><option value="text-2xl sm:text-3xl lg:text-4xl">Small</option><option value="text-3xl sm:text-4xl lg:text-5xl">Medium (Default)</option><option value="text-4xl sm:text-5xl lg:text-6xl">Large</option><option value="text-5xl sm:text-6xl lg:text-7xl">Extra Large</option></select></Field>
+      <Field label="Heading Font Size (px)"><input type="number" min="20" max="80" value={data.headingFontSize || 48} onChange={(e) => setData({ ...data, headingFontSize: parseInt(e.target.value) || 48 })} className="input-field" /></Field>
       <Field label="Subheading"><input type="text" value={data.subheading || ''} onChange={(e) => setData({ ...data, subheading: e.target.value })} className="input-field" /></Field>
+      <Field label="Subheading Font Size (px)"><input type="number" min="10" max="30" value={data.subheadingFontSize || 14} onChange={(e) => setData({ ...data, subheadingFontSize: parseInt(e.target.value) || 14 })} className="input-field" /></Field>
       <Field label="Description"><input type="text" value={data.description || ''} onChange={(e) => setData({ ...data, description: e.target.value })} className="input-field" /></Field>
-      <Field label="Description Font Size"><select value={data.descriptionFontSize || 'text-sm sm:text-base'} onChange={(e) => setData({ ...data, descriptionFontSize: e.target.value })} className="input-field"><option value="text-xs sm:text-sm">Extra Small</option><option value="text-sm sm:text-base">Small (Default)</option><option value="text-base sm:text-lg">Medium</option><option value="text-lg sm:text-xl">Large</option></select></Field>
+      <Field label="Description Font Size (px)"><input type="number" min="10" max="30" value={data.descriptionFontSize || 16} onChange={(e) => setData({ ...data, descriptionFontSize: parseInt(e.target.value) || 16 })} className="input-field" /></Field>
 
       <div className="border border-slate-200 p-4 rounded-xl space-y-4 bg-slate-50/50">
         <h4 className="font-semibold text-sm text-slate-700">Hero Section Bullet Points (Exactly 4)</h4>
@@ -837,7 +838,7 @@ export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
   );
 }
 
-export function GalleryEditor({ homepage, onAdd, onDelete }) {
+export function GalleryEditor({ homepage, onAdd, onDelete, onToggleFeatured }) {
   const [newPhoto, setNewPhoto] = useState({ url: '', caption: '' });
   const [uploading, setUploading] = useState(false);
   const { showSuccess, showError } = useToast();
@@ -864,12 +865,23 @@ export function GalleryEditor({ homepage, onAdd, onDelete }) {
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Gallery</h3>
+      <p className="text-xs text-slate-500">Click the star icon to feature a photo on the homepage slider. Featured photos will auto-slide on the homepage.</p>
       <div className="grid grid-cols-3 gap-3">
         {(homepage.gallery?.photos || []).map((p, i) => (
           <div key={i} className="relative group">
-            <img src={p.url} alt={p.caption} className="w-full h-32 object-cover rounded-lg" />
+            <img src={p.url} alt={p.caption} className="w-full h-32 object-cover rounded-lg" onError={(e) => { if (!e.target.dataset.retried && p.url?.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${p.url}`; } }} />
+            <div className="absolute top-1 left-1 flex gap-1">
+              <button
+                onClick={() => onToggleFeatured(i)}
+                className={`rounded-full p-1 transition-all ${p.featured ? 'bg-amber-500 text-white' : 'bg-white/80 text-slate-400 opacity-0 group-hover:opacity-100'}`}
+                title={p.featured ? 'Featured on homepage' : 'Click to feature on homepage'}
+              >
+                <Star className="w-3 h-3" fill={p.featured ? 'currentColor' : 'none'} />
+              </button>
+            </div>
             <button onClick={() => onDelete(i)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
             {p.caption && <p className="text-xs text-gray-500 mt-1 truncate">{p.caption}</p>}
+            {p.featured && <span className="absolute bottom-1 left-1 text-[9px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded">Featured</span>}
           </div>
         ))}
       </div>
