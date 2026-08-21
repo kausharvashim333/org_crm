@@ -126,11 +126,11 @@ export default function OrgAboutPage() {
                 </div>
               </Reveal>
               
-              <div className="flex flex-wrap justify-center gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
                 {about.features.map((f, i) => {
                   const Icon = iconMap[f.icon] || BookOpen;
                   return (
-                    <Reveal key={i} delay={i * 100} className="h-full w-full max-w-[200px]">
+                    <Reveal key={i} delay={i * 100} className="h-full">
                       <div className="h-full flex flex-col items-center justify-start text-center group p-6 bg-slate-50/50 hover:bg-slate-50/20 hover:border-slate-300 rounded-2xl transition-all border border-slate-100 shadow-sm">
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-110" style={{ backgroundColor: `${themeColor}12` }}>
                           <Icon className="w-6 h-6" style={{ color: themeColor }} />
