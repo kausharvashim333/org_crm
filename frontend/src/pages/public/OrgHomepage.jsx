@@ -263,29 +263,36 @@ export default function OrgHomepage() {
 
                   {/* Main Hero Headline */}
                   <Reveal delay={100}>
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.18] text-slate-900">
-                      {(() => {
-                        const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
-                        const words = title.split(' ');
-                        if (words.length > 2) {
-                          const lastWords = words.splice(-2).join(' ');
-                          return (
-                            <>
-                              {words.join(' ')}{' '}
-                              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
-                                {lastWords}
-                              </span>
-                            </>
-                          );
-                        }
-                        return title;
-                      })()}
-                    </h1>
+                    <div className="space-y-1">
+                      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.18] text-slate-900">
+                        {(() => {
+                          const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
+                          const words = title.split(' ');
+                          if (words.length > 2) {
+                            const lastWords = words.splice(-2).join(' ');
+                            return (
+                              <>
+                                {words.join(' ')}{' '}
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">
+                                  {lastWords}
+                                </span>
+                              </>
+                            );
+                          }
+                          return title;
+                        })()}
+                      </h1>
+                      {hp?.settings?.shortName && (
+                        <p className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-400 tracking-wide">
+                          {hp.settings.shortName}
+                        </p>
+                      )}
+                    </div>
                   </Reveal>
 
                   {/* Hero Description */}
                   <Reveal delay={150}>
-                    <p className="text-slate-600 text-base sm:text-lg max-w-2xl leading-relaxed font-normal">
+                    <p className="text-slate-600 text-sm sm:text-base max-w-2xl leading-relaxed font-normal">
                       {hp.hero?.description || 'Government-aligned vocational curriculum, hands-on practical lab modules, standardized student certificates, and dedicated career guidance.'}
                     </p>
                   </Reveal>
@@ -349,6 +356,15 @@ export default function OrgHomepage() {
                         <Building className="w-4 h-4 text-indigo-600" />
                         <span>Partner Franchise</span>
                       </Link>
+
+                      <Link
+                        to="/admission"
+                        className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-600/20 transition-all hover:scale-105"
+                      >
+                        <GraduationCap className="w-4 h-4" />
+                        <span>Apply for Admission</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   </Reveal>
 
@@ -372,48 +388,9 @@ export default function OrgHomepage() {
 
                 </div>
 
-                {/* Right Hero Column: Professional Announcement Hub (5 Cols on desktop) */}
+                {/* Right Hero Column: Announcement Hub (5 Cols on desktop) */}
                 <div className="lg:col-span-5 w-full">
                   <Reveal delay={200}>
-                    {/* Premium Redesigned Online Admission Action Card */}
-                    <Link
-                      to="/admission"
-                      className="group w-full mb-3.5 flex items-center justify-between p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-white via-indigo-50/50 to-blue-50/40 hover:from-white hover:to-indigo-50/70 border border-indigo-100/90 ring-4 ring-indigo-50/60 shadow-lg shadow-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/15 cursor-pointer relative overflow-hidden mirror-shine"
-                    >
-                      {/* Ambient background accent light */}
-                      <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        {/* Icon Capsule */}
-                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25 shrink-0 group-hover:scale-105 group-hover:rotate-3 transition-transform">
-                          <GraduationCap className="w-5 h-5" />
-                        </div>
-
-                        <div className="text-left min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight truncate">
-                              Online Admission 2026-27
-                            </span>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9.5px] font-black uppercase tracking-wider shrink-0">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              Open
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-500 font-medium truncate">
-                            IT, Paramedical, Finance & Skill Projects
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Right Action Button Pill */}
-                      <div className="shrink-0 ml-2">
-                        <span className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-indigo-600 group-hover:bg-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 group-hover:shadow-indigo-600/30 transition-all">
-                          <span>Apply</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                        </span>
-                      </div>
-                    </Link>
-
                     <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/50 relative overflow-hidden">
                       
                       {/* Widget Header */}

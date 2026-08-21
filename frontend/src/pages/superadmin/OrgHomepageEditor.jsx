@@ -13,6 +13,7 @@ import {
   addOrgVertical, deleteOrgVertical,
   addOrgCustomSection, updateOrgCustomSection, deleteOrgCustomSection,
   addOrgCustomCard, deleteOrgCustomCard,
+  updateOrgCentersStrip, addOrgCenter, deleteOrgCenter,
 } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { ExternalLink } from 'lucide-react';
@@ -21,7 +22,7 @@ import {
   CertificationsEditor, GalleryEditor, TestimonialsEditor,
   NoticesEditor, CtaEditor, ContactEditor, SettingsEditor,
   ServicesEditor, AnnouncementEditor, EnquiryConfigEditor,
-  CodeSeriesEditor, VerticalsEditor, CustomSectionsEditor,
+  CodeSeriesEditor, VerticalsEditor, CustomSectionsEditor, CentersStripEditor,
 } from './websiteEditors';
 
 const tabs = [
@@ -144,7 +145,13 @@ export default function OrgHomepageEditor() {
           <ServicesEditor homepage={homepage} onSave={(d) => save('services', d)} onAdd={(d) => add(addOrgService, d, 'Service added')} onDelete={(i) => del(deleteOrgService, i, 'Deleted')} />
         )}
 
-        {activeTab === 'custom' && (
+        {activeTab === 'custom' && <>
+          <CentersStripEditor
+            homepage={homepage}
+            onUpdate={(d) => add(updateOrgCentersStrip, d, 'Centers strip updated')}
+            onAddCenter={(d) => add(addOrgCenter, d, 'Center added')}
+            onDeleteCenter={(i) => del(deleteOrgCenter, i, 'Center deleted')}
+          />
           <CustomSectionsEditor
             homepage={homepage}
             onAddSection={(d) => add(addOrgCustomSection, d, 'Section created')}
@@ -153,7 +160,7 @@ export default function OrgHomepageEditor() {
             onAddCard={(sectionId, d) => add(addOrgCustomCard.bind(null, sectionId), d, 'Card added')}
             onDeleteCard={(sectionId, cardIndex) => del(deleteOrgCustomCard.bind(null, sectionId), cardIndex, 'Card deleted')}
           />
-        )}
+        </>}
 
         {activeTab === 'media' && <>
           <GalleryEditor homepage={homepage} onAdd={(d) => add(addOrgGalleryPhoto, d, 'Photo added')} onDelete={(i) => del(deleteOrgGalleryPhoto, i, 'Deleted')} />

@@ -731,6 +731,50 @@ router.delete('/services/:index', protect, superAdminOnly, async (req, res) => {
   }
 });
 
+// Centers Strip
+router.put('/centers-strip', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    if (!homepage.centersStrip) homepage.centersStrip = { show: false, title: 'Our Centers', centers: [] };
+    ['show', 'title'].forEach(field => {
+      if (req.body[field] !== undefined) homepage.centersStrip[field] = req.body[field];
+    });
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/centers-strip/centers', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    if (!homepage.centersStrip) homepage.centersStrip = { show: false, title: 'Our Centers', centers: [] };
+    homepage.centersStrip.centers.push({
+      name: req.body.name || 'New Center',
+      logo: req.body.logo || '',
+      link: req.body.link || '',
+    });
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/centers-strip/centers/:index', protect, superAdminOnly, async (req, res) => {
+  try {
+    const homepage = await createDefaultIfMissing();
+    if (homepage.centersStrip?.centers) {
+      homepage.centersStrip.centers.splice(parseInt(req.params.index), 1);
+    }
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Custom Sections
 router.post('/custom-sections', protect, superAdminOnly, async (req, res) => {
   try {

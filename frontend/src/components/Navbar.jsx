@@ -393,6 +393,33 @@ export default function Navbar({ activePage }) {
       )}
       </header>
 
+      {/* Centers Strip */}
+      {hp?.centersStrip?.show && hp?.centersStrip?.centers?.length > 0 && (
+        <div className="w-full bg-white border-b border-slate-200/80 shadow-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div className="flex items-center gap-3 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">{hp.centersStrip.title || 'Our Centers'}</span>
+              {hp.centersStrip.centers.map((center, i) => (
+                <a
+                  key={i}
+                  href={center.link || '#'}
+                  target={center.link ? '_blank' : undefined}
+                  rel="noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 transition-all shrink-0 group"
+                >
+                  {center.logo ? (
+                    <img src={center.logo} alt={center.name} className="w-5 h-5 rounded object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                  ) : (
+                    <Building2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600" />
+                  )}
+                  <span className="text-xs font-bold text-slate-700 group-hover:text-indigo-600 whitespace-nowrap">{center.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Global Search Modal Overlay */}
       {searchOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-start justify-center pt-16 px-4">

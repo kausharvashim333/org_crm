@@ -1199,6 +1199,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
     <div className="card space-y-4">
       <h3 className="font-semibold">Branding & Settings</h3>
       <Field label="Organization Name"><input type="text" value={settings.orgName || ''} onChange={(e) => setSettings({ ...settings, orgName: e.target.value })} className="input-field" /></Field>
+      <Field label="Short Name (shown below hero title)"><input type="text" value={settings.shortName || ''} onChange={(e) => setSettings({ ...settings, shortName: e.target.value })} className="input-field" placeholder="e.g. SITN" /></Field>
       <Field label="Browser Tab Title"><input type="text" value={settings.browserTitle || ''} onChange={(e) => setSettings({ ...settings, browserTitle: e.target.value })} className="input-field" /></Field>
 
       <div className="border-t pt-4">
@@ -1731,6 +1732,67 @@ export function CustomSectionsEditor({ homepage, onAddSection, onUpdateSection, 
           </div>
         ))
       )}
+    </div>
+  );
+}
+
+export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCenter }) {
+  const strip = homepage.centersStrip || { show: false, title: 'Our Centers', centers: [] };
+
+  return (
+    <div className="card space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-semibold">Centers Strip</h3>
+          <p className="text-xs text-slate-500">Shows a strip of organization-owned centers below the navbar. Clicking a center opens its page.</p>
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={strip.show !== false} onChange={(e) => onUpdate({ show: e.target.checked })} className="rounded" />
+          Show Strip
+        </label>
+      </div>
+
+      <Field label="Strip Title">
+        <input type="text" value={strip.title || ''} onChange={(e) => onUpdate({ title: e.target.value })} className="input-field" placeholder="e.g. Our Centers" />
+      </Field>
+
+      <div className="border-t pt-3">
+        <p className="text-xs font-bold text-slate-600 mb-2">Centers ({strip.centers?.length || 0})</p>
+        {strip.centers?.length > 0 && (
+          <div className="space-y-2 mb-3">
+            {strip.centers.map((center, i) => (
+              <div key={i} className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200/60">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input type="text" value={center.name} onChange={(e) => {
+                    const updated = [...strip.centers];
+                    updated[i] = { ...center, name: e.target.value };
+                    onUpdate({ centers: updated });
+                  }} className="input-field text-xs" placeholder="Center name" />
+                  <input type="text" value={center.logo || ''} onChange={(e) => {
+                    const updated = [...strip.centers];
+                    updated[i] = { ...center, logo: e.target.value };
+                    onUpdate({ centers: updated });
+                  }} className="input-field text-xs" placeholder="Logo URL (optional)" />
+                  <input type="text" value={center.link || ''} onChange={(e) => {
+                    const updated = [...strip.centers];
+                    updated[i] = { ...center, link: e.target.value };
+                    onUpdate({ centers: updated });
+                  }} className="input-field text-xs" placeholder="Link URL (e.g. /center/1)" />
+                </div>
+                <button onClick={() => onDeleteCenter(i)} className="text-rose-500 hover:text-rose-700 p-1 rounded">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          onClick={() => onAddCenter({ name: 'New Center', logo: '', link: '' })}
+          className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+        >
+          <Plus className="w-3.5 h-3.5" /> Add Center
+        </button>
+      </div>
     </div>
   );
 }

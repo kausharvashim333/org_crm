@@ -193,6 +193,10 @@ export const deleteOrgCustomSection = (id) => API.delete(`/org-homepage/custom-s
 export const addOrgCustomCard = (sectionId, data) => API.post(`/org-homepage/custom-sections/${sectionId}/cards`, data);
 export const deleteOrgCustomCard = (sectionId, cardIndex) => API.delete(`/org-homepage/custom-sections/${sectionId}/cards/${cardIndex}`);
 
+export const updateOrgCentersStrip = (data) => API.put('/org-homepage/centers-strip', data);
+export const addOrgCenter = (data) => API.post('/org-homepage/centers-strip/centers', data);
+export const deleteOrgCenter = (index) => API.delete(`/org-homepage/centers-strip/centers/${index}`);
+
 // RBAC & Security APIs
 export const getRoles = () => API.get('/rbac/roles');
 export const createRole = (data) => API.post('/rbac/roles', data);

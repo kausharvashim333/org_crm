@@ -218,7 +218,18 @@ const orgHomepageSchema = new mongoose.Schema({
     logo: { type: String },
     favicon: { type: String },
     orgName: { type: String, default: 'Skill India' },
+    shortName: { type: String, default: '' },
     browserTitle: { type: String, default: 'Skill India - Training Institute Management' },
+  },
+
+  centersStrip: {
+    show: { type: Boolean, default: false },
+    title: { type: String, default: 'Our Centers' },
+    centers: [{
+      name: { type: String, required: true },
+      logo: { type: String, default: '' },
+      link: { type: String, default: '' },
+    }],
   },
 
   layoutOrder: [{ type: String }],
