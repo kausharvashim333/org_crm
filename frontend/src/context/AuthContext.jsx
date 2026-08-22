@@ -39,10 +39,14 @@ export const AuthProvider = ({ children }) => {
           setUser(res.data.user);
           localStorage.setItem(userKey, JSON.stringify(res.data.user));
         })
-        .catch(() => {
-          localStorage.removeItem(tokenKey);
-          localStorage.removeItem(userKey);
-          setUser(null);
+        .catch((err) => {
+          // Only clear token on 401 (auth failure), not on network errors or 500s
+          if (err.response?.status === 401) {
+            localStorage.removeItem(tokenKey);
+            localStorage.removeItem(userKey);
+            setUser(null);
+          }
+          // On network errors or server errors, keep cached user to prevent unexpected logout
         })
         .finally(() => setLoading(false));
     } else {
