@@ -595,6 +595,29 @@ export function FranchiseEditor({ homepage, onSave }) {
               />
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">CTA Button Text</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Apply for this Plan / Get Started"
+                  value={planForm.buttonText}
+                  onChange={(e) => setPlanForm({ ...planForm, buttonText: e.target.value })}
+                  className="input-field text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">CTA Button Link</label>
+                <input
+                  type="text"
+                  placeholder="/franchise/apply"
+                  value={planForm.buttonLink}
+                  onChange={(e) => setPlanForm({ ...planForm, buttonLink: e.target.value })}
+                  className="input-field text-sm"
+                />
+              </div>
+            </div>
+
             <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
               <div className="flex items-center gap-5 text-xs font-bold text-slate-800">
                 <label className="flex items-center gap-1.5 cursor-pointer">
@@ -706,6 +729,11 @@ export function FranchiseEditor({ homepage, onSave }) {
                       +{plan.features.length - 4} more features
                     </p>
                   )}
+                </div>
+
+                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                  <span className="text-slate-400">Button:</span>
+                  <span className="font-bold text-slate-700">{plan.buttonText || 'Apply for Plan'}</span>
                 </div>
               </div>
             </div>
