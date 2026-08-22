@@ -320,7 +320,7 @@ export default function OrgHomepage() {
                   {/* Main Hero Headline */}
                   <Reveal delay={100}>
                     <div className="space-y-1">
-                      <h1 className="font-black tracking-tight leading-[1.35] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: ['number'].includes(typeof hp.hero?.headingFontSize) ? `${hp.hero.headingFontSize}px` : undefined }}>
+                      <h1 className="font-black tracking-tight leading-[1.5] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: ['number'].includes(typeof hp.hero?.headingFontSize) ? `${hp.hero.headingFontSize}px` : undefined }}>
                         {(() => {
                           const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
                           const words = title.split(' ');
