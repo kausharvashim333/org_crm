@@ -143,7 +143,7 @@ export default function OrgFranchisePage() {
               </div>
             </div>
           </section>
-        )
+        )}
 
         {/* Benefits Section - Modern Cards */}
         {franchise.benefits?.length > 0 && (
