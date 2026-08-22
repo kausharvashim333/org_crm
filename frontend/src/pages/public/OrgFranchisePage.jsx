@@ -71,7 +71,7 @@ export default function OrgFranchisePage() {
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col justify-between">
       <div>
-        <SEO title="Franchise Partnership - Start Your Training Center" description="Join our franchise network and start your own training institute with established brand, curriculum, and ongoing support" />
+        <SEO title="Partner with Us - Start Your Training Center" description="Join our partner network and start your own training institute with established brand, curriculum, and ongoing support" />
         <Navbar activePage="franchise" />
 
         {/* Hero Section */}
@@ -154,14 +154,14 @@ export default function OrgFranchisePage() {
           </section>
         )}
 
-        {/* Dynamic Partnership & Franchise Plans Section */}
+        {/* Dynamic Partnership Plans Section */}
         {plans.length > 0 && (
           <section className="py-20 px-4 bg-gradient-to-b from-slate-100 via-white to-slate-50 border-y border-slate-200/70" id="partnership-plans">
             <div className="max-w-7xl mx-auto">
               <Reveal>
                 <div className="text-center mb-14">
                   <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-black uppercase tracking-wider mb-3">
-                    <Sparkles className="w-3.5 h-3.5" /> Institutional Franchise Models
+                    <Sparkles className="w-3.5 h-3.5" /> Institutional Partner Models
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
                     Choose Your Partnership Plan
@@ -291,7 +291,7 @@ export default function OrgFranchisePage() {
                   </div>
                   <div>
                     <h4 className="font-extrabold text-sm text-slate-900">Need Custom Institutional Setup or State Partnership?</h4>
-                    <p className="text-xs text-slate-500">Contact our franchise counseling experts directly for tailored agreements and territorial booking.</p>
+                    <p className="text-xs text-slate-500">Contact our partner counseling experts directly for tailored agreements and territorial booking.</p>
                   </div>
                 </div>
                 <Link

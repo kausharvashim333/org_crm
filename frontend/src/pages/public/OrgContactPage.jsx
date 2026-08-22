@@ -65,7 +65,7 @@ export default function OrgContactPage() {
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col justify-between">
       <div>
-        <SEO title="Contact Us - Training Institute" description="Get in touch with us for admissions, franchise inquiries, and course information" />
+        <SEO title="Contact Us - Training Institute" description="Get in touch with us for admissions, partner inquiries, and course information" />
         <Navbar />
 
         {/* Hero Section */}

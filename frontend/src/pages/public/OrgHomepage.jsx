@@ -304,7 +304,7 @@ export default function OrgHomepage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
                 
                 {/* Left Hero Column (7 Cols on desktop) */}
-                <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
+                <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
                   
                   {/* Top Notification Badge */}
                   <Reveal>
@@ -320,7 +320,7 @@ export default function OrgHomepage() {
                   {/* Main Hero Headline */}
                   <Reveal delay={100}>
                     <div className="space-y-1">
-                      <h1 className="font-black tracking-tight leading-[1.18] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: ['number'].includes(typeof hp.hero?.headingFontSize) ? `${hp.hero.headingFontSize}px` : undefined }}>
+                      <h1 className="font-black tracking-tight leading-[1.35] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: ['number'].includes(typeof hp.hero?.headingFontSize) ? `${hp.hero.headingFontSize}px` : undefined }}>
                         {(() => {
                           const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
                           const words = title.split(' ');
@@ -353,51 +353,30 @@ export default function OrgHomepage() {
                     </p>
                   </Reveal>
 
-                  {/* Redesigned Search Bar */}
+                  {/* Auto-sliding Trending Courses */}
                   <Reveal delay={200} className="w-full max-w-md">
-                    <form onSubmit={handleHeroSearch} className="group relative">
-                      <div className="absolute -inset-px rounded-xl opacity-0 blur transition-opacity group-focus-within:opacity-25" style={{ background: `linear-gradient(135deg, ${themeColor}, #6366f1)` }} />
-                      <div className="relative flex items-center bg-white rounded-xl shadow-md border border-slate-200/60 overflow-hidden h-11">
-                        <div className="flex items-center justify-center w-10 h-full shrink-0" style={{ color: themeColor }}>
-                          <Search className="w-4 h-4" />
-                        </div>
-                        <input
-                          type="text"
-                          value={heroSearch}
-                          onChange={(e) => setHeroSearch(e.target.value)}
-                          placeholder="Search courses — ADCA, Tally, Web Dev..."
-                          className="w-full bg-transparent text-sm text-slate-800 placeholder-slate-400 focus:outline-none font-medium"
-                        />
-                        <button
-                          type="submit"
-                          className="m-1 px-4 py-1.5 rounded-lg font-bold text-xs text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 shrink-0 flex items-center gap-1"
-                          style={{ backgroundColor: themeColor }}
-                        >
-                          Explore
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </form>
-
-                    {/* Quick Course Keyword Chips - Single Line */}
-                    <div className="flex items-center gap-1.5 pt-2 text-[11px] overflow-x-auto scrollbar-hide whitespace-nowrap">
+                    <div className="flex items-center gap-1.5 text-[11px] overflow-hidden whitespace-nowrap">
                       <span className="font-semibold text-slate-400 flex items-center gap-0.5 shrink-0">
                         <Sparkles className="w-2.5 h-2.5" style={{ color: themeColor }} />
                         Trending
                       </span>
-                      {['ADCA Pro', 'Tally Prime GST', 'Web Dev', 'Python AI', 'DMLT'].map((term, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            setHeroSearch(term);
-                            navigate(`/courses?search=${encodeURIComponent(term)}`);
-                          }}
-                          className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-slate-300 text-slate-500 hover:text-slate-800 font-medium transition-all shrink-0"
-                        >
-                          {term}
-                        </button>
-                      ))}
+                      <div className="overflow-hidden flex-1">
+                        <div className="flex items-center gap-1.5 animate-marquee-chips">
+                          {[...['ADCA Pro', 'Tally Prime GST', 'Web Dev', 'Python AI', 'DMLT'], ...['ADCA Pro', 'Tally Prime GST', 'Web Dev', 'Python AI', 'DMLT']].map((term, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                setHeroSearch(term);
+                                navigate(`/courses?search=${encodeURIComponent(term)}`);
+                              }}
+                              className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-slate-300 text-slate-500 hover:text-slate-800 font-medium transition-all shrink-0"
+                            >
+                              {term}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </Reveal>
 
@@ -419,7 +398,7 @@ export default function OrgHomepage() {
                         className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 shadow-xs transition-all hover:scale-105"
                       >
                         <Building className="w-4 h-4 text-indigo-600" />
-                        <span>Partner Franchise</span>
+                        <span>Become a Partner</span>
                       </Link>
 
                       <Link
@@ -453,7 +432,7 @@ export default function OrgHomepage() {
 
                 </div>
 
-                {/* Right Hero Column: Announcement Hub (5 Cols on desktop) */}
+                {/* Right Hero Column: Notice Hub (5 Cols on desktop) */}
                 <div className="lg:col-span-5 w-full">
                   <Reveal delay={200}>
                     <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/50 relative overflow-hidden">
@@ -465,8 +444,7 @@ export default function OrgHomepage() {
                             <Bell className="w-4 h-4" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-slate-900 text-base">Announcements</h3>
-                            <p className="text-[11px] text-slate-500">Live notifications & circulars</p>
+                            <h3 className="font-bold text-slate-900 text-base">Live notifications & circulars</h3>
                           </div>
                         </div>
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase tracking-wider">

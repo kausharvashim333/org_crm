@@ -300,7 +300,7 @@ export default function CourseDetailPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-sky-600 shrink-0" />
-                  <span>Option to practice in 50+ Franchise Computer Labs</span>
+                  <span>Option to practice in 50+ Partner Computer Labs</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -537,13 +537,13 @@ export default function CourseDetailPage() {
             </div>
           )}
 
-          {/* Hybrid Learning / Franchise Centers Option */}
+          {/* Hybrid Learning / Partner Centers Option */}
           {partners.length > 0 && (
             <div className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <div>
                   <h3 className="text-2xl font-bold text-slate-900 mb-1">
-                    Available Franchise Practice Centers
+                    Available Partner Practice Centers
                   </h3>
                   <p className="text-xs text-slate-500">
                     You can visit any of these authorized centers for practical computer lab sessions.

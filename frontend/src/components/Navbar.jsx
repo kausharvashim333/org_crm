@@ -149,7 +149,7 @@ export default function Navbar({ activePage }) {
     { label: 'Partner with Us', to: '/franchise', key: 'franchise' },
     { label: 'Centers', to: '/franchises', key: 'franchises' },
     { label: 'Notices', to: '/notices', key: 'notices' },
-    { label: 'About', to: '/about', key: 'about' },
+    { label: 'About Us', to: '/about', key: 'about' },
   ];
 
   // Search Filter
@@ -274,7 +274,7 @@ export default function Navbar({ activePage }) {
               style={{ backgroundColor: themeColor }}
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span className="hidden xs:inline">Login</span>
+              <span>Login</span>
               <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${loginDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
@@ -310,7 +310,7 @@ export default function Navbar({ activePage }) {
                     <Building2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold">Franchise Partner</p>
+                    <p className="text-xs font-bold">Partner IMS Login</p>
                     <p className="text-[10px] text-slate-400">Manage Center & Students</p>
                   </div>
                 </Link>
@@ -385,7 +385,7 @@ export default function Navbar({ activePage }) {
               onClick={() => { setMobileMenu(false); window.dispatchEvent(new Event('open-partner-enquiry')); }}
               className="py-2.5 px-3 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold text-center"
             >
-              Partner Franchise
+              Partner Enquiry
             </button>
           </div>
 
@@ -465,7 +465,7 @@ export default function Navbar({ activePage }) {
               {searchQuery.trim() === '' ? (
                 <div className="text-center py-10 text-slate-400 text-xs">
                   <Search className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                  <p>Type keywords to search courses, syllabus, and franchise centers...</p>
+                  <p>Type keywords to search courses, syllabus, and partner centers...</p>
                 </div>
               ) : (
                 <>
@@ -608,7 +608,7 @@ export default function Navbar({ activePage }) {
                   rows="2"
                   value={enquiryForm.message}
                   onChange={(e) => setEnquiryForm(prev => ({ ...prev, message: e.target.value }))}
-                  placeholder="Ask about fees, timing, franchise centers..."
+                  placeholder="Ask about fees, timing, partner centers..."
                   className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
                 />
               </div>
@@ -634,7 +634,7 @@ export default function Navbar({ activePage }) {
         </div>
       )}
 
-      {/* Partner Franchise Modal */}
+      {/* Partner Enquiry Modal */}
       {partnerEnquiryOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-150">

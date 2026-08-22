@@ -133,7 +133,7 @@ export default function OrderSuccessPage() {
                 <Award className="w-7 h-7" /> Skill India Computer Education
               </div>
               <p className="text-xs text-slate-500 max-w-sm">
-                Registered Franchise & Digital Skill Mission • ISO 9001:2015 Certified
+                Registered Partner & Digital Skill Mission • ISO 9001:2015 Certified
               </p>
               <p className="text-xs text-slate-400 mt-1">support@skillindia.com | www.skillindia.com</p>
             </div>

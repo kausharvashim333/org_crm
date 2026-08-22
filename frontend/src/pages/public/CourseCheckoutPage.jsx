@@ -28,7 +28,7 @@ export default function CourseCheckoutPage() {
     customerCity: '',
     customerState: '',
     learningMode: 'online', // 'online' | 'hybrid_offline_lab'
-    preferredFranchiseCenter: '',
+    preferredPartnerCenter: '',
     paymentGateway: 'upi_qr', // 'upi_qr' | 'razorpay' | 'mock_gateway'
   });
 
@@ -111,7 +111,7 @@ export default function CourseCheckoutPage() {
         customerCity: formData.customerCity,
         customerState: formData.customerState,
         learningMode: formData.learningMode,
-        preferredFranchiseCenter: formData.preferredFranchiseCenter || undefined,
+        preferredPartnerCenter: formData.preferredPartnerCenter || undefined,
         couponCode: appliedCoupon ? appliedCoupon.code : undefined,
         paymentGateway: formData.paymentGateway,
       });
@@ -343,7 +343,7 @@ export default function CourseCheckoutPage() {
               </div>
             </div>
 
-            {/* Step 2: Learning Mode & Hybrid Franchise Option */}
+            {/* Step 2: Learning Mode & Hybrid Partner Option */}
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-4">
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
@@ -393,20 +393,20 @@ export default function CourseCheckoutPage() {
                     />
                   </div>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Online videos + physical lab practicals & teacher guidance at nearest franchise center.
+                    Online videos + physical lab practicals & teacher guidance at nearest partner center.
                   </p>
                 </div>
               </div>
 
-              {/* Franchise Center Dropdown if Hybrid */}
+              {/* Partner Center Dropdown if Hybrid */}
               {formData.learningMode === 'hybrid_offline_lab' && partners.length > 0 && (
                 <div className="pt-3">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Select Nearest Franchise Computer Center
+                    Select Nearest Partner Computer Center
                   </label>
                   <select
-                    value={formData.preferredFranchiseCenter}
-                    onChange={(e) => setFormData({ ...formData, preferredFranchiseCenter: e.target.value })}
+                    value={formData.preferredPartnerCenter}
+                    onChange={(e) => setFormData({ ...formData, preferredPartnerCenter: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   >
                     <option value="">-- Choose Nearest Center --</option>

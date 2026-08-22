@@ -189,6 +189,18 @@ body {
   animation: marquee 30s linear infinite;
 }
 
+/* Marquee animation for trending chips */
+@keyframes marquee-chips {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee-chips {
+  animation: marquee-chips 20s linear infinite;
+}
+.animate-marquee-chips:hover {
+  animation-play-state: paused;
+}
+
 /* Print Styles for Invoices, Receipts & Certificates */
 @media print {
   .no-print,

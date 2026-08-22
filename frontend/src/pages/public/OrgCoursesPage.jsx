@@ -343,7 +343,7 @@ export default function OrgCoursesPage() {
         )}
       </section>
 
-      {/* Franchise Lab Hybrid Banner */}
+      {/* Partner Lab Hybrid Banner */}
       <section className="py-12 px-4 bg-slate-950 text-white relative overflow-hidden mt-8">
         <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(ellipse 60% 80% at 20% 50%, ${themeColor}, transparent)` }} />
         <div className="max-w-5xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -355,7 +355,7 @@ export default function OrgCoursesPage() {
               Want Physical Lab Practice?
             </h2>
             <p className="text-slate-400 text-sm leading-relaxed mb-5">
-              Enroll online and access your nearest franchise training center for practical lab sessions and exam guidance.
+              Enroll online and access your nearest partner training center for practical lab sessions and exam guidance.
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <Link
