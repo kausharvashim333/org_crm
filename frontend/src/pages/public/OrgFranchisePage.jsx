@@ -171,7 +171,7 @@ export default function OrgFranchisePage() {
               </div>
             </div>
           </section>
-        )
+        )}
 
         {/* Dynamic Partnership Plans Section - Premium Redesign */}
         {plans.length > 0 && (
@@ -320,7 +320,7 @@ export default function OrgFranchisePage() {
               </Reveal>
             </div>
           </section>
-        )
+        )}
 
         {/* Steps/Roadmap Section - Timeline Redesign */}
         {franchise.steps?.length > 0 && (
@@ -343,7 +343,7 @@ export default function OrgFranchisePage() {
               </Reveal>
             </div>
           </section>
-        )
+        )}
 
         {/* Support Checklist Section - Modern Grid */}
         <section className="py-24 px-4 bg-slate-50 border-t border-slate-200/60">
