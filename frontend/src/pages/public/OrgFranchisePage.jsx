@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -110,12 +110,12 @@ export default function OrgFranchisePage() {
                 >
                   Start Application <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <a
-                  href="#partnership-plans"
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition-all"
+                <button
+                  onClick={() => document.getElementById('partnership-plans')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md transition-all cursor-pointer"
                 >
                   View Plans <Sparkles className="w-4 h-4" />
-                </a>
+                </button>
               </div>
             </Reveal>
           </div>
@@ -150,11 +150,11 @@ export default function OrgFranchisePage() {
           <section className="py-24 px-4 bg-gradient-to-b from-slate-50 to-white">
             <div className="max-w-6xl mx-auto">
               <Reveal><SectionHeading title="Why Partner With Us?" subtitle="Discover the advantages of joining our partner network" themeColor={themeColor} /></Reveal>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="flex flex-wrap justify-center gap-6">
                 {franchise.benefits.map((b, i) => {
                   const Icon = iconMap[b.icon] || Building;
                   return (
-                    <Reveal key={i} delay={i * 80}>
+                    <Reveal key={i} delay={i * 80} className="w-full max-w-[300px]">
                       <div className="group bg-white rounded-3xl p-8 border border-slate-200/60 hover:shadow-2xl hover:shadow-slate-300/30 transition-all duration-300 hover:-translate-y-1 h-full relative overflow-hidden">
                         <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-500" style={{ backgroundColor: themeColor }} />
                         <div className="flex items-center gap-4 mb-4">
