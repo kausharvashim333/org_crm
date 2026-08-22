@@ -7,7 +7,7 @@ import SEO from '../../components/SEO';
 import {
   GraduationCap, ArrowRight, Building, BookOpen, Users, Award, Monitor,
   Target, Heart, TrendingUp, Check, Briefcase, Sparkles, Star, ShieldCheck,
-  CheckCircle2, Zap, Crown, CheckCircle, Rocket, Handshake, TrendingUp as TrendUp,
+  CheckCircle2, Zap, Crown, CheckCircle, Rocket, Users as Handshake,
   Wallet, FileBadge, Headphones, Settings2, BarChart3
 } from 'lucide-react';
 
