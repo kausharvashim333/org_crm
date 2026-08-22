@@ -23,6 +23,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const path = window.location.pathname;
+    const isProtectedRoute = path.startsWith('/admin') || path.startsWith('/partner') || path.startsWith('/student');
+
+    // On public pages, don't attempt getMe() — the request interceptor won't attach
+    // a token on public routes, so getMe() would return 401 and wrongly clear the token.
+    if (!isProtectedRoute) {
+      setLoading(false);
+      return;
+    }
+
     const { tokenKey, userKey } = getRoleKeysForPath();
     const token = localStorage.getItem(tokenKey);
     const cachedUserStr = localStorage.getItem(userKey);
@@ -40,13 +50,17 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem(userKey, JSON.stringify(res.data.user));
         })
         .catch((err) => {
-          // Only clear token on 401 (auth failure), not on network errors or 500s
+          // Only clear token on 401 with actual token-invalid message.
+          // Don't clear on "no token" 401s (token wasn't sent, not invalid)
+          // or on network errors / 500s.
           if (err.response?.status === 401) {
-            localStorage.removeItem(tokenKey);
-            localStorage.removeItem(userKey);
-            setUser(null);
+            const msg = err.response?.data?.message || '';
+            if (!msg.includes('no token')) {
+              localStorage.removeItem(tokenKey);
+              localStorage.removeItem(userKey);
+              setUser(null);
+            }
           }
-          // On network errors or server errors, keep cached user to prevent unexpected logout
         })
         .finally(() => setLoading(false));
     } else {
