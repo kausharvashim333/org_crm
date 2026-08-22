@@ -124,7 +124,7 @@ export default function OrgFranchisePage() {
         {/* Stats Section - Floating Glass Card */}
         {stats.items?.length > 0 && (
           <section className="px-4 max-w-6xl mx-auto -mt-12 relative z-20">
-            <div className="bg-white/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-200/60 shadow-2xl shadow-slate-300/30">
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xl">
               <div className="flex flex-wrap justify-center gap-8">
                 {stats.items.map((s, i) => {
                   const Icon = iconMap[s.icon] || Building;
@@ -181,7 +181,7 @@ export default function OrgFranchisePage() {
             <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <div className="text-center mb-16">
-                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs font-black uppercase tracking-wider mb-4">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-800 border border-slate-700 text-white/90 text-xs font-black uppercase tracking-wider mb-4">
                     <Sparkles className="w-3.5 h-3.5" style={{ color: themeColor }} /> Institutional Partner Models
                   </span>
                   <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
@@ -206,7 +206,7 @@ export default function OrgFranchisePage() {
                         className={`h-full flex flex-col rounded-3xl transition-all duration-300 relative overflow-hidden ${
                           isPopular
                             ? 'bg-white text-slate-900 shadow-2xl ring-2 ring-white/50 scale-[1.03] z-10'
-                            : 'bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-white/10 hover:border-white/20'
+                            : 'bg-slate-800 border border-slate-700 text-white hover:bg-slate-750 hover:border-slate-600'
                         }`}
                       >
                         {isPopular && (
@@ -233,7 +233,7 @@ export default function OrgFranchisePage() {
                             </p>
                           )}
 
-                          <div className={`p-5 rounded-2xl mb-5 space-y-2 ${isPopular ? 'bg-slate-50 border border-slate-100' : 'bg-white/5 border border-white/10'}`}>
+                          <div className={`p-5 rounded-2xl mb-5 space-y-2 ${isPopular ? 'bg-slate-50 border border-slate-100' : 'bg-slate-800 border border-slate-700'}`}>
                             <div className="flex items-baseline gap-2">
                               <span className={`text-3xl sm:text-4xl font-black ${isPopular ? 'text-slate-900' : 'text-white'}`}>
                                 ₹{plan.fee?.toLocaleString('en-IN')}
@@ -255,11 +255,11 @@ export default function OrgFranchisePage() {
                           </div>
 
                           <div className="grid grid-cols-2 gap-2 mb-5 text-xs">
-                            <div className={`p-3 rounded-xl border ${isPopular ? 'bg-indigo-50/70 border-indigo-100/80' : 'bg-white/5 border-white/10'}`}>
+                            <div className={`p-3 rounded-xl border ${isPopular ? 'bg-indigo-50 border-indigo-100' : 'bg-slate-800 border-slate-700'}`}>
                               <span className={`text-[10px] font-bold block uppercase ${isPopular ? 'text-indigo-900/70' : 'text-slate-400'}`}>Royalty</span>
                               <strong className={`font-black text-xs ${isPopular ? 'text-indigo-950' : 'text-white'}`}>{plan.royaltyPercentage || 'Zero Royalty'}</strong>
                             </div>
-                            <div className={`p-3 rounded-xl border ${isPopular ? 'bg-slate-100/70 border-slate-200/80' : 'bg-white/5 border-white/10'}`}>
+                            <div className={`p-3 rounded-xl border ${isPopular ? 'bg-slate-100 border-slate-200' : 'bg-slate-800 border-slate-700'}`}>
                               <span className={`text-[10px] font-bold block uppercase ${isPopular ? 'text-slate-500' : 'text-slate-400'}`}>Cert. Cost</span>
                               <strong className={`font-black text-xs ${isPopular ? 'text-slate-900' : 'text-white'}`}>{plan.certificateShare || '₹150 / Student'}</strong>
                             </div>
@@ -300,7 +300,7 @@ export default function OrgFranchisePage() {
               </div>
 
               <Reveal delay={200}>
-                <div className="mt-12 p-5 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                <div className="mt-12 p-5 rounded-2xl bg-slate-800 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0" style={{ color: themeColor }}>
                       <ShieldCheck className="w-6 h-6" />

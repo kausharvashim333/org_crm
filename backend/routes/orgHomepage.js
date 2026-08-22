@@ -105,6 +105,8 @@ const createDefaultIfMissing = async (lean = false) => {
           { icon: 'book', title: 'Ready Curriculum', description: 'Get access to our proven course materials' },
           { icon: 'users', title: 'Training & Support', description: 'Complete staff training and ongoing support' },
           { icon: 'monitor', title: 'Software Access', description: 'Complete management software for your institute' },
+          { icon: 'sparkles', title: 'Marketing Support', description: 'Promotional materials, templates, and lead generation assistance' },
+          { icon: 'award', title: 'Certificate Verification', description: 'Online certificate generation with instant verification system' },
         ],
         steps: [
           { step: 1, title: 'Apply', description: 'Submit your partner application with required details' },

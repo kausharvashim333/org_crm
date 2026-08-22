@@ -767,6 +767,14 @@ export function FranchiseEditor({ homepage, onSave }) {
                 <option value="monitor">Monitor</option>
                 <option value="award">Award</option>
                 <option value="target">Target</option>
+                <option value="heart">Heart</option>
+                <option value="trending">Trending</option>
+                <option value="briefcase">Briefcase</option>
+                <option value="sparkles">Sparkles</option>
+                <option value="zap">Zap</option>
+                <option value="rocket">Rocket</option>
+                <option value="wallet">Wallet</option>
+                <option value="headphones">Headphones</option>
               </select>
               <div className="flex-1 space-y-1">
                 <input type="text" placeholder="Title" value={b.title} onChange={(e) => updateBenefit(i, 'title', e.target.value)} className="input-field text-xs font-bold" />
