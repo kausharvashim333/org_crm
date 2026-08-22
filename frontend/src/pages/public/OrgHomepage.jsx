@@ -17,7 +17,7 @@ const iconMap = {
   book: BookOpen, briefcase: Briefcase, users: Users, award: Award,
   monitor: Monitor, building: Building, wifi: Award, target: Target,
   heart: Heart, trending: TrendingUp, shield: Shield, rocket: Rocket,
-  compass: Compass, check: CheckCircle2,
+  compass: Compass, check: CheckCircle2, sparkles: Sparkles, zap: Zap,
 };
 
 function useInView() {
@@ -275,9 +275,9 @@ export default function OrgHomepage() {
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
   const orgName = hp?.settings?.orgName || 'Skill India Training Network';
-  const hiddenSections = ['courses', 'franchise', 'notices', 'cta', 'stats'];
+  const hiddenSections = ['courses', 'franchise', 'notices', 'stats'];
   const layoutOrder = (hp?.layoutOrder || [
-    'hero', 'verticals', 'services', 'about', 'certifications', 'gallery', 'testimonials', 'contact'
+    'hero', 'categories', 'verticals', 'services', 'verifyWidget', 'about', 'certifications', 'gallery', 'testimonials', 'cta', 'contact'
   ]).filter(s => !hiddenSections.includes(s));
 
   // Notice categories extraction
@@ -560,29 +560,37 @@ export default function OrgHomepage() {
         );
 
       case 'categories':
+        if (hp.categories?.show === false) return null;
+        const cmsCats = hp.categories?.items;
+        const defaultCats = [
+          { label: 'Computer & Software', icon: 'monitor', link: '/courses', color: '#2563eb' },
+          { label: 'Paramedical & Healthcare', icon: 'heart', link: '/courses', color: '#dc2626' },
+          { label: 'Accounting & Tally GST', icon: 'trending', link: '/courses', color: '#059669' },
+          { label: 'Graphic Design & Media', icon: 'sparkles', link: '/courses', color: '#7c3aed' },
+          { label: 'Govt Skill Projects', icon: 'briefcase', link: '/courses', color: '#d97706' },
+          { label: 'Verify Certificate', icon: 'award', link: '/verify-certificate', color: '#0891b2' },
+        ];
+        const catItems = (cmsCats && cmsCats.length > 0) ? cmsCats : defaultCats;
+        if (!catItems.length) return null;
         return (
           <section key="categories" className="py-5 bg-white border-b border-slate-200/80 shadow-xs relative z-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-                {[
-                  { label: 'Computer & Software', icon: Monitor, link: '/courses', color: '#2563eb' },
-                  { label: 'Paramedical & Healthcare', icon: Heart, link: '/courses', color: '#dc2626' },
-                  { label: 'Accounting & Tally GST', icon: TrendingUp, link: '/courses', color: '#059669' },
-                  { label: 'Graphic Design & Media', icon: Sparkles, link: '/courses', color: '#7c3aed' },
-                  { label: 'Govt Skill Projects', icon: Briefcase, link: '/courses', color: '#d97706' },
-                  { label: 'Verify Certificate', icon: Award, link: '/verify-certificate', color: '#0891b2' },
-                ].map((cat, i) => (
-                  <Link
-                    key={i}
-                    to={cat.link}
-                    className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 transition-all hover:border-slate-300 shrink-0 text-xs sm:text-sm font-bold shadow-xs group"
-                  >
-                    <div className="w-6 h-6 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs" style={{ backgroundColor: cat.color }}>
-                      <cat.icon className="w-3.5 h-3.5" />
-                    </div>
-                    <span>{cat.label}</span>
-                  </Link>
-                ))}
+                {catItems.map((cat, i) => {
+                  const Icon = iconMap[cat.icon] || Monitor;
+                  return (
+                    <Link
+                      key={i}
+                      to={cat.link || '/courses'}
+                      className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 transition-all hover:border-slate-300 shrink-0 text-xs sm:text-sm font-bold shadow-xs group"
+                    >
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs" style={{ backgroundColor: cat.color || themeColor }}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span>{cat.label}</span>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -801,19 +809,20 @@ export default function OrgHomepage() {
         );
 
       case 'verifyWidget':
+        if (hp.verifyWidget?.show === false) return null;
         return (
           <section key="verifyWidget" className="py-14 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
             <div className="max-w-4xl mx-auto bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                 <div className="md:col-span-5 text-left">
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md inline-block mb-2" style={{ color: themeColor, backgroundColor: `${themeColor}15`, borderColor: `${themeColor}30` }}>
-                    Online Verification
+                    {hp.verifyWidget?.badge || 'Online Verification'}
                   </span>
                   <h3 className="text-xl font-bold text-slate-900 leading-snug mb-1.5">
-                    Verify Student Certificate
+                    {hp.verifyWidget?.title || 'Verify Student Certificate'}
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    Check authenticity, institute name, grade, and passing year online directly from our database.
+                    {hp.verifyWidget?.subtitle || 'Check authenticity, institute name, grade, and passing year online directly from our database.'}
                   </p>
                 </div>
 
@@ -823,7 +832,7 @@ export default function OrgHomepage() {
                       type="text"
                       value={verifyCode}
                       onChange={(e) => setVerifyCode(e.target.value)}
-                      placeholder="Enter Certificate Code (e.g. CERT-00123)"
+                      placeholder={hp.verifyWidget?.placeholder || 'Enter Certificate Code (e.g. CERT-00123)'}
                       className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-600"
                     />
                     <button
@@ -832,7 +841,7 @@ export default function OrgHomepage() {
                       style={{ backgroundColor: themeColor }}
                     >
                       <Award className="w-4 h-4" />
-                      Verify Now
+                      {hp.verifyWidget?.buttonText || 'Verify Now'}
                     </button>
                   </form>
                 </div>

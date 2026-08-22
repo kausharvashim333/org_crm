@@ -435,7 +435,7 @@ router.put('/', protect, superAdminOnly, async (req, res) => {
 router.put('/section/:section', protect, superAdminOnly, async (req, res) => {
   try {
     const { section } = req.params;
-    const allowedSections = ['hero', 'verticals', 'about', 'stats', 'courses', 'franchise', 'certifications', 'cta', 'gallery', 'testimonials', 'notices', 'contact', 'settings', 'layoutOrder', 'services', 'announcement', 'enquiryConfig', 'codeSeriesConfig'];
+    const allowedSections = ['hero', 'verticals', 'about', 'stats', 'courses', 'franchise', 'certifications', 'cta', 'gallery', 'testimonials', 'notices', 'contact', 'settings', 'layoutOrder', 'services', 'announcement', 'enquiryConfig', 'codeSeriesConfig', 'verifyWidget', 'categories'];
     if (!allowedSections.includes(section)) {
       return res.status(400).json({ success: false, message: 'Invalid section' });
     }

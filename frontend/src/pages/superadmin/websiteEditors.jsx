@@ -1939,3 +1939,248 @@ export function CentersStripEditor({ homepage, onUpdate, onAddCenter, onDeleteCe
     </div>
   );
 }
+
+export function LayoutOrderEditor({ homepage, onSave }) {
+  const [order, setOrder] = useState(homepage.layoutOrder || [
+    'hero', 'categories', 'verticals', 'services', 'verifyWidget', 'about', 'certifications', 'gallery', 'testimonials', 'cta', 'contact'
+  ]);
+
+  useEffect(() => {
+    setOrder(homepage.layoutOrder || [
+      'hero', 'categories', 'verticals', 'services', 'verifyWidget', 'about', 'certifications', 'gallery', 'testimonials', 'cta', 'contact'
+    ]);
+  }, [homepage]);
+
+  const sectionLabels = {
+    hero: 'Hero Section',
+    categories: 'Category Strip',
+    verticals: 'Verticals / Streams',
+    services: 'Services / Training Programs',
+    verifyWidget: 'Certificate Verify Widget',
+    about: 'About Us',
+    certifications: 'Certifications & Affiliations',
+    gallery: 'Gallery',
+    testimonials: 'Testimonials',
+    cta: 'Call to Action (CTA)',
+    contact: 'Contact Us',
+  };
+
+  const hiddenByDefault = ['courses', 'franchise', 'notices', 'stats'];
+
+  const allSections = Object.keys(sectionLabels);
+  const customSections = (homepage.customSections || []).map(s => ({ id: s.id, label: s.title || s.id }));
+
+  const currentOrder = order.filter(s => sectionLabels[s] || s.startsWith('custom_'));
+  const availableToAdd = allSections.filter(s => !currentOrder.includes(s));
+
+  const moveUp = (i) => {
+    if (i === 0) return;
+    const updated = [...currentOrder];
+    [updated[i], updated[i - 1]] = [updated[i - 1], updated[i]];
+    setOrder(updated);
+  };
+
+  const moveDown = (i) => {
+    if (i === currentOrder.length - 1) return;
+    const updated = [...currentOrder];
+    [updated[i], updated[i + 1]] = [updated[i + 1], updated[i]];
+    setOrder(updated);
+  };
+
+  const remove = (s) => {
+    setOrder(currentOrder.filter(x => x !== s));
+  };
+
+  const add = (s) => {
+    setOrder([...currentOrder, s]);
+  };
+
+  return (
+    <div className="card space-y-4">
+      <h3 className="font-bold text-lg mb-2 text-slate-800 border-b pb-2">Section Order & Visibility</h3>
+      <p className="text-xs text-slate-500">Reorder sections to control how they appear on the homepage. Remove sections you don't want shown.</p>
+
+      <div className="space-y-2">
+        {currentOrder.map((s, i) => {
+          const isCustom = s.startsWith('custom_');
+          const label = isCustom ? (customSections.find(c => c.id === s)?.label || s) : sectionLabels[s];
+          if (!label) return null;
+          return (
+            <div key={s} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200/60">
+              <span className="text-xs font-mono font-bold text-slate-400 w-6 text-center">{i + 1}</span>
+              <span className="flex-1 text-sm font-semibold text-slate-700">{label}</span>
+              <div className="flex items-center gap-1">
+                <button onClick={() => moveUp(i)} disabled={i === 0} className={`p-1.5 rounded-lg border transition-all ${i === 0 ? 'text-slate-200 cursor-not-allowed bg-slate-50' : 'text-slate-600 hover:bg-white hover:shadow-sm cursor-pointer'}`}>
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => moveDown(i)} disabled={i === currentOrder.length - 1} className={`p-1.5 rounded-lg border transition-all ${i === currentOrder.length - 1 ? 'text-slate-200 cursor-not-allowed bg-slate-50' : 'text-slate-600 hover:bg-white hover:shadow-sm cursor-pointer'}`}>
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => remove(s)} className="p-1.5 rounded-lg border text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-all cursor-pointer" title="Remove from homepage">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {availableToAdd.length > 0 && (
+        <div className="border-t pt-3">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Available Sections</p>
+          <div className="flex flex-wrap gap-2">
+            {availableToAdd.map(s => (
+              <button key={s} onClick={() => add(s)} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-all flex items-center gap-1">
+                <Plus className="w-3 h-3" /> {sectionLabels[s]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="border-t pt-3">
+        <p className="text-[11px] text-slate-400">Note: Hero section is always shown first. Franchise, Notices, Stats, and Courses sections have dedicated pages and are managed separately.</p>
+      </div>
+
+      <button onClick={() => onSave(order)} className="btn-primary flex items-center gap-2 w-full justify-center">
+        <Save className="w-4 h-4" /> Save Section Order
+      </button>
+    </div>
+  );
+}
+
+export function VerifyWidgetEditor({ homepage, onSave }) {
+  const vw = homepage.verifyWidget || { show: true, badge: 'Online Verification', title: 'Verify Student Certificate', subtitle: '', placeholder: '', buttonText: 'Verify Now' };
+  const [show, setShow] = useState(vw.show !== false);
+  const [badge, setBadge] = useState(vw.badge || 'Online Verification');
+  const [title, setTitle] = useState(vw.title || 'Verify Student Certificate');
+  const [subtitle, setSubtitle] = useState(vw.subtitle || '');
+  const [placeholder, setPlaceholder] = useState(vw.placeholder || '');
+  const [buttonText, setButtonText] = useState(vw.buttonText || 'Verify Now');
+
+  useEffect(() => {
+    const u = homepage.verifyWidget || {};
+    setShow(u.show !== false);
+    setBadge(u.badge || 'Online Verification');
+    setTitle(u.title || 'Verify Student Certificate');
+    setSubtitle(u.subtitle || '');
+    setPlaceholder(u.placeholder || '');
+    setButtonText(u.buttonText || 'Verify Now');
+  }, [homepage]);
+
+  return (
+    <div className="card space-y-4">
+      <h3 className="font-bold text-lg mb-2 text-slate-800 border-b pb-2">Certificate Verification Widget</h3>
+      <div className="flex items-center gap-2">
+        <input type="checkbox" id="showVerify" checked={show} onChange={(e) => setShow(e.target.checked)} className="rounded text-primary-600 focus:ring-primary-500" />
+        <label htmlFor="showVerify" className="text-sm font-semibold text-slate-700">Display Verify Widget on Homepage</label>
+      </div>
+      <Field label="Badge Text"><input type="text" value={badge} onChange={(e) => setBadge(e.target.value)} className="input-field" placeholder="Online Verification" /></Field>
+      <Field label="Title"><input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="input-field" placeholder="Verify Student Certificate" /></Field>
+      <Field label="Subtitle / Description"><textarea rows="2" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="input-field" placeholder="Check authenticity, institute name, grade, and passing year online..." /></Field>
+      <Field label="Input Placeholder"><input type="text" value={placeholder} onChange={(e) => setPlaceholder(e.target.value)} className="input-field" placeholder="Enter Certificate Code (e.g. CERT-00123)" /></Field>
+      <Field label="Button Text"><input type="text" value={buttonText} onChange={(e) => setButtonText(e.target.value)} className="input-field" placeholder="Verify Now" /></Field>
+      <button onClick={() => onSave({ show, badge, title, subtitle, placeholder, buttonText })} className="btn-primary flex items-center gap-2"><Save className="w-4 h-4" /> Save Widget</button>
+    </div>
+  );
+}
+
+export function CategoriesEditor({ homepage, onSave }) {
+  const cats = homepage.categories || { show: true, items: [] };
+  const [show, setShow] = useState(cats.show !== false);
+  const [items, setItems] = useState(cats.items || []);
+
+  useEffect(() => {
+    const u = homepage.categories || {};
+    setShow(u.show !== false);
+    setItems(u.items || []);
+  }, [homepage]);
+
+  const iconOptions = [
+    { value: 'monitor', label: 'Monitor (Computer)' },
+    { value: 'heart', label: 'Heart (Healthcare)' },
+    { value: 'trending', label: 'Trending (Accounting)' },
+    { value: 'sparkles', label: 'Sparkles (Design)' },
+    { value: 'briefcase', label: 'Briefcase (Business)' },
+    { value: 'award', label: 'Award (Certificate)' },
+    { value: 'book', label: 'Book (Education)' },
+    { value: 'users', label: 'Users (Community)' },
+    { value: 'building', label: 'Building (Institute)' },
+    { value: 'target', label: 'Target (Goals)' },
+  ];
+
+  const addItem = () => {
+    setItems([...items, { label: '', icon: 'book', link: '/courses', color: '#2563eb' }]);
+  };
+
+  const updateItem = (i, field, value) => {
+    const updated = [...items];
+    updated[i] = { ...updated[i], [field]: value };
+    setItems(updated);
+  };
+
+  const removeItem = (i) => {
+    setItems(items.filter((_, idx) => idx !== i));
+  };
+
+  const moveItem = (i, dir) => {
+    if (dir === 'up' && i > 0) {
+      const updated = [...items];
+      [updated[i], updated[i - 1]] = [updated[i - 1], updated[i]];
+      setItems(updated);
+    } else if (dir === 'down' && i < items.length - 1) {
+      const updated = [...items];
+      [updated[i], updated[i + 1]] = [updated[i + 1], updated[i]];
+      setItems(updated);
+    }
+  };
+
+  return (
+    <div className="card space-y-4">
+      <h3 className="font-bold text-lg mb-2 text-slate-800 border-b pb-2">Category Strip</h3>
+      <p className="text-xs text-slate-500">Quick-access category links shown below the hero section.</p>
+      <div className="flex items-center gap-2">
+        <input type="checkbox" id="showCats" checked={show} onChange={(e) => setShow(e.target.checked)} className="rounded text-primary-600 focus:ring-primary-500" />
+        <label htmlFor="showCats" className="text-sm font-semibold text-slate-700">Display Category Strip</label>
+      </div>
+
+      <div className="space-y-3">
+        {items.map((item, i) => (
+          <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold text-slate-400 w-6 text-center">{i + 1}</span>
+              <input type="text" value={item.label} onChange={(e) => updateItem(i, 'label', e.target.value)} className="input-field text-sm flex-1" placeholder="Category label (e.g. Computer & Software)" />
+              <button onClick={() => moveItem(i, 'up')} disabled={i === 0} className={`p-1.5 rounded-lg border ${i === 0 ? 'text-slate-200 cursor-not-allowed' : 'text-slate-600 hover:bg-white cursor-pointer'}`}>
+                <ArrowUp className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => moveItem(i, 'down')} disabled={i === items.length - 1} className={`p-1.5 rounded-lg border ${i === items.length - 1 ? 'text-slate-200 cursor-not-allowed' : 'text-slate-600 hover:bg-white cursor-pointer'}`}>
+                <ArrowDown className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => removeItem(i)} className="p-1.5 rounded-lg border text-rose-500 hover:bg-rose-50 cursor-pointer">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pl-8">
+              <select value={item.icon} onChange={(e) => updateItem(i, 'icon', e.target.value)} className="input-field text-xs">
+                {iconOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+              <input type="text" value={item.link} onChange={(e) => updateItem(i, 'link', e.target.value)} className="input-field text-xs" placeholder="/courses" />
+              <div className="flex items-center gap-2">
+                <input type="color" value={item.color} onChange={(e) => updateItem(i, 'color', e.target.value)} className="w-8 h-8 border rounded cursor-pointer" />
+                <input type="text" value={item.color} onChange={(e) => updateItem(i, 'color', e.target.value)} className="input-field text-xs flex-1" placeholder="#2563eb" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button onClick={addItem} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+        <Plus className="w-3.5 h-3.5" /> Add Category
+      </button>
+
+      <button onClick={() => onSave({ show, items })} className="btn-primary flex items-center gap-2">
+        <Save className="w-4 h-4" /> Save Categories
+      </button>
+    </div>
+  );
+}

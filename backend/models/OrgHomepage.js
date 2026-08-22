@@ -236,6 +236,25 @@ const orgHomepageSchema = new mongoose.Schema({
     }],
   },
 
+  verifyWidget: {
+    show: { type: Boolean, default: true },
+    badge: { type: String, default: 'Online Verification' },
+    title: { type: String, default: 'Verify Student Certificate' },
+    subtitle: { type: String, default: 'Check authenticity, institute name, grade, and passing year online directly from our database.' },
+    placeholder: { type: String, default: 'Enter Certificate Code (e.g. CERT-00123)' },
+    buttonText: { type: String, default: 'Verify Now' },
+  },
+
+  categories: {
+    show: { type: Boolean, default: true },
+    items: [{
+      label: { type: String, required: true },
+      icon: { type: String, default: 'book' },
+      link: { type: String, default: '/courses' },
+      color: { type: String, default: '#2563eb' },
+    }],
+  },
+
   layoutOrder: [{ type: String }],
 
   customSections: [{

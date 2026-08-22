@@ -23,6 +23,7 @@ import {
   NoticesEditor, CtaEditor, ContactEditor, SettingsEditor,
   ServicesEditor, AnnouncementEditor, EnquiryConfigEditor,
   CodeSeriesEditor, VerticalsEditor, CustomSectionsEditor, CentersStripEditor,
+  LayoutOrderEditor, VerifyWidgetEditor, CategoriesEditor,
 } from './websiteEditors';
 
 const tabs = [
@@ -33,6 +34,7 @@ const tabs = [
   { key: 'services', label: 'Services' },
   { key: 'custom', label: 'Custom Sections' },
   { key: 'media', label: 'Media' },
+  { key: 'layout', label: 'Section Order' },
   { key: 'settings', label: 'Settings' },
 ];
 
@@ -46,6 +48,7 @@ const sectionToTab = {
   custom: 'custom',
   gallery: 'media', testimonials: 'media', notices: 'media',
   announcement: 'settings', enquiryConfig: 'settings', contact: 'settings', settings: 'settings',
+  verifyWidget: 'custom', categories: 'custom', layoutOrder: 'layout',
 };
 
 export default function OrgHomepageEditor() {
@@ -146,6 +149,8 @@ export default function OrgHomepageEditor() {
         )}
 
         {activeTab === 'custom' && <>
+          <CategoriesEditor homepage={homepage} onSave={(d) => save('categories', d)} />
+          <VerifyWidgetEditor homepage={homepage} onSave={(d) => save('verifyWidget', d)} />
           <CentersStripEditor
             homepage={homepage}
             onUpdate={(d) => add(updateOrgCentersStrip, d, 'Centers strip saved')}
@@ -164,6 +169,10 @@ export default function OrgHomepageEditor() {
           <GalleryEditor homepage={homepage} onAdd={(d) => add(addOrgGalleryPhoto, d, 'Photo added')} onDelete={(i) => del(deleteOrgGalleryPhoto, i, 'Deleted')} onToggleFeatured={(i) => update(toggleOrgGalleryFeatured, i, null, 'Featured status updated')} />
           <TestimonialsEditor homepage={homepage} onSave={(d) => save('testimonials', d)} onAdd={(d) => add(addOrgTestimonial, d, 'Testimonial added')} onDelete={(i) => del(deleteOrgTestimonial, i, 'Deleted')} onUpdate={(i, d) => update(updateOrgTestimonial, i, d, 'Testimonial updated')} />
           <NoticesEditor homepage={homepage} onSave={(d) => save('notices', d)} onAdd={(d) => add(addOrgNotice, d, 'Notice added')} onDelete={(i) => del(deleteOrgNotice, i, 'Deleted')} onUpdate={(i, d) => update(updateOrgNotice, i, d, 'Notice updated')} />
+        </>}
+
+        {activeTab === 'layout' && <>
+          <LayoutOrderEditor homepage={homepage} onSave={(d) => save('layoutOrder', d)} />
         </>}
 
         {activeTab === 'settings' && <>
