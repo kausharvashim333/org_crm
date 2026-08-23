@@ -148,6 +148,7 @@ export const deleteMaterial = (id) => API.delete(`/materials/${id}`);
 export const getCertificates = (params) => API.get('/certificates', { params });
 export const requestCertificate = (data) => API.post('/certificates', data);
 export const approveCertificate = (id, data) => API.put(`/certificates/${id}/approve`, data);
+export const bulkApproveCertificates = (data) => API.put('/certificates/bulk-approve', data);
 export const rejectCertificate = (id, reason) => API.put(`/certificates/${id}/reject`, { rejectionReason: reason });
 export const verifyCertificate = (code) => API.get(`/certificates/verify/${code}`);
 

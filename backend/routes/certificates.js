@@ -79,6 +79,43 @@ router.put('/:id/reject', protect, superAdminOnly, async (req, res) => {
   }
 });
 
+router.put('/bulk-approve', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { certIds, grade, percentage } = req.body;
+    if (!certIds || !Array.isArray(certIds) || certIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'No certificates selected' });
+    }
+    const OrgHomepage = require('../models/OrgHomepage');
+    const org = await OrgHomepage.findOne();
+    const cfg = org?.codeSeriesConfig || {};
+    const prefix = cfg.certificatePrefix !== undefined ? cfg.certificatePrefix : 'CERT-';
+    const startNo = cfg.certificateStartNo || 1;
+    const padLen = cfg.certificatePadLength || 6;
+    let certCount = await Certificate.countDocuments({ status: 'issued' });
+
+    const results = [];
+    for (const certId of certIds) {
+      const cert = await Certificate.findById(certId);
+      if (!cert || cert.status !== 'requested') continue;
+      cert.grade = grade || 'A';
+      cert.percentage = percentage || 0;
+      cert.approvedAt = new Date();
+      cert.approvedBy = req.user._id;
+      const num = startNo + certCount;
+      cert.certificateNo = `${prefix}${String(num).padStart(padLen, '0')}`;
+      cert.verificationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      cert.issueDate = new Date();
+      cert.status = 'issued';
+      await cert.save();
+      certCount++;
+      results.push(cert._id);
+    }
+    res.json({ success: true, approved: results.length, message: `${results.length} certificate(s) issued successfully` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.get('/verify/:code', async (req, res) => {
   try {
     const cert = await Certificate.findOne({ verificationCode: req.params.code, status: 'issued' })

@@ -6,7 +6,7 @@ import {
   BookOpen, PlayCircle, Award, CheckCircle2, LogOut, GraduationCap, ArrowRight, User, 
   FileText, Calendar, CreditCard, Download, ExternalLink, ShieldCheck, MapPin, Phone, 
   Mail, KeyRound, Clock, Sparkles, Building2, Check, AlertCircle, Menu, X, ChevronRight,
-  Edit3, Save, Lock, School, BookMarked, UserCheck, Shield
+  Edit3, Save, Lock, School, BookMarked, UserCheck, Shield, Bell, ClipboardList, TrendingUp
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -209,6 +209,10 @@ export default function StudentDashboard() {
   const attendance = dashboardData?.attendance || [];
   const materials = dashboardData?.materials || [];
   const certificates = dashboardData?.certificates || [];
+  const exams = dashboardData?.exams || [];
+  const notifications = dashboardData?.notifications || [];
+  const [showNotifications, setShowNotifications] = useState(false);
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const orgSettings = dashboardData?.orgSettings;
   const orgLogo = orgSettings?.logo || '/uploads/logo-1783236511925-286536357.jpeg';
@@ -289,6 +293,8 @@ export default function StudentDashboard() {
           {[
             { id: 'courses', label: 'My Courses', icon: BookOpen, count: courses.length },
             { id: 'materials', label: 'Study Materials', icon: FileText, count: materials.length },
+            { id: 'attendance', label: 'My Attendance', icon: Calendar, count: attendance.length },
+            { id: 'exams', label: 'Exam Results', icon: ClipboardList, count: exams.length },
             { id: 'fees', label: 'Fee Receipts', icon: CreditCard, count: fees.length },
             { id: 'certificates', label: 'My Certificates', icon: Award, count: certificates.length },
             { id: 'profile', label: 'My Profile & Settings', icon: User },
@@ -355,6 +361,8 @@ export default function StudentDashboard() {
               <h1 className="font-black text-sm sm:text-base text-slate-900 capitalize">
                 {activeTab === 'courses' && '📚 My Enrolled Courses'}
                 {activeTab === 'materials' && '📁 Study Materials & eBook Notes'}
+                {activeTab === 'attendance' && '📅 My Attendance Records'}
+                {activeTab === 'exams' && '📝 Exam Results & Grades'}
                 {activeTab === 'fees' && '💳 Fee Receipts & Ledger'}
                 {activeTab === 'certificates' && '🎓 My QR Verifiable Certificates'}
                 {activeTab === 'profile' && '⚙️ My Profile & Security Settings'}
@@ -366,6 +374,38 @@ export default function StudentDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                <Bell className="w-5 h-5 text-slate-700" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center animate-pulse">{unreadCount}</span>
+                )}
+              </button>
+              {showNotifications && (
+                <div className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
+                  <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+                    <h4 className="font-bold text-sm text-slate-900">Notifications</h4>
+                    <span className="text-[10px] text-slate-400 font-medium">{notifications.length} total</span>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-6 text-center text-slate-400 text-sm">No notifications</div>
+                    ) : notifications.map((n, i) => (
+                      <div key={i} className={`p-3 border-b border-slate-50 ${!n.isRead ? 'bg-indigo-50/40' : ''}`}>
+                        <p className="text-xs font-bold text-slate-900">{n.title}</p>
+                        <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">{n.message}</p>
+                        <p className="text-[10px] text-slate-400 mt-1">{new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="text-right hidden sm:block">
               <p className="text-xs font-extrabold text-slate-900">{user?.name}</p>
               <p className="text-[10px] text-indigo-600 font-bold">{user?.studentIdNo}</p>
@@ -565,6 +605,135 @@ export default function StudentDashboard() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Option 2.5: My Attendance */}
+          {activeTab === 'attendance' && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-indigo-600" /> Attendance History
+                </h3>
+                <span className="text-xs text-slate-400 font-medium">{attendance.length} records</span>
+              </div>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm text-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Present</p>
+                  <p className="text-2xl font-black text-emerald-600">{attendance.filter(a => a.records?.some(r => r.status === 'present')).length || attendance.filter(a => a.status === 'present').length}</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm text-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Absent</p>
+                  <p className="text-2xl font-black text-red-500">{attendance.filter(a => a.records?.some(r => r.status === 'absent')).length || attendance.filter(a => a.status === 'absent').length}</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm text-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Late</p>
+                  <p className="text-2xl font-black text-amber-500">{attendance.filter(a => a.records?.some(r => r.status === 'late')).length || attendance.filter(a => a.status === 'late').length}</p>
+                </div>
+              </div>
+
+              {/* Attendance Table */}
+              <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+                {attendance.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm text-slate-400 font-medium">No attendance records yet</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-50">
+                    {attendance.map((rec, i) => {
+                      const myRecord = rec.records?.find(r => r.studentId?.toString?.() === student?._id?.toString?.()) || rec;
+                      const status = myRecord.status || 'present';
+                      const statusColor = status === 'present' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : status === 'absent' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200';
+                      return (
+                        <div key={i} className="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                              <Calendar className="w-5 h-5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900">{new Date(rec.date || rec.createdAt).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                              <p className="text-[11px] text-slate-500">{rec.batchId?.name || 'Batch'}</p>
+                            </div>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold border ${statusColor}`}>{status}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Option 2.7: Exam Results */}
+          {activeTab === 'exams' && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-indigo-600" /> Exam Results & Grades
+                </h3>
+                <span className="text-xs text-slate-400 font-medium">{exams.length} results</span>
+              </div>
+
+              {/* Summary */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm text-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exams Taken</p>
+                  <p className="text-2xl font-black text-indigo-600">{exams.length}</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 border border-emerald-200/80 shadow-sm text-center bg-emerald-50/20">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Passed</p>
+                  <p className="text-2xl font-black text-emerald-600">{exams.filter(e => e.status === 'pass').length}</p>
+                </div>
+                <div className="bg-white rounded-2xl p-4 border border-red-200/80 shadow-sm text-center bg-red-50/20">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Failed</p>
+                  <p className="text-2xl font-black text-red-500">{exams.filter(e => e.status === 'fail').length}</p>
+                </div>
+              </div>
+
+              {/* Exam Results Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {exams.length === 0 ? (
+                  <div className="col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-12 text-center">
+                    <ClipboardList className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-sm text-slate-400 font-medium">No exam results declared yet</p>
+                  </div>
+                ) : exams.map((exam, i) => {
+                  const percentage = exam.maxMarks > 0 ? ((exam.marksObtained / exam.maxMarks) * 100).toFixed(1) : 0;
+                  const isPass = exam.status === 'pass';
+                  return (
+                    <div key={i} className={`bg-white rounded-3xl p-5 border shadow-sm space-y-3 ${isPass ? 'border-emerald-200/80' : 'border-red-200/80'}`}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900">{exam.name}</h4>
+                          <p className="text-[11px] text-slate-500">{exam.courseName} · {exam.examType}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-black border ${isPass ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                          {exam.status?.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex items-end justify-between pt-2 border-t border-slate-100">
+                        <div className="space-y-0.5">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Marks</p>
+                          <p className="text-lg font-black text-slate-900">{exam.marksObtained}/{exam.maxMarks}</p>
+                        </div>
+                        <div className="space-y-0.5 text-right">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">Grade</p>
+                          <p className={`text-2xl font-black ${isPass ? 'text-emerald-600' : 'text-red-500'}`}>{exam.grade || 'F'}</p>
+                        </div>
+                        <div className="space-y-0.5 text-right">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase">%</p>
+                          <p className="text-lg font-black text-indigo-600">{percentage}%</p>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-slate-400">Conducted: {new Date(exam.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

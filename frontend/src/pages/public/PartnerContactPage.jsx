@@ -4,7 +4,7 @@ import { getPublicHomepage, getPublicCourses, submitInquiry } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import {
   GraduationCap, Phone, Mail, MapPin, ArrowRight, X, Map as MapIcon,
-  Facebook, Instagram, Youtube, MessageCircle,
+  Facebook, Instagram, Youtube, MessageCircle, Menu,
 } from 'lucide-react';
 
 const socialIcons = { facebook: Facebook, instagram: Instagram, youtube: Youtube, whatsapp: MessageCircle };
@@ -17,6 +17,7 @@ export default function PartnerContactPage() {
   const [courses, setCourses] = useState([]);
   const [form, setForm] = useState({ name: '', phone: '', email: '', courseInterest: '', message: '' });
   const [showMap, setShowMap] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     getPublicHomepage(slug).then(res => {
@@ -60,9 +61,26 @@ export default function PartnerContactPage() {
             <Link to={`/institute/${slug}/gallery`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">Gallery</Link>
             <Link to={`/institute/${slug}/notices`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">Notices</Link>
             <Link to={`/institute/${slug}/contact`} className="text-sm text-white hidden md:block px-3 py-2 rounded-lg font-medium" style={{ backgroundColor: themeColor }}>Contact</Link>
-            <Link to={`/institute/${slug}/login`} className="text-sm px-4 py-2 rounded-xl text-white font-bold transition-all hover:scale-105" style={{ backgroundColor: themeColor }}>Login</Link>
+            <Link to={`/institute/${slug}/login`} className="text-sm px-4 py-2 rounded-xl text-white font-bold transition-all hover:scale-105 hidden sm:block" style={{ backgroundColor: themeColor }}>Login</Link>
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors">
+              {mobileMenuOpen ? <X className="w-5 h-5 text-slate-700" /> : <Menu className="w-5 h-5 text-slate-700" />}
+            </button>
           </div>
         </div>
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-100 bg-white">
+            <div className="px-4 py-3 space-y-1">
+              <Link to={`/institute/${slug}`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Home</Link>
+              <Link to={`/institute/${slug}/courses`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Courses</Link>
+              <Link to={`/institute/${slug}/about`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">About</Link>
+              <Link to={`/institute/${slug}/faculty`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Faculty</Link>
+              <Link to={`/institute/${slug}/gallery`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Gallery</Link>
+              <Link to={`/institute/${slug}/notices`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">Notices</Link>
+              <Link to={`/institute/${slug}/contact`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-white font-medium" style={{ backgroundColor: themeColor }}>Contact</Link>
+              <Link to={`/institute/${slug}/login`} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-white font-bold text-center mt-2" style={{ backgroundColor: themeColor }}>Login</Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       <section className="py-16 px-4" style={{ backgroundColor: `${themeColor}08` }}>

@@ -1,19 +1,60 @@
 import { useState, useEffect } from 'react';
-import { getPartnerDashboard } from '../../api';
+import { getPartnerDashboard, getStudents, getFees, getInquiries } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import StatCard from '../../components/StatCard';
-import { Users, GraduationCap, IndianRupee, UserCog, Bell, Award, Briefcase, BookOpen, ExternalLink, FileText, Sparkles } from 'lucide-react';
+import { Users, GraduationCap, IndianRupee, UserCog, Bell, Award, Briefcase, BookOpen, ExternalLink, FileText, Sparkles, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+
+const exportToCSV = (data, filename, headers) => {
+  if (!data || data.length === 0) return;
+  const csvRows = [];
+  csvRows.push(headers.join(','));
+  data.forEach(item => {
+    const row = headers.map(h => {
+      const val = item[h] ?? '';
+      return typeof val === 'string' && val.includes(',') ? `"${val.replace(/"/g, '""')}"` : val;
+    });
+    csvRows.push(row.join(','));
+  });
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.URL.revokeObjectURL(url);
+};
 
 export default function PartnerDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     getPartnerDashboard().then(res => setData(res.data)).catch(() => {}).finally(() => setLoading(false));
   }, []);
+
+  const handleExport = async (type) => {
+    setExporting(true);
+    try {
+      if (type === 'students') {
+        const res = await getStudents({ limit: 1000 });
+        exportToCSV(res.data.students, 'students_export.csv', ['fullName', 'phone', 'email', 'status', 'courseId']);
+      } else if (type === 'fees') {
+        const res = await getFees({ limit: 1000 });
+        exportToCSV(res.data.fees, 'fees_export.csv', ['studentId', 'totalAmount', 'paidAmount', 'status', 'createdAt']);
+      } else if (type === 'inquiries') {
+        const res = await getInquiries({ limit: 1000 });
+        exportToCSV(res.data.inquiries, 'inquiries_export.csv', ['name', 'phone', 'courseInterest', 'status', 'createdAt']);
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (loading) return <div className="flex items-center justify-center h-96"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
 
@@ -45,6 +86,20 @@ export default function PartnerDashboard() {
             <ExternalLink className="w-4 h-4" /> View Public Homepage
           </a>
         </div>
+      </div>
+
+      {/* Data Export Bar */}
+      <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+        <span className="text-xs font-bold text-slate-600 mr-2">Export Data:</span>
+        <button onClick={() => handleExport('students')} disabled={exporting} className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50">
+          <Download className="w-3.5 h-3.5" /> Students CSV
+        </button>
+        <button onClick={() => handleExport('fees')} disabled={exporting} className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50">
+          <Download className="w-3.5 h-3.5" /> Fees CSV
+        </button>
+        <button onClick={() => handleExport('inquiries')} disabled={exporting} className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50">
+          <Download className="w-3.5 h-3.5" /> Inquiries CSV
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

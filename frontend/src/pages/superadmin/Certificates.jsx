@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
-import { getCertificates, approveCertificate, rejectCertificate } from '../../api';
+import { getCertificates, approveCertificate, bulkApproveCertificates, rejectCertificate } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
-import { Check, X, Award } from 'lucide-react';
+import { Check, X, Award, CheckCircle } from 'lucide-react';
 
 export default function AdminCertificates() {
   const [certs, setCerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showApprove, setShowApprove] = useState(null);
   const [showReject, setShowReject] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showBulkApprove, setShowBulkApprove] = useState(false);
+  const [bulkData, setBulkData] = useState({ grade: 'A', percentage: 0 });
+  const [bulkProcessing, setBulkProcessing] = useState(false);
   const { showSuccess, showError } = useToast();
   const [approveData, setApproveData] = useState({ grade: '', percentage: 0 });
   const [rejectReason, setRejectReason] = useState('');
@@ -29,14 +33,68 @@ export default function AdminCertificates() {
     catch (error) { showError('Failed'); }
   };
 
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAll = () => {
+    const requestedCerts = certs.filter(c => c.status === 'requested');
+    if (selectedIds.length === requestedCerts.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(requestedCerts.map(c => c._id));
+    }
+  };
+
+  const handleBulkApprove = async (e) => {
+    e.preventDefault();
+    setBulkProcessing(true);
+    try {
+      const res = await bulkApproveCertificates({ certIds: selectedIds, grade: bulkData.grade, percentage: bulkData.percentage });
+      showSuccess(res.data.message || `${res.data.approved} certificate(s) issued`);
+      setShowBulkApprove(false);
+      setSelectedIds([]);
+      setBulkData({ grade: 'A', percentage: 0 });
+      load();
+    } catch (error) {
+      showError('Bulk approve failed');
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const requestedCerts = certs.filter(c => c.status === 'requested');
+
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl font-bold text-gray-800">Certificates</h1><p className="text-gray-500">Approve or reject certificate requests</p></div>
+      <div className="flex items-center justify-between">
+        <div><h1 className="text-2xl font-bold text-gray-800">Certificates</h1><p className="text-gray-500">Approve or reject certificate requests</p></div>
+        {selectedIds.length > 0 && (
+          <button onClick={() => setShowBulkApprove(true)} className="btn-primary flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" /> Bulk Approve ({selectedIds.length})
+          </button>
+        )}
+      </div>
       <div className="card">
         {loading ? <div className="text-center py-8 text-gray-400">Loading...</div> : (
-          <Table headers={['Student', 'Institute', 'Course', 'Status', 'Cert No', 'Requested', 'Actions']}>
+          <Table headers={['', 'Student', 'Institute', 'Course', 'Status', 'Cert No', 'Requested', 'Actions']}>
+            {requestedCerts.length > 0 && (
+              <TableRow>
+                <TableCell>
+                  <input type="checkbox" checked={selectedIds.length === requestedCerts.length && requestedCerts.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded cursor-pointer" />
+                </TableCell>
+                <TableCell colSpan={7} className="text-xs font-bold text-slate-500">
+                  {selectedIds.length > 0 ? `${selectedIds.length} selected` : 'Select all requested'}
+                </TableCell>
+              </TableRow>
+            )}
             {certs.map(c => (
               <TableRow key={c._id}>
+                <TableCell>
+                  {c.status === 'requested' && (
+                    <input type="checkbox" checked={selectedIds.includes(c._id)} onChange={() => toggleSelect(c._id)} className="w-4 h-4 rounded cursor-pointer" />
+                  )}
+                </TableCell>
                 <TableCell><div className="flex items-center gap-2"><Award className="w-4 h-4 text-gray-400" />{c.studentId?.fullName || 'N/A'}</div></TableCell>
                 <TableCell>{c.partnerId?.instituteName || 'N/A'}</TableCell>
                 <TableCell>{c.courseId?.name || 'N/A'}</TableCell>
@@ -56,6 +114,17 @@ export default function AdminCertificates() {
           </Table>
         )}
       </div>
+
+      {showBulkApprove && (
+        <Modal isOpen={true} onClose={() => setShowBulkApprove(false)} title={`Bulk Approve ${selectedIds.length} Certificates`} size="md">
+          <form onSubmit={handleBulkApprove} className="space-y-4">
+            <p className="text-sm text-gray-600">You are about to issue {selectedIds.length} certificates with the same grade and percentage.</p>
+            <div><label className="block text-sm font-medium mb-1">Grade (applies to all)</label><input type="text" placeholder="A, B, C..." value={bulkData.grade} onChange={(e) => setBulkData({ ...bulkData, grade: e.target.value })} className="input-field" /></div>
+            <div><label className="block text-sm font-medium mb-1">Percentage (applies to all)</label><input type="number" min="0" max="100" value={bulkData.percentage} onChange={(e) => setBulkData({ ...bulkData, percentage: +e.target.value })} className="input-field" /></div>
+            <button type="submit" disabled={bulkProcessing} className="btn-primary w-full disabled:opacity-50">{bulkProcessing ? 'Processing...' : `Issue ${selectedIds.length} Certificates`}</button>
+          </form>
+        </Modal>
+      )}
 
       {showApprove && (
         <Modal isOpen={true} onClose={() => setShowApprove(null)} title="Issue Certificate" size="md">

@@ -9,6 +9,8 @@ const Attendance = require('../models/Attendance');
 const Material = require('../models/Material');
 const User = require('../models/User');
 const OrgHomepage = require('../models/OrgHomepage');
+const Exam = require('../models/Exam');
+const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -359,7 +361,42 @@ router.get('/dashboard', protect, async (req, res) => {
         .lean();
     }
 
-    // 6. Organization Settings for Direct Online Students
+    // 6. Exam Results
+    let examResults = [];
+    if (student) {
+      const exams = await Exam.find({
+        partnerId: student.partnerId,
+        'results.studentId': student._id,
+        status: 'result_declared'
+      }).populate('courseId', 'name code').sort({ date: -1 }).lean();
+      examResults = exams.map(exam => {
+        const result = exam.results.find(r => r.studentId && r.studentId.toString() === student._id.toString());
+        return {
+          _id: exam._id,
+          name: exam.name,
+          examType: exam.examType,
+          date: exam.date,
+          maxMarks: exam.maxMarks,
+          passingMarks: exam.passingMarks,
+          courseName: exam.courseId?.name || 'N/A',
+          marksObtained: result?.marksObtained,
+          grade: result?.grade,
+          status: result?.status,
+        };
+      });
+    }
+
+    // 7. Notifications
+    let notifications = [];
+    if (req.user.partnerId) {
+      notifications = await Notification.find({
+        $or: [{ toPartnerId: req.user.partnerId }, { toPartnerId: null, type: 'broadcast' }]
+      }).sort({ createdAt: -1 }).limit(10).lean();
+    } else {
+      notifications = await Notification.find({ toPartnerId: null, type: 'broadcast' }).sort({ createdAt: -1 }).limit(10).lean();
+    }
+
+    // 8. Organization Settings for Direct Online Students
     const orgHp = await OrgHomepage.findOne().lean();
 
     res.json({
@@ -383,6 +420,8 @@ router.get('/dashboard', protect, async (req, res) => {
       attendance: attendanceLogs,
       materials,
       certificates,
+      exams: examResults,
+      notifications,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

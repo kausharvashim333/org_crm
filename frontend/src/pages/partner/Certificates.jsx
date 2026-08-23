@@ -4,7 +4,10 @@ import { getStudents, getCourses } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
+import Pagination from '../../components/Pagination';
 import { Plus, Award } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function PartnerCertificates() {
   const [certs, setCerts] = useState([]);
@@ -12,6 +15,7 @@ export default function PartnerCertificates() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({ studentId: '', courseId: '' });
 
@@ -28,6 +32,8 @@ export default function PartnerCertificates() {
     catch (error) { showError('Failed'); }
   };
 
+  const paginatedCerts = certs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -36,8 +42,9 @@ export default function PartnerCertificates() {
       </div>
       <div className="card">
         {loading ? <div className="text-center py-8 text-gray-400">Loading...</div> : (
+          <>
           <Table headers={['Student', 'Course', 'Status', 'Cert No', 'Grade', 'Requested', 'Verify']}>
-            {certs.map(c => (
+            {paginatedCerts.map(c => (
               <TableRow key={c._id}>
                 <TableCell><div className="flex items-center gap-2"><Award className="w-4 h-4 text-gray-400" /><span className="font-medium">{c.studentId?.fullName || 'N/A'}</span></div></TableCell>
                 <TableCell>{c.courseId?.name || 'N/A'}</TableCell>
@@ -49,6 +56,14 @@ export default function PartnerCertificates() {
               </TableRow>
             ))}
           </Table>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(certs.length / ITEMS_PER_PAGE)}
+            onPageChange={setCurrentPage}
+            totalItems={certs.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+          />
+          </>
         )}
       </div>
 

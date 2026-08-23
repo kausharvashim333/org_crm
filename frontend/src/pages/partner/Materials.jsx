@@ -4,13 +4,17 @@ import { getCourses } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
+import Pagination from '../../components/Pagination';
 import { Plus, Trash2, FileText, Video, Link as LinkIcon, Download } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 10;
 
 export default function PartnerMaterials() {
   const [materials, setMaterials] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({ title: '', description: '', type: 'notes', externalLink: '' });
   const [file, setFile] = useState(null);
@@ -47,6 +51,8 @@ export default function PartnerMaterials() {
 
   const typeIcon = (type) => type === 'video' ? <Video className="w-4 h-4 text-red-500" /> : type === 'link' ? <LinkIcon className="w-4 h-4 text-blue-500" /> : <FileText className="w-4 h-4 text-gray-400" />;
 
+  const paginatedMaterials = materials.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -55,8 +61,9 @@ export default function PartnerMaterials() {
       </div>
       <div className="card">
         {loading ? <div className="text-center py-8 text-gray-400">Loading...</div> : (
+          <>
           <Table headers={['Title', 'Type', 'Standard/Custom', 'Status', 'Actions']}>
-            {materials.map(m => (
+            {paginatedMaterials.map(m => (
               <TableRow key={m._id}>
                 <TableCell><div className="flex items-center gap-2">{typeIcon(m.type)}<span className="font-medium">{m.title}</span></div></TableCell>
                 <TableCell className="capitalize">{m.type}</TableCell>
@@ -71,6 +78,14 @@ export default function PartnerMaterials() {
               </TableRow>
             ))}
           </Table>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(materials.length / ITEMS_PER_PAGE)}
+            onPageChange={setCurrentPage}
+            totalItems={materials.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+          />
+          </>
         )}
       </div>
 
