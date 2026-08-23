@@ -704,7 +704,7 @@ router.post('/partner-center/submit', protect, upload.fields([
     const partnerId = req.user.partnerId;
     const fullName = req.body.fullName || req.body.name;
     const phone = req.body.phone;
-    const studentEmail = req.body.email;
+    const studentEmail = (req.body.email || `${phone}@student.local`).toLowerCase();
     if (!fullName || !phone || !courseId) {
       return res.status(400).json({ success: false, message: 'Name, phone, and course are required' });
     }
@@ -837,7 +837,6 @@ router.post('/partner-center/submit', protect, upload.fields([
     }
 
     // Create student User account
-    const studentEmail = (req.body.email || `${phone}@student.local`).toLowerCase();
     const existingUser = await User.findOne({ email: studentEmail });
     if (!existingUser) {
       await User.create({
