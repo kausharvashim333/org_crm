@@ -152,6 +152,7 @@ export default function UniversalAdmissionPage() {
   });
 
   const [paymentMode, setPaymentMode] = useState('online_razorpay'); // 'online_razorpay' | 'pay_at_center'
+  const [paidAmount, setPaidAmount] = useState(0);
 
   useEffect(() => {
     Promise.all([getPublicPartners(), getPublicCourses(), getOrgHomepagePublic()])
@@ -220,6 +221,7 @@ export default function UniversalAdmissionPage() {
   const selectedPartner = partners.find(p => p._id === formData.partnerId);
   const selectedCourse = courses.find(c => c._id === formData.courseId);
   const registrationFee = selectedCourse?.registrationFee > 0 ? selectedCourse.registrationFee : 500;
+  const courseTotalFee = selectedCourse?.fee || selectedCourse?.studentFee || 0;
 
   // Determine if Graduation section is required
   const isGraduationRequired = () => {
@@ -342,7 +344,7 @@ export default function UniversalAdmissionPage() {
 
       // Append payment details
       data.append('paymentMode', paymentDetails.paymentMode || paymentMode);
-      data.append('paidAmount', paymentDetails.paidAmount !== undefined ? paymentDetails.paidAmount : (paymentMode === 'online_razorpay' ? registrationFee : 0));
+      data.append('paidAmount', paymentDetails.paidAmount !== undefined ? paymentDetails.paidAmount : (paymentMode === 'online_razorpay' ? (paidAmount || registrationFee) : paidAmount));
       if (paymentDetails.razorpayOrderId) data.append('razorpayOrderId', paymentDetails.razorpayOrderId);
       if (paymentDetails.razorpayPaymentId) data.append('razorpayPaymentId', paymentDetails.razorpayPaymentId);
       if (paymentDetails.razorpaySignature) data.append('razorpaySignature', paymentDetails.razorpaySignature);
@@ -428,14 +430,15 @@ export default function UniversalAdmissionPage() {
           fullName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
-          feeAmount: registrationFee,
+          feeAmount: paidAmount || registrationFee,
         });
 
         const rzpData = orderRes.data;
+        const amountToPay = paidAmount || registrationFee;
 
         const options = {
           key: rzpData.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TQKFK8UhmFxMt1',
-          amount: Math.round(registrationFee * 100),
+          amount: Math.round(amountToPay * 100),
           currency: 'INR',
           name: 'Skill India Institute Network',
           description: `Admission Registration: ${selectedCourse?.name || 'Course Registration'}`,
@@ -451,7 +454,7 @@ export default function UniversalAdmissionPage() {
           handler: async function (response) {
             await performSubmission({
               paymentMode: 'online_razorpay',
-              paidAmount: registrationFee,
+              paidAmount: amountToPay,
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
@@ -1598,6 +1601,31 @@ export default function UniversalAdmissionPage() {
                     </p>
                   </label>
                 </div>
+
+                {/* Fee Amount Input */}
+                {courseTotalFee > 0 && (
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Student kitna fee jama karna chahta hai? ₹</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={courseTotalFee}
+                        value={paidAmount}
+                        onChange={(e) => setPaidAmount(Math.max(0, Number(e.target.value)))}
+                        placeholder="0"
+                        className="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-800 text-sm font-bold focus:outline-none focus:border-indigo-500"
+                      />
+                      <p className="text-[10px] text-slate-400 mt-1">Baki fees student baad me de sakta hai.</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">Pending Fee ₹</label>
+                      <div className="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-rose-600 text-sm font-black flex items-center">
+                        ₹{Math.max(0, courseTotalFee - paidAmount)}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between pt-6 border-t border-slate-100">
@@ -1621,7 +1649,7 @@ export default function UniversalAdmissionPage() {
                     </>
                   ) : paymentMode === 'online_razorpay' ? (
                     <>
-                      <Zap className="w-5 h-5" /> Pay ₹{registrationFee} & Complete Admission
+                      <Zap className="w-5 h-5" /> Pay ₹{paidAmount || registrationFee} & Complete Admission
                     </>
                   ) : (
                     <>

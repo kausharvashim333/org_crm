@@ -926,7 +926,7 @@ export default function PartnerAdmissionPage() {
               {/* Fee Input */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Amount Paid Now (Cash) ₹</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Student kitna fee jama karna chahta hai? ₹</label>
                   <input
                     type="number"
                     min="0"
@@ -936,6 +936,7 @@ export default function PartnerAdmissionPage() {
                     placeholder="0"
                     className="input-field text-sm"
                   />
+                  <p className="text-[10px] text-slate-400 mt-1">Baki fees student baad me de sakta hai.</p>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5">Pending Fee ₹</label>

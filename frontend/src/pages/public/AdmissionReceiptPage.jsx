@@ -84,10 +84,13 @@ export default function AdmissionReceiptPage() {
   const course = (student.courseId && student.courseId[0]) || {};
   const formattedDate = student.createdAt ? new Date(student.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString();
 
-  // Verification QR Code URL (Google Chart API / QuickChart)
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-    `STUDENT: ${student.fullName} | APP: ${student.applicationNo} | ID: ${student.studentIdNo || 'STU'} | CENTER: ${partner.instituteName || partner.centerName || 'CRM'}`
-  )}`;
+  // Verification QR Code - encodes a URL that opens verification page
+  const verifyUrl = `${window.location.origin}/verify-student/${student.applicationNo || student._id}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`;
+
+  // Resolve photo & signature to absolute URLs for print
+  const photoUrl = student.photo ? (student.photo.startsWith('http') ? student.photo : `${window.location.origin}${student.photo}`) : null;
+  const signatureUrl = student.signature ? (student.signature.startsWith('http') ? student.signature : `${window.location.origin}${student.signature}`) : null;
 
   const tenth = student.tenthDetails || {};
   const twelfth = student.twelfthDetails || {};
@@ -174,8 +177,8 @@ export default function AdmissionReceiptPage() {
               {/* Photo */}
               <div className="text-center">
                 <div className="w-24 h-28 rounded-lg bg-slate-100 border-2 border-indigo-950 p-0.5 overflow-hidden shadow-sm">
-                  {student.photo ? (
-                    <img src={student.photo} alt="Student" className="w-full h-full object-cover rounded" />
+                  {photoUrl ? (
+                    <img src={photoUrl} alt="Student" className="w-full h-full object-cover rounded" crossOrigin="anonymous" />
                   ) : (
                     <User className="w-10 h-10 mx-auto text-slate-400 mt-8" />
                   )}
@@ -186,8 +189,8 @@ export default function AdmissionReceiptPage() {
               {/* Signature */}
               <div className="text-center">
                 <div className="w-28 h-16 rounded-lg bg-slate-100 border border-slate-300 p-1 overflow-hidden flex items-center justify-center">
-                  {student.signature ? (
-                    <img src={student.signature} alt="Signature" className="w-full h-full object-contain" />
+                  {signatureUrl ? (
+                    <img src={signatureUrl} alt="Signature" className="w-full h-full object-contain" crossOrigin="anonymous" />
                   ) : (
                     <span className="text-[10px] text-slate-400 italic">Signature</span>
                   )}
@@ -459,6 +462,8 @@ export default function AdmissionReceiptPage() {
           body {
             background-color: white !important;
             color: black !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           header, nav, footer, .print\\:hidden {
             display: none !important;
@@ -470,6 +475,11 @@ export default function AdmissionReceiptPage() {
             width: 100% !important;
             max-width: 100% !important;
             page-break-inside: avoid;
+          }
+          img {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            max-width: 100% !important;
           }
         }
       `}</style>

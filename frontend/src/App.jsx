@@ -27,6 +27,7 @@ const OrgGalleryPage = lazy(() => import('./pages/public/OrgGalleryPage'));
 const UniversalAdmissionPage = lazy(() => import('./pages/public/UniversalAdmissionPage'));
 const PublicPartnerAdmissionPage = lazy(() => import('./pages/public/PublicPartnerAdmissionPage'));
 const AdmissionReceiptPage = lazy(() => import('./pages/public/AdmissionReceiptPage'));
+const StudentVerifyPage = lazy(() => import('./pages/public/StudentVerifyPage'));
 const FranchiseVerificationPage = lazy(() => import('./pages/public/FranchiseVerificationPage'));
 const PartnerCoursesPage = lazy(() => import('./pages/public/PartnerCoursesPage'));
 const PartnerFacultyPage = lazy(() => import('./pages/public/PartnerFacultyPage'));
@@ -142,6 +143,7 @@ export default function App() {
         <Route path="/apply" element={<UniversalAdmissionPage />} />
         <Route path="/admission-receipt/:applicationNo" element={<AdmissionReceiptPage />} />
         <Route path="/admission/receipt/:applicationNo" element={<AdmissionReceiptPage />} />
+        <Route path="/verify-student/:applicationNo" element={<StudentVerifyPage />} />
         <Route path="/institute/:slug" element={<PublicHomepage />} />
         <Route path="/institute/:slug/admission" element={<PublicPartnerAdmissionPage />} />
         <Route path="/institute/:slug/apply" element={<PublicPartnerAdmissionPage />} />
