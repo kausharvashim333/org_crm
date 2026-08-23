@@ -109,12 +109,13 @@ export default function PublicHomepage() {
   const activeStaff = staff.filter(s => s.status === 'active');
 
   const navLinks = [
-    { label: 'Home', href: '#top' },
-    { label: 'Courses', href: '#courses' },
-    { label: 'About', href: '#about' },
-    { label: 'Faculty', href: '#faculty' },
-    { label: 'Gallery', href: '#gallery' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'Home', to: `/institute/${slug}` },
+    { label: 'Courses', to: `/institute/${slug}/courses` },
+    { label: 'About', to: `/institute/${slug}/about` },
+    { label: 'Faculty', to: `/institute/${slug}/faculty` },
+    { label: 'Gallery', to: `/institute/${slug}/gallery` },
+    { label: 'Notices', to: `/institute/${slug}/notices` },
+    { label: 'Contact', to: `/institute/${slug}/contact` },
   ];
 
   const renderSection = (section) => {
@@ -145,9 +146,9 @@ export default function PublicHomepage() {
                   <Link to={`/institute/${slug}/admission`} className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-slate-900 font-bold text-sm rounded-xl hover:bg-slate-100 transition-all shadow-2xl hover:scale-105">
                     <GraduationCap className="w-5 h-5" style={{ color: themeColor }} /> Apply for Admission <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <a href="#courses" className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold text-sm rounded-xl hover:bg-white/20 transition-all">
+                  <Link to={`/institute/${slug}/courses`} className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold text-sm rounded-xl hover:bg-white/20 transition-all">
                     <BookOpen className="w-5 h-5" /> View Courses
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Quick Stats */}
@@ -233,6 +234,13 @@ export default function PublicHomepage() {
                 ))}
               </div>
               {activeCourses.length === 0 && <p className="text-center text-slate-400 py-8">No courses available yet.</p>}
+              {activeCourses.length > 0 && (
+                <div className="text-center mt-8">
+                  <Link to={`/institute/${slug}/courses`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 shadow-md" style={{ backgroundColor: themeColor }}>
+                    View All Courses <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
             </div>
           </section>
         );
@@ -258,6 +266,13 @@ export default function PublicHomepage() {
                 ))}
               </div>
               {activeStaff.length === 0 && <p className="text-center text-slate-400 py-8">Faculty details coming soon.</p>}
+              {activeStaff.length > 0 && (
+                <div className="text-center mt-8">
+                  <Link to={`/institute/${slug}/faculty`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 shadow-md" style={{ backgroundColor: themeColor }}>
+                    View All Faculty <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
             </div>
           </section>
         );
@@ -280,6 +295,13 @@ export default function PublicHomepage() {
                   </Reveal>
                 ))}
               </div>
+              {homepage.gallery.photos.length > 4 && (
+                <div className="text-center mt-8">
+                  <Link to={`/institute/${slug}/gallery`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 shadow-md" style={{ backgroundColor: themeColor }}>
+                    View Full Gallery <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
             </div>
           </section>
         );
@@ -361,6 +383,13 @@ export default function PublicHomepage() {
                   </Reveal>
                 ))}
               </div>
+              {homepage.notices.items.length > 4 && (
+                <div className="text-center mt-8">
+                  <Link to={`/institute/${slug}/notices`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:scale-105 shadow-md" style={{ backgroundColor: themeColor }}>
+                    View All Notices <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
             </div>
           </section>
         );
@@ -433,7 +462,7 @@ export default function PublicHomepage() {
           </Link>
 
           <div className="flex items-center gap-1">
-            {navLinks.map(l => <a key={l.href} href={l.href} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">{l.label}</a>)}
+            {navLinks.map(l => <Link key={l.to} to={l.to} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">{l.label}</Link>)}
             <Link to={`/institute/${slug}/login`} className="text-sm px-4 py-2 rounded-xl text-white font-bold transition-all hover:scale-105 hidden sm:block" style={{ backgroundColor: themeColor }}>Login</Link>
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors">
               {mobileMenuOpen ? <X className="w-5 h-5 text-slate-700" /> : <Menu className="w-5 h-5 text-slate-700" />}
@@ -444,7 +473,7 @@ export default function PublicHomepage() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-100 bg-white">
             <div className="px-4 py-3 space-y-1">
-              {navLinks.map(l => <a key={l.href} href={l.href} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">{l.label}</a>)}
+              {navLinks.map(l => <Link key={l.to} to={l.to} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">{l.label}</Link>)}
               <Link to={`/institute/${slug}/login`} className="block px-3 py-2.5 rounded-lg text-sm text-white font-bold text-center mt-2" style={{ backgroundColor: themeColor }}>Login</Link>
             </div>
           </div>
@@ -476,7 +505,7 @@ export default function PublicHomepage() {
             <div>
               <h4 className="font-bold text-sm mb-3 text-slate-200">Quick Links</h4>
               <div className="space-y-2">
-                {navLinks.map(l => <a key={l.href} href={l.href} className="block text-sm text-slate-400 hover:text-white transition-colors">{l.label}</a>)}
+                {navLinks.map(l => <Link key={l.to} to={l.to} className="block text-sm text-slate-400 hover:text-white transition-colors">{l.label}</Link>)}
                 <Link to={`/institute/${slug}/admission`} className="block text-sm text-slate-400 hover:text-white transition-colors">Admission</Link>
               </div>
             </div>

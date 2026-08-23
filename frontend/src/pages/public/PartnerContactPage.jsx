@@ -46,17 +46,21 @@ export default function PartnerContactPage() {
 
   return (
     <div>
-      <nav className="bg-white shadow-sm sticky top-0 z-40">
+      <nav className="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {partner.logo ? <img src={partner.logo} alt="logo" className="w-10 h-10 rounded-lg object-cover" onError={(e) => { const img = e.target; if (!img.dataset.retried && partner.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = partner.logo.substring(partner.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} /> : <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: themeColor }}><GraduationCap className="w-6 h-6 text-white" /></div>}
-            <span className="font-bold text-lg">{partner.instituteName}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link to={`/institute/${slug}`} className="text-sm text-gray-600 hover:text-gray-900">Home</Link>
-            <Link to={`/institute/${slug}/about`} className="text-sm text-gray-600 hover:text-gray-900">About</Link>
-            <Link to={`/institute/${slug}/contact`} className="text-sm font-medium" style={{ color: themeColor }}>Contact</Link>
-            <Link to={`/institute/${slug}/login`} className="text-sm px-4 py-2 rounded-lg text-white" style={{ backgroundColor: themeColor }}>Login</Link>
+          <Link to={`/institute/${slug}`} className="flex items-center gap-2.5">
+            {partner.logo ? <img src={partner.logo} alt="logo" className="w-10 h-10 rounded-xl object-cover" onError={(e) => { const img = e.target; if (!img.dataset.retried && partner.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = partner.logo.substring(partner.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} /> : <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: themeColor }}><GraduationCap className="w-6 h-6 text-white" /></div>}
+            <span className="font-bold text-base text-slate-900 truncate max-w-[200px]">{partner.instituteName}</span>
+          </Link>
+          <div className="flex items-center gap-1">
+            <Link to={`/institute/${slug}`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">Home</Link>
+            <Link to={`/institute/${slug}/courses`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">Courses</Link>
+            <Link to={`/institute/${slug}/about`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">About</Link>
+            <Link to={`/institute/${slug}/faculty`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">Faculty</Link>
+            <Link to={`/institute/${slug}/gallery`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">Gallery</Link>
+            <Link to={`/institute/${slug}/notices`} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">Notices</Link>
+            <Link to={`/institute/${slug}/contact`} className="text-sm text-white hidden md:block px-3 py-2 rounded-lg font-medium" style={{ backgroundColor: themeColor }}>Contact</Link>
+            <Link to={`/institute/${slug}/login`} className="text-sm px-4 py-2 rounded-xl text-white font-bold transition-all hover:scale-105" style={{ backgroundColor: themeColor }}>Login</Link>
           </div>
         </div>
       </nav>

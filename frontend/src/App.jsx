@@ -28,6 +28,10 @@ const UniversalAdmissionPage = lazy(() => import('./pages/public/UniversalAdmiss
 const PublicPartnerAdmissionPage = lazy(() => import('./pages/public/PublicPartnerAdmissionPage'));
 const AdmissionReceiptPage = lazy(() => import('./pages/public/AdmissionReceiptPage'));
 const FranchiseVerificationPage = lazy(() => import('./pages/public/FranchiseVerificationPage'));
+const PartnerCoursesPage = lazy(() => import('./pages/public/PartnerCoursesPage'));
+const PartnerFacultyPage = lazy(() => import('./pages/public/PartnerFacultyPage'));
+const PartnerGalleryPage = lazy(() => import('./pages/public/PartnerGalleryPage'));
+const PartnerNoticesPage = lazy(() => import('./pages/public/PartnerNoticesPage'));
 
 // SuperAdmin Pages (Lazy)
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/Login'));
@@ -138,6 +142,10 @@ export default function App() {
         <Route path="/institute/:slug" element={<PublicHomepage />} />
         <Route path="/institute/:slug/admission" element={<PublicPartnerAdmissionPage />} />
         <Route path="/institute/:slug/apply" element={<PublicPartnerAdmissionPage />} />
+        <Route path="/institute/:slug/courses" element={<PartnerCoursesPage />} />
+        <Route path="/institute/:slug/faculty" element={<PartnerFacultyPage />} />
+        <Route path="/institute/:slug/gallery" element={<PartnerGalleryPage />} />
+        <Route path="/institute/:slug/notices" element={<PartnerNoticesPage />} />
         <Route path="/institute/:slug/about" element={<PartnerAboutPage />} />
         <Route path="/institute/:slug/contact" element={<PartnerContactPage />} />
         <Route path="/institute/:slug/login" element={<PartnerLogin />} />
