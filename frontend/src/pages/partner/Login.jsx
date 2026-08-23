@@ -385,36 +385,6 @@ export default function PartnerLogin() {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* Institute Dropdown Selection (if not linked via specific center route) */}
-            {!slug && (
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Select Your Center / Institute *</label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-                  <select
-                    required
-                    value={selectedInstituteId}
-                    onChange={handleInstituteChange}
-                    disabled={institutesLoading}
-                    className="w-full px-4 py-3 pl-10 border border-slate-200 rounded-xl focus:outline-none transition-all text-sm bg-slate-50 text-slate-800 disabled:opacity-60"
-                    style={focusField === 'institute' ? { borderColor: themeColor, boxShadow: `0 0 0 4px ${themeColor}15`, backgroundColor: 'white' } : {}}
-                    onFocus={() => setFocusField('institute')}
-                    onBlur={() => setFocusField('')}
-                  >
-                    <option value="">{institutesLoading ? 'Loading centers...' : '-- Choose Center --'}</option>
-                    {allInstitutes.map(inst => (
-                      <option key={inst._id} value={inst._id}>
-                        {inst.instituteName} ({inst.city}, {inst.state})
-                      </option>
-                    ))}
-                  </select>
-                  {institutesLoading && (
-                    <Loader2 className="absolute right-3 top-3.5 w-4 h-4 text-slate-400 animate-spin" />
-                  )}
-                </div>
-              </div>
-            )}
 
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
