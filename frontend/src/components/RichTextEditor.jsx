@@ -1,18 +1,30 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Bold, Italic, Underline, List, ListOrdered, Image, Quote, Code } from 'lucide-react';
 
 export default function RichTextEditor({ value, onChange, placeholder, rows = 3 }) {
   const editorRef = useRef(null);
+  const isInternalChange = useRef(false);
+
+  useEffect(() => {
+    if (editorRef.current && !isInternalChange.current) {
+      if (editorRef.current.innerHTML !== value) {
+        editorRef.current.innerHTML = value || '';
+      }
+    }
+    isInternalChange.current = false;
+  }, [value]);
 
   const exec = (command, val = null) => {
     document.execCommand(command, false, val);
     if (editorRef.current) {
+      isInternalChange.current = true;
       onChange(editorRef.current.innerHTML);
     }
   };
 
   const handleInput = () => {
     if (editorRef.current) {
+      isInternalChange.current = true;
       onChange(editorRef.current.innerHTML);
     }
   };
@@ -58,7 +70,6 @@ export default function RichTextEditor({ value, onChange, placeholder, rows = 3 
         className="px-3 py-2 text-sm outline-none prose prose-sm max-w-none"
         style={{ minHeight: `${rows * 1.5}rem` }}
         data-placeholder={placeholder}
-        dangerouslySetInnerHTML={{ __html: value || '' }}
       />
     </div>
   );
