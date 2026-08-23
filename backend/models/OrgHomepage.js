@@ -223,6 +223,7 @@ const orgHomepageSchema = new mongoose.Schema({
     favicon: { type: String },
     orgName: { type: String, default: 'Skill India' },
     shortName: { type: String, default: '' },
+    tagline: { type: String, default: 'Govt. Recognized & ISO 9001:2015 Certified Educational Network' },
     browserTitle: { type: String, default: 'Skill India - Training Institute Management' },
   },
 

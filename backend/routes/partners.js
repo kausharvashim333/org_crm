@@ -142,6 +142,15 @@ router.get('/public/receipt/:param', async (req, res) => {
 
     const orgHomepage = await OrgHomepage.findOne().select('settings contact certifications stats hero');
 
+    // Convert relative logo path to absolute URL for receipt rendering
+    if (orgHomepage && orgHomepage.settings && orgHomepage.settings.logo) {
+      const logoPath = orgHomepage.settings.logo;
+      if (logoPath.startsWith('/uploads/')) {
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        orgHomepage.settings.logo = `${baseUrl}${logoPath}`;
+      }
+    }
+
     res.json({
       success: true,
       partner,

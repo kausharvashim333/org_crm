@@ -1352,6 +1352,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
     <div className="card space-y-4">
       <h3 className="font-semibold">Branding & Settings</h3>
       <Field label="Organization Name"><input type="text" value={settings.orgName || ''} onChange={(e) => setSettings({ ...settings, orgName: e.target.value })} className="input-field" /></Field>
+      <Field label="Tagline (shown on receipts & documents)"><input type="text" value={settings.tagline || ''} onChange={(e) => setSettings({ ...settings, tagline: e.target.value })} className="input-field" placeholder="Govt. Recognized & ISO 9001:2015 Certified Educational Network" /></Field>
       <Field label="Short Name (shown below hero title)"><input type="text" value={settings.shortName || ''} onChange={(e) => setSettings({ ...settings, shortName: e.target.value })} className="input-field" placeholder="e.g. SITN" /></Field>
       <Field label="Browser Tab Title"><input type="text" value={settings.browserTitle || ''} onChange={(e) => setSettings({ ...settings, browserTitle: e.target.value })} className="input-field" /></Field>
 
