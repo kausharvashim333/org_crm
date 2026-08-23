@@ -128,44 +128,106 @@ export default function PublicHomepage() {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" />
 
             {/* Content */}
-            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-20 w-full">
-              <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-bold uppercase tracking-wider mb-5">
-                  <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
-                  Admissions Open {new Date().getFullYear()}
+            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 w-full">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+                {/* Left Hero Column (7 cols) */}
+                <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-bold uppercase tracking-wider mb-5">
+                    <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
+                    Admissions Open {new Date().getFullYear()}
+                  </div>
+
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-4 tracking-tight">
+                    {homepage.hero?.heading || partner.instituteName}
+                  </h1>
+                  <p className="text-lg sm:text-xl text-white/85 mb-8 leading-relaxed max-w-xl">
+                    {homepage.hero?.subheading || partner.tagline || 'Quality Education & Skill Development Training'}
+                  </p>
+
+                  <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
+                    <Link to={`/institute/${slug}/admission`} className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-slate-900 font-bold text-sm rounded-xl hover:bg-slate-100 transition-all shadow-2xl hover:scale-105">
+                      <GraduationCap className="w-5 h-5" style={{ color: themeColor }} /> Apply for Admission <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <Link to={`/institute/${slug}/courses`} className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold text-sm rounded-xl hover:bg-white/20 transition-all">
+                      <BookOpen className="w-5 h-5" /> View Courses
+                    </Link>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-3 gap-4 mt-10 max-w-md">
+                    <div className="text-center">
+                      <p className="text-2xl sm:text-3xl font-black text-white">{activeCourses.length}+</p>
+                      <p className="text-xs text-white/70 font-medium uppercase tracking-wider">Courses</p>
+                    </div>
+                    <div className="text-center border-x border-white/20">
+                      <p className="text-2xl sm:text-3xl font-black text-white">{activeStaff.length}+</p>
+                      <p className="text-xs text-white/70 font-medium uppercase tracking-wider">Faculty</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl sm:text-3xl font-black text-white">{partner.establishedYear || '2020'}</p>
+                      <p className="text-xs text-white/70 font-medium uppercase tracking-wider">Since</p>
+                    </div>
+                  </div>
                 </div>
 
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-4 tracking-tight">
-                  {homepage.hero?.heading || partner.instituteName}
-                </h1>
-                <p className="text-lg sm:text-xl text-white/85 mb-8 leading-relaxed max-w-xl">
-                  {homepage.hero?.subheading || partner.tagline || 'Quality Education & Skill Development Training'}
-                </p>
+                {/* Right Hero Column: Notice Box (5 cols) */}
+                <div className="lg:col-span-5 w-full">
+                  <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-white/20 overflow-hidden">
+                    {/* Widget Header */}
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-xs" style={{ backgroundColor: `${themeColor}15`, border: `1px solid ${themeColor}25` }}>
+                          <Bell className="w-4 h-4" style={{ color: themeColor }} />
+                        </div>
+                        <h3 className="font-bold text-slate-900 text-sm sm:text-base">Notices & Announcements</h3>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                        Live
+                      </span>
+                    </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <Link to={`/institute/${slug}/admission`} className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-slate-900 font-bold text-sm rounded-xl hover:bg-slate-100 transition-all shadow-2xl hover:scale-105">
-                    <GraduationCap className="w-5 h-5" style={{ color: themeColor }} /> Apply for Admission <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link to={`/institute/${slug}/courses`} className="inline-flex items-center gap-2 px-7 py-3.5 bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold text-sm rounded-xl hover:bg-white/20 transition-all">
-                    <BookOpen className="w-5 h-5" /> View Courses
-                  </Link>
+                    {/* Notice Scrollable Body */}
+                    <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1" style={{ scrollbarWidth: 'none' }}>
+                      {(homepage.notices?.items || []).length > 0 ? (
+                        (homepage.notices.items).slice(0, 6).map((n, i) => (
+                          <div key={i} className="p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-50 border border-slate-200/70 transition-all text-left">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 line-clamp-2">{n.title}</h4>
+                              {n.date && (() => {
+                                const noticeDate = new Date(n.date);
+                                const diffDays = Math.ceil(Math.abs(new Date() - noticeDate) / (1000 * 60 * 60 * 24));
+                                return diffDays <= 7 ? <span className="shrink-0 px-2 py-0.5 rounded-md bg-red-600 text-white text-[9px] font-black uppercase tracking-wider shadow-xs">NEW</span> : null;
+                              })()}
+                            </div>
+                            {n.message && <p className="text-[11px] text-slate-600 line-clamp-2 mb-2 leading-relaxed">{n.message}</p>}
+                            <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-200/50">
+                              <span className="px-2 py-0.5 rounded bg-white font-semibold uppercase tracking-wider border border-slate-200/60" style={{ color: themeColor }}>
+                                Notice
+                              </span>
+                              {n.date && <span>{new Date(n.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-10 text-center text-slate-400 text-xs">
+                          <Bell className="w-8 h-8 mx-auto mb-2 text-slate-200" />
+                          No notices available right now.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer Link */}
+                    <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-[11px] text-slate-400 font-medium">Institute Notice Board</span>
+                      <Link to={`/institute/${slug}/notices`} className="text-xs font-bold inline-flex items-center gap-1" style={{ color: themeColor }}>
+                        View All <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-4 mt-10 max-w-md">
-                  <div className="text-center">
-                    <p className="text-2xl sm:text-3xl font-black text-white">{activeCourses.length}+</p>
-                    <p className="text-xs text-white/70 font-medium uppercase tracking-wider">Courses</p>
-                  </div>
-                  <div className="text-center border-x border-white/20">
-                    <p className="text-2xl sm:text-3xl font-black text-white">{activeStaff.length}+</p>
-                    <p className="text-xs text-white/70 font-medium uppercase tracking-wider">Faculty</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl sm:text-3xl font-black text-white">{partner.establishedYear || '2020'}</p>
-                    <p className="text-xs text-white/70 font-medium uppercase tracking-wider">Since</p>
-                  </div>
-                </div>
               </div>
             </div>
           </section>
