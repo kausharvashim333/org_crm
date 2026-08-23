@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getExamQuestions, submitExamAnswers } from '../../api';
-import { Clock, AlertCircle, CheckCircle, XCircle, ArrowLeft, ArrowRight, Flag, Award } from 'lucide-react';
+import { Clock, AlertCircle, CheckCircle, XCircle, ArrowLeft, ArrowRight, Flag, Award, Eye, ShieldAlert, Maximize, ClipboardList } from 'lucide-react';
 
 export default function TakeExam() {
   const { examId } = useParams();
@@ -18,13 +18,16 @@ export default function TakeExam() {
   const [result, setResult] = useState(null);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [flagged, setFlagged] = useState(new Set());
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [showWarning, setShowWarning] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showStartScreen, setShowStartScreen] = useState(true);
   const timerRef = useRef(null);
 
   useEffect(() => {
     getExamQuestions(examId).then(res => {
       setExam(res.data.exam);
       setQuestions(res.data.questions);
-      setStartedAt(new Date().toISOString());
       setTimeLeft((res.data.exam.durationMinutes || 60) * 60);
       setLoading(false);
     }).catch(err => {
@@ -32,6 +35,77 @@ export default function TakeExam() {
       setLoading(false);
     });
   }, [examId]);
+
+  // Anti-cheat: Tab switch detection
+  useEffect(() => {
+    if (showStartScreen || result) return;
+    const handleVisibility = () => {
+      if (document.hidden) {
+        setTabSwitchCount(c => c + 1);
+        setShowWarning('Tab switch detected! This activity is being recorded.');
+      }
+    };
+    const handleBlur = () => {
+      setTabSwitchCount(c => c + 1);
+      setShowWarning('You left the exam window! This activity is being recorded.');
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [showStartScreen, result]);
+
+  // Anti-cheat: Block copy-paste, right-click, text selection
+  useEffect(() => {
+    if (showStartScreen || result) return;
+    const blockContextMenu = (e) => e.preventDefault();
+    const blockCopy = (e) => { e.preventDefault(); setShowWarning('Copying is not allowed during the exam!'); };
+    const blockPaste = (e) => { e.preventDefault(); setShowWarning('Pasting is not allowed during the exam!'); };
+    const blockSelect = (e) => e.preventDefault();
+    document.addEventListener('contextmenu', blockContextMenu);
+    document.addEventListener('copy', blockCopy);
+    document.addEventListener('paste', blockPaste);
+    document.addEventListener('cut', blockCopy);
+    return () => {
+      document.removeEventListener('contextmenu', blockContextMenu);
+      document.removeEventListener('copy', blockCopy);
+      document.removeEventListener('paste', blockPaste);
+      document.removeEventListener('cut', blockCopy);
+    };
+  }, [showStartScreen, result]);
+
+  // Fullscreen handling
+  const enterFullscreen = () => {
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); setIsFullscreen(true); }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement || !!document.webkitFullscreenElement);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('webkitfullscreenchange', handleFsChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('webkitfullscreenchange', handleFsChange);
+    };
+  }, []);
+
+  // Auto-hide warning after 3 seconds
+  useEffect(() => {
+    if (showWarning) {
+      const t = setTimeout(() => setShowWarning(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [showWarning]);
+
+  const startExam = () => {
+    setShowStartScreen(false);
+    setStartedAt(new Date().toISOString());
+    enterFullscreen();
+  };
 
   const submitExam = useCallback(async (isAuto = false) => {
     if (submitting) return;
@@ -43,7 +117,7 @@ export default function TakeExam() {
         selectedOptionIndex: typeof ans === 'number' ? ans : -1,
         textAnswer: typeof ans === 'string' ? ans : '',
       }));
-      const res = await submitExamAnswers(examId, { answers: answerArr, startedAt });
+      const res = await submitExamAnswers(examId, { answers: answerArr, startedAt, tabSwitchCount });
       setResult(res.data.result);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit exam');
@@ -77,6 +151,60 @@ export default function TakeExam() {
   const isLowTime = timeLeft !== null && timeLeft < 60;
 
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-slate-50"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" /></div>;
+
+  if (showStartScreen && exam) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="max-w-lg w-full bg-white rounded-2xl shadow-lg p-8">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-indigo-50 rounded-full mx-auto mb-4 flex items-center justify-center">
+            <ClipboardList className="w-8 h-8 text-indigo-600" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-800">{exam.name}</h1>
+          <p className="text-sm text-slate-500 mt-1">{exam.courseName}</p>
+        </div>
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-slate-50 rounded-xl p-3 text-center">
+            <Clock className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
+            <p className="text-xs text-slate-400">Duration</p>
+            <p className="text-sm font-bold text-slate-700">{exam.durationMinutes} min</p>
+          </div>
+          <div className="bg-slate-50 rounded-xl p-3 text-center">
+            <ClipboardList className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
+            <p className="text-xs text-slate-400">Questions</p>
+            <p className="text-sm font-bold text-slate-700">{exam.totalQuestions}</p>
+          </div>
+          <div className="bg-slate-50 rounded-xl p-3 text-center">
+            <Award className="w-5 h-5 text-indigo-500 mx-auto mb-1" />
+            <p className="text-xs text-slate-400">Max Marks</p>
+            <p className="text-sm font-bold text-slate-700">{exam.maxMarks}</p>
+          </div>
+        </div>
+        {exam.instructions && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-amber-800">{exam.instructions}</p>
+          </div>
+        )}
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <ShieldAlert className="w-5 h-5 text-red-600" />
+            <h3 className="text-sm font-bold text-red-700">Anti-Cheat Rules</h3>
+          </div>
+          <ul className="text-xs text-red-600 space-y-1.5 ml-7">
+            <li>• Do not switch tabs or minimize the browser window</li>
+            <li>• Do not copy/paste or right-click during the exam</li>
+            <li>• Exam will run in fullscreen mode</li>
+            <li>• Tab switches are recorded and reported to your instructor</li>
+            <li>• Exam auto-submits when timer ends</li>
+          </ul>
+        </div>
+        <button onClick={startExam} className="btn-primary w-full flex items-center justify-center gap-2">
+          <Maximize className="w-5 h-5" /> Start Exam in Fullscreen
+        </button>
+        <button onClick={() => navigate('/student/dashboard')} className="w-full text-center text-sm text-slate-400 hover:text-slate-600 mt-3">Cancel</button>
+      </div>
+    </div>
+  );
   if (error) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
@@ -150,17 +278,29 @@ export default function TakeExam() {
             <p className="text-xs text-slate-400">{exam.courseName} · {exam.totalQuestions} questions</p>
           </div>
         </div>
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-sm ${isLowTime ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-slate-100 text-slate-700'}`}>
-          <Clock className="w-4 h-4" />
-          {timeLeft !== null ? formatTime(timeLeft) : '--:--'}
+        <div className="flex items-center gap-2">
+          {tabSwitchCount > 0 && (
+            <span className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold bg-red-50 text-red-600 border border-red-200">
+              <ShieldAlert className="w-3.5 h-3.5" /> {tabSwitchCount}
+            </span>
+          )}
+          {!isFullscreen && (
+            <button onClick={enterFullscreen} className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">
+              <Maximize className="w-3.5 h-3.5" /> Fullscreen
+            </button>
+          )}
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-bold text-sm ${isLowTime ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-slate-100 text-slate-700'}`}>
+            <Clock className="w-4 h-4" />
+            {timeLeft !== null ? formatTime(timeLeft) : '--:--'}
+          </div>
         </div>
       </div>
 
-      {/* Instructions */}
-      {exam.instructions && currentQ === 0 && !answeredCount && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-amber-800">{exam.instructions}</p>
+      {/* Anti-cheat warning banner */}
+      {showWarning && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fadeIn">
+          <ShieldAlert className="w-5 h-5" />
+          <span className="text-sm font-bold">{showWarning}</span>
         </div>
       )}
 

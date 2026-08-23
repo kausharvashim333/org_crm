@@ -138,6 +138,7 @@ app.use('/api/fees', require('./routes/fees'));
 app.use('/api/staff', require('./routes/staff'));
 app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/exams', require('./routes/exams'));
+app.use('/api/question-bank', require('./routes/questionBank'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/royalty', require('./routes/royalty'));
 app.use('/api/homepage', require('./routes/homepage'));

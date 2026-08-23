@@ -190,7 +190,7 @@ router.post('/:id/submit', protect, async (req, res) => {
     if (req.user.role !== 'student') {
       return res.status(403).json({ success: false, message: 'Only students can submit exams' });
     }
-    const { answers, startedAt } = req.body;
+    const { answers, startedAt, tabSwitchCount } = req.body;
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
 
@@ -247,6 +247,7 @@ router.post('/:id/submit', protect, async (req, res) => {
       startedAt: startedAt ? new Date(startedAt) : null,
       submittedAt,
       timeSpentMinutes,
+      tabSwitchCount: tabSwitchCount || 0,
     };
 
     if (existingIdx >= 0) {
@@ -280,6 +281,128 @@ router.post('/:id/submit', protect, async (req, res) => {
         totalQuestions: exam.questions.length,
       } : { status: 'submitted', message: 'Results will be declared by your instructor.' },
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Get exam analytics for partner
+router.get('/:id/analytics', protect, partnerOrAdmin, async (req, res) => {
+  try {
+    const exam = await Exam.findById(req.params.id)
+      .populate('submissions.studentId', 'fullName phone')
+      .populate('batchId', 'name');
+    if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
+    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    const submissions = exam.submissions || [];
+    const totalSubmissions = submissions.length;
+    const passedCount = submissions.filter(s => s.status === 'pass').length;
+    const failedCount = submissions.filter(s => s.status === 'fail').length;
+    const scores = submissions.map(s => s.totalMarksAwarded);
+    const avgScore = totalSubmissions > 0 ? (scores.reduce((a, b) => a + b, 0) / totalSubmissions).toFixed(2) : 0;
+    const maxScore = totalSubmissions > 0 ? Math.max(...scores) : 0;
+    const minScore = totalSubmissions > 0 ? Math.min(...scores) : 0;
+    const avgTimeSpent = totalSubmissions > 0 ? (submissions.reduce((a, s) => a + (s.timeSpentMinutes || 0), 0) / totalSubmissions).toFixed(1) : 0;
+    const totalTabSwitches = submissions.reduce((a, s) => a + (s.tabSwitchCount || 0), 0);
+
+    // Question-wise analysis
+    const questionAnalysis = (exam.questions || []).map((q, qi) => {
+      let correct = 0, attempted = 0, totalMarks = 0;
+      submissions.forEach(s => {
+        const ans = s.answers?.find(a => a.questionId?.toString() === q._id?.toString());
+        if (ans) {
+          if (ans.selectedOptionIndex >= 0 || ans.textAnswer) attempted++;
+          if (ans.isCorrect) correct++;
+          totalMarks += ans.marksAwarded || 0;
+        }
+      });
+      return {
+        questionIndex: qi,
+        questionText: q.questionText?.substring(0, 80) + (q.questionText?.length > 80 ? '...' : ''),
+        type: q.type,
+        marks: q.marks,
+        correctCount: correct,
+        attemptedCount: attempted,
+        unattemptedCount: totalSubmissions - attempted,
+        correctPercentage: totalSubmissions > 0 ? ((correct / totalSubmissions) * 100).toFixed(1) : 0,
+        avgMarks: totalSubmissions > 0 ? (totalMarks / totalSubmissions).toFixed(2) : 0,
+      };
+    });
+
+    // Student-wise performance
+    const studentPerformance = submissions.map(s => ({
+      studentName: s.studentId?.fullName || 'Unknown',
+      studentPhone: s.studentId?.phone || '',
+      totalMarksAwarded: s.totalMarksAwarded,
+      maxMarks: exam.maxMarks,
+      percentage: exam.maxMarks > 0 ? ((s.totalMarksAwarded / exam.maxMarks) * 100).toFixed(1) : 0,
+      status: s.status,
+      grade: s.grade,
+      timeSpentMinutes: s.timeSpentMinutes,
+      tabSwitchCount: s.tabSwitchCount || 0,
+      submittedAt: s.submittedAt,
+    }));
+
+    res.json({
+      success: true,
+      analytics: {
+        examName: exam.name,
+        totalSubmissions,
+        passedCount,
+        failedCount,
+        passRate: totalSubmissions > 0 ? ((passedCount / totalSubmissions) * 100).toFixed(1) : 0,
+        avgScore,
+        maxScore,
+        minScore,
+        avgTimeSpent,
+        totalTabSwitches,
+        questionAnalysis,
+        studentPerformance,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Manual grade subjective answers
+router.put('/:id/submissions/:studentId/grade', protect, partnerOrAdmin, async (req, res) => {
+  try {
+    const { grades } = req.body; // [{ questionId, marksAwarded }]
+    const exam = await Exam.findById(req.params.id);
+    if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
+    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    const subIdx = exam.submissions.findIndex(s => s.studentId?.toString() === req.params.studentId);
+    if (subIdx < 0) return res.status(404).json({ success: false, message: 'Submission not found' });
+
+    let totalMarksAwarded = 0;
+    (grades || []).forEach(g => {
+      const ansIdx = exam.submissions[subIdx].answers.findIndex(a => a.questionId?.toString() === g.questionId);
+      if (ansIdx >= 0) {
+        exam.submissions[subIdx].answers[ansIdx].marksAwarded = g.marksAwarded;
+        exam.submissions[subIdx].answers[ansIdx].isCorrect = g.marksAwarded > 0;
+      }
+    });
+
+    totalMarksAwarded = exam.submissions[subIdx].answers.reduce((sum, a) => sum + (a.marksAwarded || 0), 0);
+    const percentage = exam.maxMarks > 0 ? (totalMarksAwarded / exam.maxMarks) * 100 : 0;
+    exam.submissions[subIdx].totalMarksAwarded = totalMarksAwarded;
+    exam.submissions[subIdx].status = totalMarksAwarded >= exam.passingMarks ? 'pass' : 'fail';
+    exam.submissions[subIdx].grade = percentage >= 90 ? 'A+' : percentage >= 80 ? 'A' : percentage >= 70 ? 'B' : percentage >= 60 ? 'C' : percentage >= 40 ? 'D' : 'F';
+
+    const resultIdx = exam.results.findIndex(r => r.studentId?.toString() === req.params.studentId);
+    const resultData = { studentId: req.params.studentId, marksObtained: totalMarksAwarded, grade: exam.submissions[subIdx].grade, status: exam.submissions[subIdx].status };
+    if (resultIdx >= 0) exam.results[resultIdx] = resultData;
+    else exam.results.push(resultData);
+
+    await exam.save();
+    res.json({ success: true, message: 'Grades updated', submission: exam.submissions[subIdx] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

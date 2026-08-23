@@ -25,6 +25,7 @@ const submissionSchema = new mongoose.Schema({
   startedAt: { type: Date },
   submittedAt: { type: Date },
   timeSpentMinutes: { type: Number, default: 0 },
+  tabSwitchCount: { type: Number, default: 0 },
 }, { _id: true });
 
 const examSchema = new mongoose.Schema({

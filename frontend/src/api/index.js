@@ -104,6 +104,17 @@ export const submitExamResults = (id, results) => API.post(`/exams/${id}/results
 export const getStudentAvailableExams = () => API.get('/exams/student/available');
 export const getExamQuestions = (id) => API.get(`/exams/${id}/questions`);
 export const submitExamAnswers = (id, data) => API.post(`/exams/${id}/submit`, data);
+export const getExamAnalytics = (id) => API.get(`/exams/${id}/analytics`);
+export const gradeSubmission = (examId, studentId, grades) => API.put(`/exams/${examId}/submissions/${studentId}/grade`, { grades });
+
+// Question Bank
+export const getQuestionBank = (params) => API.get('/question-bank', { params });
+export const getQuestionCategories = () => API.get('/question-bank/categories');
+export const getQuestionTags = () => API.get('/question-bank/tags');
+export const createQuestion = (data) => API.post('/question-bank', data);
+export const bulkCreateQuestions = (questions) => API.post('/question-bank/bulk', { questions });
+export const updateQuestion = (id, data) => API.put(`/question-bank/${id}`, data);
+export const deleteQuestion = (id) => API.delete(`/question-bank/${id}`);
 
 export const getProjects = (params) => API.get('/projects', { params });
 export const getProject = (id) => API.get(`/projects/${id}`);
