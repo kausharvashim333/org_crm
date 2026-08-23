@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAddons, getMyAddons, purchaseAddonOrder, verifyAddonPayment } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
-import { Package, CheckCircle, Loader2, Sparkles, Calendar, IndianRupee, BadgeCheck } from 'lucide-react';
+import { Package, CheckCircle, Loader2, Sparkles, Calendar, IndianRupee, BadgeCheck, Search, Filter } from 'lucide-react';
 
 export default function PartnerAddons() {
   const [addons, setAddons] = useState([]);
@@ -11,6 +11,9 @@ export default function PartnerAddons() {
   const [purchasing, setPurchasing] = useState(null);
   const [billingCycle, setBillingCycle] = useState('one_time');
   const [showCheckout, setShowCheckout] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterBilling, setFilterBilling] = useState('all');
   const { showSuccess, showError } = useToast();
 
   const load = () => {
@@ -20,6 +23,19 @@ export default function PartnerAddons() {
   useEffect(() => { load(); }, []);
 
   const myAddonKeys = myAddons.map(a => a.addonKey);
+
+  const filteredAddons = addons.filter(a => {
+    const matchesSearch = !searchTerm ||
+      a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.features?.some(f => f.toLowerCase().includes(searchTerm.toLowerCase()));
+    const owned = myAddonKeys.includes(a.key) || a.isDefault;
+    const matchesStatus = filterStatus === 'all' ||
+      (filterStatus === 'active' && owned) ||
+      (filterStatus === 'available' && !owned);
+    const matchesBilling = filterBilling === 'all' || a.billingCycle === filterBilling;
+    return matchesSearch && matchesStatus && matchesBilling;
+  });
 
   const handlePurchase = async (addon) => {
     if (addon.billingCycle === 'free' || addon.price === 0 && addon.monthlyPrice === 0 && addon.yearlyPrice === 0) {
@@ -108,9 +124,45 @@ export default function PartnerAddons() {
         </div>
       )}
 
+      {/* Search & Filter */}
+      <div className="card p-4 space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search add-ons by name, description, features..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input-field text-sm pl-9"
+            />
+          </div>
+          <div className="flex gap-2">
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="input-field text-sm w-auto">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="available">Not Purchased</option>
+            </select>
+            <select value={filterBilling} onChange={(e) => setFilterBilling(e.target.value)} className="input-field text-sm w-auto">
+              <option value="all">All Plans</option>
+              <option value="free">Free</option>
+              <option value="one_time">One-Time</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <div className="flex items-center justify-between text-xs text-gray-400">
+          <span className="flex items-center gap-1"><Filter className="w-3 h-3" /> {filteredAddons.length} of {addons.length} add-ons</span>
+          {(searchTerm || filterStatus !== 'all' || filterBilling !== 'all') && (
+            <button onClick={() => { setSearchTerm(''); setFilterStatus('all'); setFilterBilling('all'); }} className="text-indigo-600 hover:text-indigo-800">Clear filters</button>
+          )}
+        </div>
+      </div>
+
       {/* Available Add-ons */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading ? <div className="text-center py-8 text-gray-400 col-span-full">Loading...</div> : addons.map(a => {
+        {loading ? <div className="text-center py-8 text-gray-400 col-span-full">Loading...</div> : filteredAddons.map(a => {
           const owned = myAddonKeys.includes(a.key) || a.isDefault;
           return (
             <div key={a._id} className={`card p-5 space-y-3 relative ${owned ? 'ring-2 ring-emerald-200' : ''}`}>
@@ -156,6 +208,15 @@ export default function PartnerAddons() {
             </div>
           );
         })}
+        {!loading && filteredAddons.length === 0 && (
+          <div className="col-span-full text-center py-12 text-gray-400">
+            <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p className="text-sm font-medium">No add-ons match your search</p>
+            {(searchTerm || filterStatus !== 'all' || filterBilling !== 'all') && (
+              <button onClick={() => { setSearchTerm(''); setFilterStatus('all'); setFilterBilling('all'); }} className="text-xs text-indigo-600 mt-2">Clear all filters</button>
+            )}
+          </div>
+        )}
         {!loading && addons.length === 0 && (
           <div className="col-span-full text-center py-12 text-gray-400">
             <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
