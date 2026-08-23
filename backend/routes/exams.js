@@ -88,7 +88,10 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
     if (!req.user.partnerId) {
       return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
     }
-    const exam = await Exam.create({ ...req.body, partnerId: req.user.partnerId });
+    const cleanBody = { ...req.body };
+    if (!cleanBody.batchId) delete cleanBody.batchId;
+    if (!cleanBody.courseId) delete cleanBody.courseId;
+    const exam = await Exam.create({ ...cleanBody, partnerId: req.user.partnerId });
     res.status(201).json({ success: true, exam });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

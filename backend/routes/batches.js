@@ -50,7 +50,13 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
     if (!req.user.partnerId) {
       return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
     }
-    const batch = await Batch.create({ ...req.body, partnerId: req.user.partnerId });
+    const cleanBody = { ...req.body };
+    if (!cleanBody.teacherId) delete cleanBody.teacherId;
+    if (!cleanBody.endDate) delete cleanBody.endDate;
+    if (!cleanBody.courseId) {
+      return res.status(400).json({ success: false, message: 'Course is required' });
+    }
+    const batch = await Batch.create({ ...cleanBody, partnerId: req.user.partnerId });
     res.status(201).json({ success: true, batch });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -64,7 +70,10 @@ router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
     if (req.user.role === 'partner' && (!req.user.partnerId || batch.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
-    const updated = await Batch.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const cleanBody = { ...req.body };
+    if (!cleanBody.teacherId) delete cleanBody.teacherId;
+    if (!cleanBody.endDate) delete cleanBody.endDate;
+    const updated = await Batch.findByIdAndUpdate(req.params.id, cleanBody, { new: true, runValidators: true });
     res.json({ success: true, batch: updated });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

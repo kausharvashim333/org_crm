@@ -34,7 +34,7 @@ export default function PartnerBatches() {
       setShowAdd(false); setEditBatch(null);
       setFormData({ courseId: '', name: '', startDate: '', endDate: '', timing: '', schedule: '', teacherId: '', maxStudents: 30 });
       load();
-    } catch (error) { showError('Failed'); }
+    } catch (error) { showError(error.response?.data?.message || 'Failed to save batch'); }
   };
 
   const handleEnroll = async (batchId, studentId) => {
