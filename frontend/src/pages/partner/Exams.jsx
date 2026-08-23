@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import RichTextEditor from '../../components/RichTextEditor';
 import { Table, TableRow, TableCell } from '../../components/Table';
-import { Plus, FileText, Award, Trash2, Pencil, Settings, Eye, ChevronUp, ChevronDown, ListChecks, Clock, AlertCircle, CheckCircle, X, BarChart3, ShieldAlert, Search, Upload, BookMarked, GraduationCap } from 'lucide-react';
+import { Plus, FileText, Award, Trash2, Pencil, Settings, Eye, ChevronUp, ChevronDown, ListChecks, Clock, AlertCircle, CheckCircle, X, BarChart3, ShieldAlert, Search, Upload, BookMarked, GraduationCap, Flag } from 'lucide-react';
 
 const emptyQuestion = { type: 'mcq', questionText: '', options: ['', '', '', ''], correctOptionIndex: 0, marks: 1, negativeMarks: 0, explanation: '' };
 const emptyExamSettings = {
