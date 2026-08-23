@@ -980,7 +980,7 @@ export default function OrgHomepage() {
                   <Reveal key={i} delay={i * 60} className="w-full max-w-[260px]">
                     <div className="bg-white rounded-2xl p-5 text-center border border-slate-200 shadow-xs hover:shadow-sm transition-all flex flex-col items-center justify-center min-h-[140px]">
                       {c.logo ? (
-                        <img src={c.logo} alt={c.name} className="w-14 h-14 object-contain mb-2.5" />
+                        <img src={c.logo} alt={c.name} className="w-14 h-14 object-contain mb-2.5" onError={(e) => { const img = e.target; if (!img.dataset.retried && c.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = c.logo.substring(c.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
                       ) : (
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2.5 bg-indigo-50 text-indigo-600">
                           <Award className="w-5 h-5" />

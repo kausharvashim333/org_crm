@@ -333,7 +333,7 @@ export default function PartnerLogin() {
             <div className="mb-6 bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 shadow-md flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white overflow-hidden flex-shrink-0">
                 {partner.logo && typeof partner.logo === 'string' && partner.logo.trim() !== '' && partner.logo !== 'undefined' ? (
-                  <img src={partner.logo} alt="logo" className="w-full h-full object-cover" onError={(e) => { if (!e.target.dataset.retried && partner.logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${partner.logo}`; } else { e.target.style.display = 'none'; } }} />
+                  <img src={partner.logo} alt="logo" className="w-full h-full object-cover" onError={(e) => { const img = e.target; if (!img.dataset.retried && partner.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = partner.logo.substring(partner.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
                 ) : (
                   <Building2 className="w-6 h-6 text-blue-400" />
                 )}

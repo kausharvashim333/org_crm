@@ -1359,7 +1359,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
       <div className="border-t pt-4">
         <label className="block text-sm font-medium mb-2">Logo</label>
         <div className="flex items-center gap-4 mb-3">
-          {settings.logo ? <img src={settings.logo} alt="logo" className="w-16 h-16 rounded-lg object-cover border" /> : <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center"><Globe className="w-8 h-8 text-gray-400" /></div>}
+          {settings.logo ? <img src={settings.logo} alt="logo" className="w-16 h-16 rounded-lg object-cover border" onError={(e) => { const img = e.target; if (!img.dataset.retried && settings.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = settings.logo.substring(settings.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} /> : <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center"><Globe className="w-8 h-8 text-gray-400" /></div>}
           <div>
             <label className="btn-secondary flex items-center gap-2 cursor-pointer">
               <Upload className="w-4 h-4" /> {uploadingLogo ? 'Uploading...' : 'Upload Logo'}

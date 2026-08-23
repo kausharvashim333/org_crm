@@ -119,7 +119,7 @@ export default function PartnerSettings() {
             <div className="relative group">
               <div className="w-32 h-32 rounded-2xl bg-slate-100 border-2 border-dashed border-indigo-300 p-1 flex items-center justify-center overflow-hidden shadow-inner">
                 {logoPreview ? (
-                  <img src={logoPreview} alt="Institute Logo" className="w-full h-full object-contain rounded-xl" />
+                  <img src={logoPreview} alt="Institute Logo" className="w-full h-full object-contain rounded-xl" onError={(e) => { const img = e.target; if (!img.dataset.retried && logoPreview.includes('/uploads/')) { img.dataset.retried = 'true'; const path = logoPreview.substring(logoPreview.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
                 ) : (
                   <div className="text-slate-400 p-2">
                     <Building2 className="w-12 h-12 mx-auto mb-1 text-slate-300" />

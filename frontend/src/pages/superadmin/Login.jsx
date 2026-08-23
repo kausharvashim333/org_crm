@@ -60,7 +60,7 @@ export default function SuperAdminLogin() {
         <div className="flex items-center gap-3 z-10">
           <div className="w-12 h-12 bg-primary-600/25 border border-primary-500/40 rounded-xl flex items-center justify-center backdrop-blur-md overflow-hidden">
             {orgSettings?.logo && typeof orgSettings.logo === 'string' && orgSettings.logo.trim() !== '' && orgSettings.logo !== 'undefined' ? (
-              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-xl" onError={(e) => { if (!e.target.dataset.retried && orgSettings.logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${orgSettings.logo}`; } else { e.target.style.display = 'none'; } }} />
+              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-xl" onError={(e) => { const img = e.target; if (!img.dataset.retried && orgSettings.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = orgSettings.logo.substring(orgSettings.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
             ) : (
               <GraduationCap className="w-6 h-6 text-primary-400" />
             )}
@@ -107,7 +107,7 @@ export default function SuperAdminLogin() {
         <div className="absolute top-8 left-8 md:hidden flex items-center gap-2">
           <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center overflow-hidden">
             {orgSettings?.logo && typeof orgSettings.logo === 'string' && orgSettings.logo.trim() !== '' && orgSettings.logo !== 'undefined' ? (
-              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-lg" onError={(e) => { if (!e.target.dataset.retried && orgSettings.logo.startsWith('/uploads/')) { e.target.dataset.retried = 'true'; e.target.src = `/api${orgSettings.logo}`; } else { e.target.style.display = 'none'; } }} />
+              <img src={orgSettings.logo} alt="logo" className="w-full h-full object-cover rounded-lg" onError={(e) => { const img = e.target; if (!img.dataset.retried && orgSettings.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = orgSettings.logo.substring(orgSettings.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
             ) : (
               <GraduationCap className="w-4 h-4 text-white" />
             )}

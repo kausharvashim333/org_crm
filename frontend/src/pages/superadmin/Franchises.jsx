@@ -176,7 +176,7 @@ export default function Franchises() {
               <TableRow key={p._id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    {p.logo ? <img src={p.logo} alt="" className="w-8 h-8 rounded-lg object-cover" /> : <Building2 className="w-4 h-4 text-gray-400" />}
+                    {p.logo ? <img src={p.logo} alt="" className="w-8 h-8 rounded-lg object-cover" onError={(e) => { const img = e.target; if (!img.dataset.retried && p.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = p.logo.substring(p.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} /> : <Building2 className="w-4 h-4 text-gray-400" />}
                     <div>
                       <p className="font-medium">{p.instituteName}</p>
                       <p className="text-xs text-gray-400">{p.franchiseId}</p>
