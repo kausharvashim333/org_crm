@@ -85,6 +85,9 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
     if (req.user.role !== 'partner') {
       return res.status(403).json({ success: false, message: 'Only partners can create exams' });
     }
+    if (!req.user.partnerId) {
+      return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
+    }
     const exam = await Exam.create({ ...req.body, partnerId: req.user.partnerId });
     res.status(201).json({ success: true, exam });
   } catch (error) {

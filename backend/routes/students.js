@@ -110,7 +110,7 @@ router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
       .populate('partnerId', 'instituteName city state franchiseId code logo')
       .populate('courseId batchIds projectIds');
     if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
-    if (req.user.role === 'partner' && student.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || student.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     res.json({ success: true, student });
@@ -158,7 +158,7 @@ router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);
     if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
-    if (req.user.role === 'partner' && student.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || student.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     const updates = { ...req.body };
@@ -176,7 +176,7 @@ router.post('/:id/upload-document', protect, partnerOrAdmin, upload.single('docu
   try {
     const student = await Student.findById(req.params.id);
     if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
-    if (req.user.role === 'partner' && student.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || student.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 

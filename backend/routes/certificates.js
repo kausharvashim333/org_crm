@@ -8,6 +8,7 @@ router.get('/', protect, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, certificates: [] });
       filter.partnerId = req.user.partnerId;
     } else if (req.user.role === 'student') {
       filter.studentId = req.user._id;

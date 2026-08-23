@@ -175,6 +175,9 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
   try {
     const courseData = sanitizeCourseFeeData(req.body);
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) {
+        return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
+      }
       const course = await Course.create({
         ...courseData,
         partnerId: req.user.partnerId,
@@ -196,7 +199,7 @@ router.put('/:id', protect, async (req, res) => {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
     if (req.user.role === 'partner') {
-      if (!course.partnerId || course.partnerId.toString() !== req.user.partnerId.toString()) {
+      if (!req.user.partnerId || !course.partnerId || course.partnerId.toString() !== req.user.partnerId.toString()) {
         return res.status(403).json({ success: false, message: 'Not authorized' });
       }
     }
@@ -256,7 +259,7 @@ router.delete('/:id', protect, async (req, res) => {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
     if (req.user.role === 'partner') {
-      if (!course.partnerId || course.partnerId.toString() !== req.user.partnerId.toString()) {
+      if (!req.user.partnerId || !course.partnerId || course.partnerId.toString() !== req.user.partnerId.toString()) {
         return res.status(403).json({ success: false, message: 'Not authorized' });
       }
     }
@@ -288,7 +291,7 @@ router.put('/:id/chapters', protect, partnerOrAdmin, async (req, res) => {
     const { chapters } = req.body;
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
-    if (req.user.role === 'partner' && course.partnerId && course.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || (course.partnerId && course.partnerId.toString() !== req.user.partnerId.toString()))) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     course.chapters = chapters || [];
@@ -305,7 +308,7 @@ router.put('/:id/assessment', protect, partnerOrAdmin, async (req, res) => {
     const { assessment } = req.body;
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
-    if (req.user.role === 'partner' && course.partnerId && course.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || (course.partnerId && course.partnerId.toString() !== req.user.partnerId.toString()))) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     course.assessment = assessment;

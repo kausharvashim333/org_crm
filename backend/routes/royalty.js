@@ -10,6 +10,7 @@ router.get('/', protect, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, royalties: [] });
       filter.partnerId = req.user.partnerId;
     }
     if (req.query.status) filter.status = req.query.status;

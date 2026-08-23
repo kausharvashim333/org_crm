@@ -9,6 +9,7 @@ router.get('/student', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, records: [] });
       filter.partnerId = req.user.partnerId;
     } else if (req.query.partnerId) {
       filter.partnerId = req.query.partnerId;
@@ -50,6 +51,7 @@ router.get('/staff', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, records: [] });
       filter.partnerId = req.user.partnerId;
     }
     if (req.query.date) filter.date = new Date(req.query.date);

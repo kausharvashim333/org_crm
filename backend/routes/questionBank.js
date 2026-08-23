@@ -32,7 +32,10 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
 router.get('/categories', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
-    if (req.user.role === 'partner') filter.partnerId = req.user.partnerId;
+    if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, categories: [] });
+      filter.partnerId = req.user.partnerId;
+    }
     const categories = await QuestionBank.distinct('category', filter);
     res.json({ success: true, categories });
   } catch (error) {
@@ -44,7 +47,10 @@ router.get('/categories', protect, partnerOrAdmin, async (req, res) => {
 router.get('/tags', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
-    if (req.user.role === 'partner') filter.partnerId = req.user.partnerId;
+    if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, tags: [] });
+      filter.partnerId = req.user.partnerId;
+    }
     const tags = await QuestionBank.distinct('tags', filter);
     res.json({ success: true, tags });
   } catch (error) {

@@ -33,7 +33,7 @@ router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
       .populate('teacherId', 'name phone qualification subjects')
       .populate('enrolledStudents', 'fullName phone email photo status');
     if (!batch) return res.status(404).json({ success: false, message: 'Batch not found' });
-    if (req.user.role === 'partner' && batch.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || batch.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     res.json({ success: true, batch });
@@ -47,6 +47,9 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
     if (req.user.role !== 'partner') {
       return res.status(403).json({ success: false, message: 'Only partners can create batches' });
     }
+    if (!req.user.partnerId) {
+      return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
+    }
     const batch = await Batch.create({ ...req.body, partnerId: req.user.partnerId });
     res.status(201).json({ success: true, batch });
   } catch (error) {
@@ -58,7 +61,7 @@ router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const batch = await Batch.findById(req.params.id);
     if (!batch) return res.status(404).json({ success: false, message: 'Batch not found' });
-    if (req.user.role === 'partner' && batch.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || batch.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     const updated = await Batch.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
@@ -73,7 +76,7 @@ router.post('/:id/enroll', protect, partnerOrAdmin, async (req, res) => {
     const { studentId } = req.body;
     const batch = await Batch.findById(req.params.id);
     if (!batch) return res.status(404).json({ success: false, message: 'Batch not found' });
-    if (req.user.role === 'partner' && batch.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || batch.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     if (batch.enrolledStudents.includes(studentId)) {
@@ -94,7 +97,7 @@ router.delete('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const batch = await Batch.findById(req.params.id);
     if (!batch) return res.status(404).json({ success: false, message: 'Batch not found' });
-    if (req.user.role === 'partner' && batch.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || batch.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     batch.status = 'cancelled';

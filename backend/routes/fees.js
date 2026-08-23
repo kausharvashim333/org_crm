@@ -8,6 +8,7 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, fees: [] });
       filter.partnerId = req.user.partnerId;
     } else if (req.query.partnerId) {
       filter.partnerId = req.query.partnerId;
@@ -28,7 +29,7 @@ router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const fee = await Fee.findById(req.params.id).populate('studentId courseId batchId');
     if (!fee) return res.status(404).json({ success: false, message: 'Fee record not found' });
-    if (req.user.role === 'partner' && fee.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || fee.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     res.json({ success: true, fee });
@@ -42,6 +43,9 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
     if (req.user.role !== 'partner') {
       return res.status(403).json({ success: false, message: 'Only partners can create fee records' });
     }
+    if (!req.user.partnerId) {
+      return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
+    }
     const fee = await Fee.create({ ...req.body, partnerId: req.user.partnerId });
     res.status(201).json({ success: true, fee });
   } catch (error) {
@@ -53,7 +57,7 @@ router.post('/:id/payment', protect, partnerOrAdmin, async (req, res) => {
   try {
     const fee = await Fee.findById(req.params.id);
     if (!fee) return res.status(404).json({ success: false, message: 'Fee record not found' });
-    if (req.user.role === 'partner' && fee.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || fee.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     const { amount, mode, transactionId, remarks } = req.body;
@@ -77,7 +81,7 @@ router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const fee = await Fee.findById(req.params.id);
     if (!fee) return res.status(404).json({ success: false, message: 'Fee record not found' });
-    if (req.user.role === 'partner' && fee.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || fee.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     const updated = await Fee.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });

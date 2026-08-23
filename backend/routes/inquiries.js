@@ -62,6 +62,7 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, inquiries: [] });
       filter.partnerId = req.user.partnerId;
       filter.type = 'student';
     } else {
@@ -82,7 +83,7 @@ router.put('/:id/status', protect, partnerOrAdmin, async (req, res) => {
     const { status } = req.body;
     const inquiry = await Inquiry.findById(req.params.id);
     if (!inquiry) return res.status(404).json({ success: false, message: 'Inquiry not found' });
-    if (req.user.role === 'partner' && inquiry.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || inquiry.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     inquiry.status = status;
@@ -98,7 +99,7 @@ router.post('/:id/followup', protect, partnerOrAdmin, async (req, res) => {
     const { note } = req.body;
     const inquiry = await Inquiry.findById(req.params.id);
     if (!inquiry) return res.status(404).json({ success: false, message: 'Inquiry not found' });
-    if (req.user.role === 'partner' && inquiry.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || inquiry.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     inquiry.followUpNotes.push({ note, addedBy: req.user._id });
