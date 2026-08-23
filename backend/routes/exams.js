@@ -22,6 +22,50 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
+// Get exams available to a student (MUST be before /:id to avoid route conflict)
+router.get('/student/available', protect, async (req, res) => {
+  try {
+    let student = null;
+    if (req.user.role === 'student') {
+      student = await Student.findOne({ $or: [{ userId: req.user._id }, { email: req.user.email }] });
+    }
+    if (!student) return res.json({ success: true, exams: [] });
+
+    const exams = await Exam.find({
+      batchId: { $in: student.batchIds || [] },
+      status: { $in: ['scheduled', 'ongoing'] },
+    }).populate('courseId', 'name').populate('batchId', 'name').sort({ date: 1 }).lean();
+
+    const examsWithSubmissionStatus = exams.map(ex => {
+      const submission = ex.submissions?.find(s => s.studentId?.toString() === student._id?.toString());
+      return {
+        _id: ex._id,
+        name: ex.name,
+        examType: ex.examType,
+        date: ex.date,
+        maxMarks: ex.maxMarks,
+        passingMarks: ex.passingMarks,
+        courseName: ex.courseId?.name || 'N/A',
+        batchName: ex.batchId?.name || 'N/A',
+        durationMinutes: ex.examSettings?.durationMinutes || 60,
+        instructions: ex.examSettings?.instructions || '',
+        questionCount: ex.questions?.length || 0,
+        hasSubmitted: !!submission,
+        submission: submission ? {
+          totalMarksAwarded: submission.totalMarksAwarded,
+          status: submission.status,
+          grade: submission.grade,
+          submittedAt: submission.submittedAt,
+        } : null,
+      };
+    });
+
+    res.json({ success: true, exams: examsWithSubmissionStatus });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id).populate('batchId courseId').populate('results.studentId', 'fullName phone');
@@ -87,50 +131,6 @@ router.post('/:id/results', protect, partnerOrAdmin, async (req, res) => {
     exam.status = 'result_declared';
     await exam.save();
     res.json({ success: true, exam });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Get exams available to a student
-router.get('/student/available', protect, async (req, res) => {
-  try {
-    let student = null;
-    if (req.user.role === 'student') {
-      student = await Student.findOne({ $or: [{ userId: req.user._id }, { email: req.user.email }] });
-    }
-    if (!student) return res.json({ success: true, exams: [] });
-
-    const exams = await Exam.find({
-      batchId: { $in: student.batchIds || [] },
-      status: { $in: ['scheduled', 'ongoing'] },
-    }).populate('courseId', 'name').populate('batchId', 'name').sort({ date: 1 }).lean();
-
-    const examsWithSubmissionStatus = exams.map(ex => {
-      const submission = ex.submissions?.find(s => s.studentId?.toString() === student._id?.toString());
-      return {
-        _id: ex._id,
-        name: ex.name,
-        examType: ex.examType,
-        date: ex.date,
-        maxMarks: ex.maxMarks,
-        passingMarks: ex.passingMarks,
-        courseName: ex.courseId?.name || 'N/A',
-        batchName: ex.batchId?.name || 'N/A',
-        durationMinutes: ex.examSettings?.durationMinutes || 60,
-        instructions: ex.examSettings?.instructions || '',
-        questionCount: ex.questions?.length || 0,
-        hasSubmitted: !!submission,
-        submission: submission ? {
-          totalMarksAwarded: submission.totalMarksAwarded,
-          status: submission.status,
-          grade: submission.grade,
-          submittedAt: submission.submittedAt,
-        } : null,
-      };
-    });
-
-    res.json({ success: true, exams: examsWithSubmissionStatus });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
