@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, Globe, Upload, ArrowUp, ArrowDown, Edit, FileText, Star } from 'lucide-react';
+import { Save, Plus, Trash2, Globe, Upload, ArrowUp, ArrowDown, Edit, FileText, Star, Pencil } from 'lucide-react';
 import { uploadOrgImage, uploadOrgLogo, uploadOrgFavicon, uploadOrgPdf } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { refreshOrgSettings } from '../../hooks/useOrgSettings';
@@ -230,28 +230,69 @@ export function AboutEditor({ homepage, onSave, onAddFeature, onDeleteFeature })
 export function StatsEditor({ homepage, onSave, onAdd, onDelete }) {
   const [data, setData] = useState(homepage.stats || { items: [] });
   const [newStat, setNewStat] = useState({ label: '', value: '', icon: 'building' });
+  const [editingIdx, setEditingIdx] = useState(null);
+  const [editStat, setEditStat] = useState({ label: '', value: '', icon: 'building' });
+
+  const iconOptions = ['building', 'users', 'book', 'briefcase', 'award', 'heart', 'target', 'trending', 'monitor', 'sparkles', 'zap', 'rocket', 'wallet', 'headphones'];
+
+  const startEdit = (i) => {
+    setEditingIdx(i);
+    setEditStat({ ...data.items[i] });
+  };
+
+  const saveEdit = () => {
+    const items = [...data.items];
+    items[editingIdx] = editStat;
+    setData({ ...data, items });
+    setEditingIdx(null);
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Stats / Impact Section</h3>
+      <Field label="Section Title">
+        <input type="text" placeholder="Our Impact in Numbers" value={data.title || ''} onChange={(e) => setData({ ...data, title: e.target.value })} className="input-field" />
+      </Field>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={data.show !== false} onChange={(e) => setData({ ...data, show: e.target.checked })} /> Show this section</label>
       <div className="border-t pt-4">
         <h4 className="font-medium text-sm mb-3">Stat Items</h4>
-        <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="space-y-2 mb-4">
           {(data.items || []).map((s, i) => (
-            <div key={i} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-              <div><p className="text-sm font-medium">{s.value}</p><p className="text-xs text-gray-500">{s.label}</p></div>
-              <button onClick={() => onDelete(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+            <div key={i} className="bg-gray-50 p-3 rounded-lg border border-slate-200">
+              {editingIdx === i ? (
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                  <input type="text" placeholder="Value" value={editStat.value} onChange={(e) => setEditStat({ ...editStat, value: e.target.value })} className="input-field text-xs" />
+                  <input type="text" placeholder="Label" value={editStat.label} onChange={(e) => setEditStat({ ...editStat, label: e.target.value })} className="input-field text-xs" />
+                  <select value={editStat.icon} onChange={(e) => setEditStat({ ...editStat, icon: e.target.value })} className="input-field text-xs">
+                    {iconOptions.map(ic => <option key={ic} value={ic}>{ic.charAt(0).toUpperCase() + ic.slice(1)}</option>)}
+                  </select>
+                  <div className="flex gap-1">
+                    <button type="button" onClick={saveEdit} className="btn-primary text-xs px-3 py-1.5 flex-1">Save</button>
+                    <button type="button" onClick={() => setEditingIdx(null)} className="btn-secondary text-xs px-3 py-1.5">Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-slate-600 capitalize bg-slate-200 px-2 py-0.5 rounded">{s.icon || 'building'}</span>
+                    <div><p className="text-sm font-bold">{s.value}</p><p className="text-xs text-gray-500">{s.label}</p></div>
+                  </div>
+                  <div className="flex gap-1">
+                    <button type="button" onClick={() => startEdit(i)} className="text-indigo-600 p-1 hover:bg-indigo-50 rounded"><Pencil className="w-4 h-4" /></button>
+                    <button type="button" onClick={() => onDelete(i)} className="text-red-600 p-1 hover:bg-rose-50 rounded"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); onAdd(newStat); setNewStat({ label: '', value: '', icon: 'building' }); }} className="grid grid-cols-3 gap-2">
-          <input type="text" required placeholder="Value (e.g. 50+)" value={newStat.value} onChange={(e) => setNewStat({ ...newStat, value: e.target.value })} className="input-field" />
-          <input type="text" required placeholder="Label (e.g. Centers)" value={newStat.label} onChange={(e) => setNewStat({ ...newStat, label: e.target.value })} className="input-field" />
-          <select value={newStat.icon} onChange={(e) => setNewStat({ ...newStat, icon: e.target.value })} className="input-field">
-            <option value="building">Building</option><option value="users">Users</option><option value="book">Book</option>
-            <option value="briefcase">Briefcase</option><option value="award">Award</option><option value="heart">Heart</option>
+        <form onSubmit={(e) => { e.preventDefault(); onAdd(newStat); setNewStat({ label: '', value: '', icon: 'building' }); }} className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input type="text" required placeholder="Value (e.g. 50+)" value={newStat.value} onChange={(e) => setNewStat({ ...newStat, value: e.target.value })} className="input-field text-xs" />
+          <input type="text" required placeholder="Label (e.g. Centers)" value={newStat.label} onChange={(e) => setNewStat({ ...newStat, label: e.target.value })} className="input-field text-xs" />
+          <select value={newStat.icon} onChange={(e) => setNewStat({ ...newStat, icon: e.target.value })} className="input-field text-xs">
+            {iconOptions.map(ic => <option key={ic} value={ic}>{ic.charAt(0).toUpperCase() + ic.slice(1)}</option>)}
           </select>
-          <button type="submit" className="btn-primary col-span-3 flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Add Stat</button>
+          <button type="submit" className="btn-primary col-span-1 sm:col-span-3 flex items-center justify-center gap-2 text-sm"><Plus className="w-4 h-4" /> Add Stat</button>
         </form>
       </div>
       <button onClick={() => onSave(data)} className="btn-primary flex items-center gap-2"><Save className="w-4 h-4" /> Save Section</button>
