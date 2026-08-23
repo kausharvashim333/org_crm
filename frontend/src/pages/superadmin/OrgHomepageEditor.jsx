@@ -10,7 +10,7 @@ import {
   addOrgNotice, deleteOrgNotice, updateOrgNotice,
   addOrgCertification, deleteOrgCertification,
   addOrgService, deleteOrgService,
-  addOrgVertical, deleteOrgVertical,
+  addOrgVertical, deleteOrgVertical, updateOrgVertical,
   addOrgCustomSection, updateOrgCustomSection, deleteOrgCustomSection,
   addOrgCustomCard, deleteOrgCustomCard,
   updateOrgCentersStrip, addOrgCenter, deleteOrgCenter,
@@ -137,7 +137,7 @@ export default function OrgHomepageEditor() {
         </>}
 
         {activeTab === 'verticals' && (
-          <VerticalsEditor homepage={homepage} onSave={(d) => save('verticals', d)} onAdd={(d) => add(addOrgVertical, d, 'Vertical added')} onDelete={(i) => del(deleteOrgVertical, i, 'Deleted')} />
+          <VerticalsEditor homepage={homepage} onSave={(d) => save('verticals', d)} onAdd={(d) => add(addOrgVertical, d, 'Vertical added')} onDelete={(i) => del(deleteOrgVertical, i, 'Deleted')} onUpdate={(i, d) => update(updateOrgVertical, i, d, 'Vertical updated')} />
         )}
 
         {activeTab === 'franchise' && (

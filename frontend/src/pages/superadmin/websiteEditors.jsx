@@ -300,9 +300,26 @@ export function StatsEditor({ homepage, onSave, onAdd, onDelete }) {
   );
 }
 
-export function VerticalsEditor({ homepage, onSave, onAdd, onDelete }) {
+export function VerticalsEditor({ homepage, onSave, onAdd, onDelete, onUpdate }) {
   const [data, setData] = useState(homepage.verticals || { items: [] });
   const [newItem, setNewItem] = useState({ icon: 'book', title: '', shortDesc: '', description: '', coursesCount: '', link: '' });
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editItem, setEditItem] = useState({ icon: 'book', title: '', shortDesc: '', description: '', coursesCount: '', link: '' });
+
+  const startEdit = (i) => {
+    const v = data.items[i];
+    setEditItem({ icon: v.icon || 'book', title: v.title || '', shortDesc: v.shortDesc || '', description: v.description || '', coursesCount: v.coursesCount || '', link: v.link || '' });
+    setEditingIndex(i);
+  };
+
+  const cancelEdit = () => { setEditingIndex(null); setEditItem({ icon: 'book', title: '', shortDesc: '', description: '', coursesCount: '', link: '' }); };
+
+  const submitEdit = (e) => {
+    e.preventDefault();
+    onUpdate(editingIndex, editItem);
+    cancelEdit();
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Verticals / Fields</h3>
@@ -313,9 +330,38 @@ export function VerticalsEditor({ homepage, onSave, onAdd, onDelete }) {
         <h4 className="font-medium text-sm mb-3">Vertical Items</h4>
         <div className="space-y-2 mb-4">
           {(data.items || []).map((v, i) => (
-            <div key={i} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-              <div><p className="text-sm font-medium">{v.title}</p><p className="text-xs text-gray-500">{v.shortDesc} - {v.coursesCount}</p></div>
-              <button onClick={() => onDelete(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+            <div key={i} className="bg-gray-50 p-3 rounded-lg">
+              {editingIndex === i ? (
+                <form onSubmit={submitEdit} className="space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-indigo-600">Editing: {v.title}</span>
+                    <button type="button" onClick={cancelEdit} className="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select value={editItem.icon} onChange={(e) => setEditItem({ ...editItem, icon: e.target.value })} className="input-field">
+                      <option value="book">Book</option><option value="briefcase">Briefcase</option><option value="users">Users</option>
+                      <option value="award">Award</option><option value="monitor">Monitor</option><option value="building">Building</option>
+                      <option value="wifi">WiFi</option><option value="target">Target</option><option value="heart">Heart</option><option value="trending">Trending</option>
+                    </select>
+                    <input type="text" required placeholder="Title" value={editItem.title} onChange={(e) => setEditItem({ ...editItem, title: e.target.value })} className="input-field" />
+                  </div>
+                  <input type="text" placeholder="Short Description" value={editItem.shortDesc} onChange={(e) => setEditItem({ ...editItem, shortDesc: e.target.value })} className="input-field" />
+                  <textarea rows="2" placeholder="Full Description" value={editItem.description} onChange={(e) => setEditItem({ ...editItem, description: e.target.value })} className="input-field" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input type="text" placeholder="Courses Count" value={editItem.coursesCount} onChange={(e) => setEditItem({ ...editItem, coursesCount: e.target.value })} className="input-field" />
+                    <input type="text" placeholder="Link" value={editItem.link} onChange={(e) => setEditItem({ ...editItem, link: e.target.value })} className="input-field" />
+                  </div>
+                  <button type="submit" className="btn-primary flex items-center justify-center gap-2 w-full"><Save className="w-4 h-4" /> Save Changes</button>
+                </form>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div><p className="text-sm font-medium">{v.title}</p><p className="text-xs text-gray-500">{v.shortDesc} - {v.coursesCount}</p></div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => startEdit(i)} className="text-blue-600 hover:text-blue-800"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => onDelete(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

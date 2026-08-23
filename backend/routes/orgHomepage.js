@@ -617,6 +617,22 @@ router.delete('/verticals/:index', protect, superAdminOnly, async (req, res) => 
   }
 });
 
+router.put('/verticals/:index', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { icon, title, shortDesc, description, coursesCount, link } = req.body;
+    const homepage = await createDefaultIfMissing();
+    const idx = parseInt(req.params.index);
+    if (idx < 0 || idx >= homepage.verticals.items.length) {
+      return res.status(400).json({ success: false, message: 'Invalid index' });
+    }
+    homepage.verticals.items[idx] = { icon, title, shortDesc, description, coursesCount, link };
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Notices
 router.post('/notices', protect, superAdminOnly, async (req, res) => {
   try {

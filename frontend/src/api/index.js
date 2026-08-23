@@ -182,6 +182,7 @@ export const uploadOrgImage = (formData) => API.post('/org-homepage/upload-image
 export const uploadOrgPdf = (formData) => API.post('/org-homepage/upload-pdf', formData);
 export const addOrgVertical = (data) => API.post('/org-homepage/verticals', data);
 export const deleteOrgVertical = (index) => API.delete(`/org-homepage/verticals/${index}`);
+export const updateOrgVertical = (index, data) => API.put(`/org-homepage/verticals/${index}`, data);
 export const addOrgNotice = (data) => API.post('/org-homepage/notices', data);
 export const deleteOrgNotice = (index) => API.delete(`/org-homepage/notices/${index}`);
 export const updateOrgNotice = (index, data) => API.put(`/org-homepage/notices/${index}`, data);
