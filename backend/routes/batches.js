@@ -8,6 +8,7 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, batches: [] });
       filter.partnerId = req.user.partnerId;
     } else if (req.query.partnerId) {
       filter.partnerId = req.query.partnerId;

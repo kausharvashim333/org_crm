@@ -9,6 +9,7 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
+      if (!req.user.partnerId) return res.json({ success: true, count: 0, exams: [] });
       filter.partnerId = req.user.partnerId;
     } else if (req.query.partnerId) {
       filter.partnerId = req.query.partnerId;
@@ -70,7 +71,7 @@ router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id).populate('batchId courseId').populate('results.studentId', 'fullName phone');
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
-    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || exam.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     res.json({ success: true, exam });
@@ -95,7 +96,7 @@ router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
-    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || exam.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     const updated = await Exam.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
@@ -109,7 +110,7 @@ router.delete('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
-    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || exam.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     await Exam.findByIdAndDelete(req.params.id);
@@ -124,7 +125,7 @@ router.post('/:id/results', protect, partnerOrAdmin, async (req, res) => {
     const { results } = req.body;
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
-    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || exam.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     exam.results = results;
@@ -293,7 +294,7 @@ router.get('/:id/analytics', protect, partnerOrAdmin, async (req, res) => {
       .populate('submissions.studentId', 'fullName phone')
       .populate('batchId', 'name');
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
-    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || exam.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
@@ -374,7 +375,7 @@ router.put('/:id/submissions/:studentId/grade', protect, partnerOrAdmin, async (
     const { grades } = req.body; // [{ questionId, marksAwarded }]
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
-    if (req.user.role === 'partner' && exam.partnerId.toString() !== req.user.partnerId.toString()) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || exam.partnerId.toString() !== req.user.partnerId.toString())) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
