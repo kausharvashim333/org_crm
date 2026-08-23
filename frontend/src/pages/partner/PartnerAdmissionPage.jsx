@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { getCourses, createStudent, createAdmissionOrder } from '../../api';
+import { getCourses, createStudent, createAdmissionOrder, sendAdmissionOtp, submitPartnerCenterAdmission } from '../../api';
 import API from '../../api/axios';
 import {
   GraduationCap, Check, User, FileText, Upload, Award, CheckCircle2,
   AlertCircle, Sparkles, Building2, ChevronRight, ArrowLeft, Printer, RefreshCw,
-  CreditCard, Zap, IndianRupee
+  CreditCard, Zap, IndianRupee, Mail, KeyRound, Loader2
 } from 'lucide-react';
 
 const RULES_CHECKLIST = [
@@ -205,12 +205,34 @@ export default function PartnerAdmissionPage() {
     setStep(4);
   };
 
-  const [paymentMode, setPaymentMode] = useState('pay_at_center'); // 'online_razorpay' | 'pay_at_center'
+  const [paymentMode, setPaymentMode] = useState('pay_at_center'); // always cash for partner center
+  const [paidAmount, setPaidAmount] = useState(0);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpValue, setOtpValue] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
 
   const selectedCourse = courses.find(c => c._id === formData.courseId);
   const registrationFee = selectedCourse?.registrationFee > 0 ? selectedCourse.registrationFee : 500;
+  const courseTotalFee = selectedCourse?.fee || selectedCourse?.studentFee || 0;
 
-  const performSubmission = async (paymentDetails = {}) => {
+  const handleSendOtp = async () => {
+    setOtpSending(true);
+    try {
+      const res = await sendAdmissionOtp();
+      setOtpSent(true);
+      showSuccess(res.data.message || 'OTP sent to your email');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const performSubmission = async () => {
+    if (!otpVerified) {
+      return showError('Please verify OTP first');
+    }
     setSubmitting(true);
     try {
       const data = new FormData();
@@ -222,12 +244,9 @@ export default function PartnerAdmissionPage() {
         }
       });
 
-      // Pass payment details
-      data.append('paymentMode', paymentDetails.paymentMode || paymentMode);
-      data.append('paidAmount', paymentDetails.paidAmount !== undefined ? paymentDetails.paidAmount : (paymentMode === 'online_razorpay' ? registrationFee : 0));
-      if (paymentDetails.razorpayOrderId) data.append('razorpayOrderId', paymentDetails.razorpayOrderId);
-      if (paymentDetails.razorpayPaymentId) data.append('razorpayPaymentId', paymentDetails.razorpayPaymentId);
-      if (paymentDetails.razorpaySignature) data.append('razorpaySignature', paymentDetails.razorpaySignature);
+      data.append('otp', otpValue);
+      data.append('paidAmount', String(paidAmount));
+      data.append('paymentMode', 'pay_at_center');
 
       if (photoFile) data.append('photo', photoFile);
       if (sigFile) data.append('signature', sigFile);
@@ -236,20 +255,24 @@ export default function PartnerAdmissionPage() {
       if (twelfthFile) data.append('twelfthMarksheet', twelfthFile);
       if (gradFile) data.append('gradMarksheet', gradFile);
 
-      // Call public apply endpoint
-      const res = await API.post('/students/public/apply', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await submitPartnerCenterAdmission(data);
 
-      showSuccess(res.data.message || 'Student Admission Form submitted successfully!');
+      showSuccess(res.data.message || 'Admission confirmed successfully!');
       setSubmittedData({
         ...formData,
         applicationNo: res.data.applicationNo,
-        studentIdNo: res.data.studentId,
-        paymentStatus: res.data.paymentStatus,
+        studentIdNo: res.data.studentIdNo,
+        studentId: res.data.studentId,
+        totalFee: res.data.totalFee,
+        paidAmount: res.data.paidAmount,
+        pendingFee: res.data.pendingFee,
       });
     } catch (err) {
       showError(err.response?.data?.message || 'Failed to submit admission form');
+      if (err.response?.data?.message?.includes('OTP')) {
+        setOtpVerified(false);
+        setOtpValue('');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -260,63 +283,10 @@ export default function PartnerAdmissionPage() {
     if (!allRulesAgreed) {
       return showError('Kripya sabhi 10 niyamo par tick lagayein');
     }
-
-    if (paymentMode === 'online_razorpay' && window.Razorpay && registrationFee > 0) {
-      setSubmitting(true);
-      try {
-        const orderRes = await createAdmissionOrder({
-          courseId: formData.courseId,
-          fullName: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          feeAmount: registrationFee,
-        });
-
-        const rzpData = orderRes.data;
-
-        const options = {
-          key: rzpData.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TQKFK8UhmFxMt1',
-          amount: Math.round(registrationFee * 100),
-          currency: 'INR',
-          name: partnerName || 'Franchise Center Admission',
-          description: `Admission Registration: ${selectedCourse?.name || 'Course'}`,
-          order_id: rzpData.razorpayOrderId,
-          prefill: {
-            name: formData.name,
-            email: formData.email,
-            contact: formData.phone,
-          },
-          theme: {
-            color: '#4f46e5',
-          },
-          handler: async function (response) {
-            await performSubmission({
-              paymentMode: 'online_razorpay',
-              paidAmount: registrationFee,
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
-          },
-          modal: {
-            ondismiss: function () {
-              setSubmitting(false);
-              showError('Online payment window closed. You can choose Pay at Center or retry.');
-            },
-          },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-        return;
-      } catch (err) {
-        console.error(err);
-        showError('Could not initialize online payment. Submitting with Center Cash option.');
-        await performSubmission({ paymentMode: 'pay_at_center' });
-      }
-    } else {
-      await performSubmission({ paymentMode: 'pay_at_center' });
+    if (!otpVerified) {
+      return showError('Please send OTP to partner email and verify it before submitting');
     }
+    await performSubmission();
   };
 
   // If successfully submitted, show receipt preview card
@@ -336,6 +306,14 @@ export default function PartnerAdmissionPage() {
             <p>Application No: <span className="font-bold text-yellow-300">{submittedData.applicationNo}</span></p>
             <p>Student Roll/ID: <span className="font-bold text-yellow-300">{submittedData.studentIdNo || 'Auto Generated'}</span></p>
           </div>
+
+          {submittedData.totalFee > 0 && (
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl max-w-sm mx-auto text-xs space-y-1">
+              <div className="flex justify-between"><span className="text-emerald-100">Total Fee:</span> <span className="font-bold text-white">₹{submittedData.totalFee}</span></div>
+              <div className="flex justify-between"><span className="text-emerald-100">Paid (Cash):</span> <span className="font-bold text-white">₹{submittedData.paidAmount}</span></div>
+              <div className="flex justify-between"><span className="text-emerald-100">Pending:</span> <span className="font-bold text-yellow-300">₹{submittedData.pendingFee}</span></div>
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <a
@@ -923,7 +901,7 @@ export default function PartnerAdmissionPage() {
               ))}
             </div>
 
-            {/* Registration Fee & Payment Mode Selection Card */}
+            {/* Fee Payment + OTP Verification Card */}
             <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-50/80 via-blue-50/70 to-slate-50 border border-indigo-100 space-y-4">
               <div className="flex items-center justify-between border-b border-indigo-100 pb-3">
                 <div className="flex items-center gap-2.5">
@@ -932,72 +910,85 @@ export default function PartnerAdmissionPage() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-slate-900">
-                      Admission Registration Fee (प्रवेश शुल्क)
+                      Fee Payment (Cash Collection)
                     </h4>
-                    <p className="text-[11px] text-slate-500">Collect fee via Online Razorpay or Center Counter Cash</p>
+                    <p className="text-[11px] text-slate-500">Collect fee in cash at center counter</p>
                   </div>
                 </div>
+                {courseTotalFee > 0 && (
+                  <div className="text-right">
+                    <span className="text-[11px] text-slate-500 font-semibold block">Total Course Fee</span>
+                    <strong className="text-lg font-black text-indigo-700">₹{courseTotalFee}</strong>
+                  </div>
+                )}
+              </div>
 
-                <div className="text-right">
-                  <span className="text-[11px] text-slate-500 font-semibold block">Payable Amount</span>
-                  <strong className="text-lg font-black text-indigo-700">₹{registrationFee}</strong>
+              {/* Fee Input */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Amount Paid Now (Cash) ₹</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max={courseTotalFee}
+                    value={paidAmount}
+                    onChange={(e) => setPaidAmount(Math.max(0, Number(e.target.value)))}
+                    placeholder="0"
+                    className="input-field text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">Pending Fee ₹</label>
+                  <div className="input-field text-sm bg-slate-50 flex items-center font-bold text-rose-600">
+                    ₹{Math.max(0, courseTotalFee - paidAmount)}
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Option A: Razorpay Online Payment */}
-                <label
-                  onClick={() => setPaymentMode('online_razorpay')}
-                  className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                    paymentMode === 'online_razorpay'
-                      ? 'border-indigo-600 bg-white shadow-md shadow-indigo-600/10 ring-2 ring-indigo-100'
-                      : 'border-slate-200 bg-white/70 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        paymentMode === 'online_razorpay' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-400'
-                      }`}>
-                        {paymentMode === 'online_razorpay' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </span>
-                      <strong className="text-xs font-bold text-slate-900">⚡ Online Payment (Razorpay)</strong>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase">
-                      UPI / QR / Cards
-                    </span>
+              {/* OTP Verification */}
+              <div className="border-t border-indigo-100 pt-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="w-4 h-4 text-indigo-600" />
+                  <h4 className="text-sm font-bold text-slate-900">OTP Verification Required</h4>
+                </div>
+                <p className="text-[11px] text-slate-500">An OTP will be sent to your partner email. Enter it below to confirm admission.</p>
+                
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={otpSending || otpSent}
+                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {otpSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                    {otpSent ? 'OTP Sent' : 'Send OTP'}
+                  </button>
+                  <input
+                    type="text"
+                    maxLength="6"
+                    value={otpValue}
+                    onChange={(e) => { setOtpValue(e.target.value.replace(/\D/g, '')); setOtpVerified(false); }}
+                    placeholder="Enter 6-digit OTP"
+                    disabled={!otpSent}
+                    className="input-field text-sm font-mono tracking-widest flex-1 disabled:opacity-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (otpValue.length === 6) { setOtpVerified(true); showSuccess('OTP verified! You can now submit.'); }
+                      else showError('Please enter 6-digit OTP');
+                    }}
+                    disabled={!otpSent || otpValue.length !== 6}
+                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl disabled:opacity-50"
+                  >
+                    Verify
+                  </button>
+                </div>
+                {otpVerified && (
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200">
+                    <CheckCircle2 className="w-4 h-4" /> OTP Verified - You can submit admission now
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-snug pl-6">
-                    Student pays via Google Pay, PhonePe, Paytm QR code or Card. Instant verified receipt.
-                  </p>
-                </label>
-
-                {/* Option B: Direct Cash / Center Counter */}
-                <label
-                  onClick={() => setPaymentMode('pay_at_center')}
-                  className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                    paymentMode === 'pay_at_center'
-                      ? 'border-indigo-600 bg-white shadow-md shadow-indigo-600/10 ring-2 ring-indigo-100'
-                      : 'border-slate-200 bg-white/70 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                        paymentMode === 'pay_at_center' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-400'
-                      }`}>
-                        {paymentMode === 'pay_at_center' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </span>
-                      <strong className="text-xs font-bold text-slate-900">🏢 Direct Cash (Center Desk)</strong>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold">
-                      Offline
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 leading-snug pl-6">
-                    Collect ₹{registrationFee} directly at your center counter in Cash or personal UPI.
-                  </p>
-                </label>
+                )}
               </div>
             </div>
 
@@ -1012,7 +1003,7 @@ export default function PartnerAdmissionPage() {
 
               <button
                 type="submit"
-                disabled={submitting || !allRulesAgreed}
+                disabled={submitting || !allRulesAgreed || !otpVerified}
                 className="btn-primary py-3 px-10 text-sm font-black flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 shadow-lg"
               >
                 {submitting ? (
@@ -1020,13 +1011,9 @@ export default function PartnerAdmissionPage() {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Processing Admission...
                   </>
-                ) : paymentMode === 'online_razorpay' ? (
-                  <>
-                    <Zap className="w-5 h-5" /> Pay ₹{registrationFee} Online & Register Student
-                  </>
                 ) : (
                   <>
-                    <CheckCircle2 className="w-5 h-5" /> Register Student (Cash at Center)
+                    <CheckCircle2 className="w-5 h-5" /> Confirm Admission (Cash ₹{paidAmount})
                   </>
                 )}
               </button>

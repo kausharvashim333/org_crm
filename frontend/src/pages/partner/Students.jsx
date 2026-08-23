@@ -6,7 +6,7 @@ import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
 import FilePreviewBox from '../../components/FilePreviewBox';
 import {
-  Plus, Search, Edit, Users, Upload, FileText, CheckCircle2, UserX, ExternalLink, BookOpen, Trash2, X, MessageSquare, GraduationCap, UserCheck, FileCheck, ShieldAlert
+  Plus, Search, Edit, Users, Upload, FileText, CheckCircle2, UserX, ExternalLink, BookOpen, Trash2, X, MessageSquare, GraduationCap, UserCheck, FileCheck, ShieldAlert, IndianRupee
 } from 'lucide-react';
 
 export default function PartnerStudents() {
@@ -394,7 +394,7 @@ export default function PartnerStudents() {
             </p>
           </div>
         ) : (
-          <Table headers={['Student Candidate', 'Contact Details', 'Enrolled Course', 'Documents', 'Admission Slip', 'Status', 'Actions']}>
+          <Table headers={['Student Candidate', 'Contact Details', 'Enrolled Course', 'Fee Status', 'Documents', 'Admission Slip', 'Status', 'Actions']}>
             {filteredStudents.map(s => {
               const studentDocs = getAllStudentDocs(s);
               const hasFullDocs = studentDocs.length >= 3;
@@ -458,6 +458,24 @@ export default function PartnerStudents() {
                       </div>
                     ) : (
                       <span className="text-slate-400 text-xs italic">No course assigned</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {s.pendingFee > 0 ? (
+                      <div className="space-y-0.5">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">
+                          <IndianRupee className="w-3 h-3" /> Pending ₹{s.pendingFee}
+                        </span>
+                        {s.totalFee > 0 && (
+                          <p className="text-[10px] text-slate-400">Total: ₹{s.totalFee} | Paid: ₹{(s.totalFee - s.pendingFee)}</p>
+                        )}
+                      </div>
+                    ) : s.totalFee > 0 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                        <CheckCircle2 className="w-3 h-3" /> Fully Paid
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 text-[10px] italic">No fee set</span>
                     )}
                   </TableCell>
                   <TableCell>

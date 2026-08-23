@@ -31,6 +31,11 @@ export const uploadStudentDocument = (id, formData) => API.post(`/students/${id}
 export const createAdmissionOrder = (data) => API.post('/students/public/create-admission-order', data);
 export const submitPublicAdmission = (formData) => API.post('/students/public/apply', formData);
 export const getPublicAdmissionReceipt = (applicationNo) => API.get(`/students/public/receipt/${applicationNo}`);
+export const sendAdmissionOtp = () => API.post('/students/partner-center/send-otp');
+export const submitPartnerCenterAdmission = (formData) => API.post('/students/partner-center/submit', formData);
+export const getCourseBatches = (courseId, partnerId) => API.get(`/students/public/batches/${courseId}`, { params: { partnerId } });
+export const assignStudentBatch = (data) => API.post('/students/public/assign-batch', data);
+export const payStudentFee = (data) => API.post('/students/public/pay-fee', data);
 
 export const getCourses = (params) => API.get('/courses', { params });
 export const getPublicCourses = (params) => API.get('/courses/public', { params });
@@ -69,6 +74,7 @@ export const markChapterWatched = (data) => API.post('/student-lms/watch-chapter
 export const submitStudentAssessment = (data) => API.post('/student-lms/submit-assessment', data);
 export const getStudentCertificate = (id) => API.get(`/student-lms/certificate/${id}`);
 export const updateStudentLmsProfile = (data) => API.put('/student-lms/profile', data);
+export const uploadStudentLmsDocument = (formData) => API.post('/student-lms/upload-document', formData);
 
 export const getBatches = (params) => API.get('/batches', { params });
 export const getBatch = (id) => API.get(`/batches/${id}`);

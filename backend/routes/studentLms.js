@@ -12,6 +12,7 @@ const OrgHomepage = require('../models/OrgHomepage');
 const Exam = require('../models/Exam');
 const Notification = require('../models/Notification');
 const { protect } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -516,6 +517,27 @@ router.put('/profile', protect, async (req, res) => {
         studentIdNo: student.studentIdNo || student.applicationNo,
       },
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Student upload document (deferred upload)
+router.post('/upload-document', protect, upload.single('document'), async (req, res) => {
+  try {
+    const student = await getStudentForUser(req.user);
+    if (!student) return res.status(404).json({ success: false, message: 'Student record not found' });
+
+    if (!req.file) return res.status(400).json({ success: false, message: 'Please select a file' });
+    const { docName } = req.body;
+    if (!docName) return res.status(400).json({ success: false, message: 'Document name is required' });
+
+    const fileUrl = `/uploads/${req.file.filename}`;
+    student.uploadedDocuments = (student.uploadedDocuments || []).filter(d => d.docName !== docName);
+    student.uploadedDocuments.push({ docName, fileUrl, uploadedAt: new Date() });
+    await student.save();
+
+    res.json({ success: true, message: 'Document uploaded successfully', student });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

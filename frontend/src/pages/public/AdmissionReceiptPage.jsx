@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getPublicAdmissionReceipt, getOrgHomepagePublic } from '../../api';
+import { getPublicAdmissionReceipt, getOrgHomepagePublic, getCourseBatches, assignStudentBatch } from '../../api';
+import { useToast } from '../../context/ToastContext';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-import { Printer, Download, CheckCircle2, ArrowLeft, Building2, BookOpen, GraduationCap, ShieldCheck, User, QrCode, Phone, Mail, MapPin, School, Calendar, Check } from 'lucide-react';
+import { Printer, Download, CheckCircle2, ArrowLeft, Building2, BookOpen, GraduationCap, ShieldCheck, User, QrCode, Phone, Mail, MapPin, School, Calendar, Check, Users, Loader2 } from 'lucide-react';
 
 export default function AdmissionReceiptPage() {
   const { applicationNo } = useParams();
   const [loading, setLoading] = useState(true);
   const [student, setStudent] = useState(null);
   const [orgLogo, setOrgLogo] = useState('');
+  const [batches, setBatches] = useState([]);
+  const [selectedBatch, setSelectedBatch] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const [batchAssigned, setBatchAssigned] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     getOrgHomepagePublic()
@@ -22,11 +28,35 @@ export default function AdmissionReceiptPage() {
       .then(res => {
         setStudent(res.data.student);
         setLoading(false);
+        // Fetch batches for the student's course
+        const cId = res.data.student?.courseId?.[0]?._id || res.data.student?.courseId?.[0];
+        const pId = res.data.student?.partnerId?._id || res.data.student?.partnerId;
+        if (cId) {
+          getCourseBatches(cId, pId)
+            .then(bRes => setBatches(bRes.data.batches || []))
+            .catch(() => {});
+        }
+        if (res.data.student?.batchId) setBatchAssigned(true);
       })
       .catch(() => {
         setLoading(false);
       });
   }, [applicationNo]);
+
+  const handleAssignBatch = async () => {
+    if (!selectedBatch) return showError('Please select a batch');
+    setAssigning(true);
+    try {
+      const res = await assignStudentBatch({ studentId: student._id, batchId: selectedBatch });
+      setBatchAssigned(true);
+      setStudent(res.data.student);
+      showSuccess('Batch assigned successfully!');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to assign batch');
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -257,7 +287,89 @@ export default function AdmissionReceiptPage() {
             </div>
           </div>
 
-          {/* 3. Academic Qualifications Table */}
+          {/* 3. Fee Details & Batch Selection */}
+          <div className="space-y-3 mb-5 print:hidden">
+            <h3 className="font-bold text-xs text-indigo-950 uppercase tracking-wider bg-indigo-900 text-white px-3 py-1 rounded-md inline-block">
+              3. Fee Details & Batch Selection
+            </h3>
+
+            {/* Fee Summary */}
+            {student.totalFee > 0 && (
+              <div className="grid grid-cols-3 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                <div className="text-center">
+                  <span className="text-slate-500 block uppercase font-bold text-[10px]">Total Fee</span>
+                  <span className="font-black text-slate-900 text-base">₹{student.totalFee}</span>
+                </div>
+                <div className="text-center">
+                  <span className="text-slate-500 block uppercase font-bold text-[10px]">Paid</span>
+                  <span className="font-black text-emerald-600 text-base">₹{student.totalFee - (student.pendingFee || 0)}</span>
+                </div>
+                <div className="text-center">
+                  <span className="text-slate-500 block uppercase font-bold text-[10px]">Pending</span>
+                  <span className="font-black text-rose-600 text-base">₹{student.pendingFee || 0}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Batch Selection */}
+            {batchAssigned ? (
+              <div className="flex items-center gap-2 text-xs text-emerald-700 font-bold bg-emerald-50 px-4 py-3 rounded-xl border border-emerald-200">
+                <CheckCircle2 className="w-5 h-5" /> Batch assigned successfully!
+              </div>
+            ) : batches.length > 0 ? (
+              <div className="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-indigo-600" />
+                  <h4 className="text-sm font-bold text-slate-900">Select Your Batch</h4>
+                </div>
+                <div className="space-y-2">
+                  {batches.map(b => (
+                    <label
+                      key={b._id}
+                      className={`flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition-all ${selectedBatch === b._id ? 'border-indigo-600 bg-white' : 'border-slate-200 bg-white/60 hover:border-slate-300'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          name="batch"
+                          value={b._id}
+                          checked={selectedBatch === b._id}
+                          onChange={(e) => setSelectedBatch(e.target.value)}
+                          className="w-4 h-4 text-indigo-600"
+                        />
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">{b.name}</p>
+                          <p className="text-[10px] text-slate-500">
+                            {b.timing || 'Time TBD'} | Starts: {new Date(b.startDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${b.availableSeats > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+                          {b.availableSeats > 0 ? `${b.availableSeats} seats left` : 'Full'}
+                        </span>
+                        <p className="text-[10px] text-slate-400 mt-0.5">{b.enrolledCount}/{b.maxStudents} enrolled</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                <button
+                  onClick={handleAssignBatch}
+                  disabled={!selectedBatch || assigning}
+                  className="btn-primary text-xs py-2.5 px-6 flex items-center gap-2 disabled:opacity-50"
+                >
+                  {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  Confirm Batch
+                </button>
+              </div>
+            ) : (
+              <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                No batches available for this course yet. Please contact your center for batch assignment.
+              </div>
+            )}
+          </div>
+
+          {/* 4. Academic Qualifications Table */}
           <div className="space-y-3 mb-5">
             <h3 className="font-bold text-xs text-indigo-950 uppercase tracking-wider bg-indigo-900 text-white px-3 py-1 rounded-md inline-block">
               3. Educational Qualification Breakdown

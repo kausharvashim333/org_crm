@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getStudentLmsDashboard, changePassword, updateStudentLmsProfile, getStudentAvailableExams } from '../../api';
+import { getStudentLmsDashboard, changePassword, updateStudentLmsProfile, getStudentAvailableExams, uploadStudentLmsDocument } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { 
   BookOpen, PlayCircle, Award, CheckCircle2, LogOut, GraduationCap, ArrowRight, User, 
@@ -1593,6 +1593,69 @@ export default function StudentDashboard() {
                     {passwordLoading ? 'Updating Password...' : 'Save New Password'}
                   </button>
                 </form>
+              </div>
+
+              {/* Document Upload Card */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-5 h-fit">
+                <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-900 text-sm">My Documents</h4>
+                    <p className="text-[11px] text-slate-400">Upload pending documents</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {(student?.uploadedDocuments || []).map((doc, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200">
+                      <span className="font-bold text-emerald-800">{doc.docName}</span>
+                      <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-bold">View</a>
+                    </div>
+                  ))}
+                  {(student?.uploadedDocuments || []).length === 0 && (
+                    <p className="text-xs text-slate-400 italic">No documents uploaded yet.</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <select id="docNameSelect" className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 text-xs font-bold">
+                    <option value="10th Marksheet">10th Marksheet</option>
+                    <option value="12th Marksheet">12th Marksheet</option>
+                    <option value="Graduation Marksheet">Graduation Marksheet</option>
+                    <option value="ID Proof / Aadhaar Card">ID Proof / Aadhaar Card</option>
+                    <option value="Passport Photo">Passport Photo</option>
+                    <option value="Student Signature">Student Signature</option>
+                    <option value="Other Document">Other Document</option>
+                  </select>
+                  <input
+                    type="file"
+                    id="studentDocFile"
+                    className="w-full text-xs file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 file:font-bold"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const fileInput = document.getElementById('studentDocFile');
+                      const docSelect = document.getElementById('docNameSelect');
+                      if (!fileInput.files[0]) { showError('Please select a file'); return; }
+                      const fd = new FormData();
+                      fd.append('document', fileInput.files[0]);
+                      fd.append('docName', docSelect.value);
+                      try {
+                        const res = await uploadStudentLmsDocument(fd);
+                        showSuccess('Document uploaded successfully');
+                        setDashboardData(prev => ({ ...prev, student: res.data.student }));
+                      } catch (err) {
+                        showError(err.response?.data?.message || 'Upload failed');
+                      }
+                    }}
+                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-all"
+                  >
+                    Upload Document
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -81,9 +81,17 @@ const studentSchema = new mongoose.Schema({
   percentage: { type: Number },
   approvalStatus: {
     type: String,
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'approved', 'rejected', 'pending_otp'],
     default: 'approved',
   },
+  admissionType: {
+    type: String,
+    enum: ['partner_center', 'public_online'],
+    default: 'public_online',
+  },
+  totalFee: { type: Number, default: 0 },
+  pendingFee: { type: Number, default: 0 },
+  batchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Batch' },
   courseId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Course' }],
   batchIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Batch' }],
   projectIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
