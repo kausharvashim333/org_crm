@@ -83,6 +83,13 @@ router.post('/login', async (req, res) => {
     let partner = null;
     if (user.partnerId) {
       partner = await Partner.findById(user.partnerId);
+      if (partner) {
+        partner = partner.toObject();
+        if (partner.logo && partner.logo.startsWith('/uploads/')) {
+          const baseUrl = `${req.protocol}://${req.get('host')}`;
+          partner.logo = `${baseUrl}${partner.logo}`;
+        }
+      }
     }
     res.json({
       success: true,
@@ -110,6 +117,13 @@ router.get('/me', protect, async (req, res) => {
     let partner = null;
     if (req.user.partnerId) {
       partner = await Partner.findById(req.user.partnerId);
+      if (partner) {
+        partner = partner.toObject();
+        if (partner.logo && partner.logo.startsWith('/uploads/')) {
+          const baseUrl = `${req.protocol}://${req.get('host')}`;
+          partner.logo = `${baseUrl}${partner.logo}`;
+        }
+      }
     }
     res.json({
       success: true,
@@ -452,6 +466,13 @@ router.post('/google-login', async (req, res) => {
     let partner = null;
     if (user.partnerId) {
       partner = await Partner.findById(user.partnerId);
+      if (partner) {
+        partner = partner.toObject();
+        if (partner.logo && partner.logo.startsWith('/uploads/')) {
+          const baseUrl = `${req.protocol}://${req.get('host')}`;
+          partner.logo = `${baseUrl}${partner.logo}`;
+        }
+      }
     }
 
     res.json({
