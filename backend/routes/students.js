@@ -324,6 +324,34 @@ router.post('/public/apply', upload.fields([
       return res.status(400).json({ success: false, message: 'Please provide Center, Course, Name, and Phone number' });
     }
 
+    // Duplicate registration check: phone or email already exists
+    const dupFilter = { $or: [{ phone }] };
+    if (email) dupFilter.$or.push({ email: email.toLowerCase() });
+    const existingStudent = await Student.findOne(dupFilter);
+    if (existingStudent) {
+      return res.status(409).json({
+        success: false,
+        message: `This student is already registered. Application No: ${existingStudent.applicationNo}, Student ID: ${existingStudent.studentIdNo || 'N/A'}. Duplicate registration is not allowed.`,
+      });
+    }
+
+    // If cash payment (pay_at_center), require OTP to partner center email
+    if (paymentMode === 'pay_at_center') {
+      const { otp } = req.body;
+      if (!otp) {
+ return res.status(400).json({ success: false, message: 'OTP is required for cash payment at center' }); }
+      if (!router.publicAdmissionOtps) router.publicAdmissionOtps = new Map();
+      const stored = router.publicAdmissionOtps.get(partnerId);
+      if (!stored || stored.expiresAt < Date.now()) {
+        return res.status(400).json({ success: false, message: 'OTP expired. Please request a new OTP.' });
+      }
+      const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+      if (otpHash !== stored.hash) {
+        return res.status(400).json({ success: false, message: 'Invalid OTP' });
+      }
+      router.publicAdmissionOtps.delete(partnerId);
+    }
+
     // Verify Razorpay signature if online payment made
     let verifiedPaymentStatus = 'pending';
     if (paymentMode === 'online_razorpay' && razorpayOrderId && razorpayPaymentId && razorpaySignature) {
@@ -475,6 +503,49 @@ router.post('/public/apply', upload.fields([
       });
     }
 
+    // Send admission confirmation email to student
+    if (email) {
+      try {
+        const org = await OrgHomepage.findOne();
+        const orgName = org?.settings?.orgName || 'Lili Organization';
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+        const partnerRec = await Partner.findById(partnerId).lean();
+        const courseRec = await Course.findById(courseId).lean();
+
+        await sendEmail({
+          email: email.toLowerCase(),
+          subject: `Admission Confirmed: ${student.fullName} - ${orgName}`,
+          message: `Dear ${student.fullName}, your admission has been confirmed. Application No: ${student.applicationNo}, Student ID: ${student.studentIdNo}. Course: ${courseRec?.name || 'N/A'} at ${partnerRec?.instituteName || 'Institute'}. Login at ${clientUrl}/student/login`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+            <div style="background:#4f46e5;color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+              <h1 style="margin:0;font-size:22px">Admission Confirmed!</h1>
+              <p style="margin:4px 0 0;opacity:0.9">${orgName}</p>
+            </div>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 12px 12px;padding:24px">
+              <p>Dear <strong>${student.fullName}</strong>,</p>
+              <p>Congratulations! Your admission has been successfully confirmed.</p>
+              <div style="background:#f8fafc;border-radius:8px;padding:16px;margin:16px 0">
+                <table style="width:100%;font-size:14px;color:#334155">
+                  <tr><td style="color:#64748b;padding:4px 0">Application No:</td><td style="font-weight:bold">${student.applicationNo}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Student ID:</td><td style="font-weight:bold">${student.studentIdNo || 'Auto-Assigned'}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Course:</td><td style="font-weight:bold">${courseRec?.name || 'N/A'}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Institute:</td><td style="font-weight:bold">${partnerRec?.instituteName || 'N/A'}</td></tr>
+                  ${student.totalFee > 0 ? `<tr><td style="color:#64748b;padding:4px 0">Total Fee:</td><td style="font-weight:bold">₹${student.totalFee}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Paid:</td><td style="font-weight:bold;color:#15803d">₹${student.paymentInfo?.paidAmount || 0}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Pending:</td><td style="font-weight:bold;color:#b45309">₹${student.pendingFee}</td></tr>` : ''}
+                </table>
+              </div>
+              <p>You can login to your student portal at <a href="${clientUrl}/student/login" style="color:#4f46e5;font-weight:bold">${clientUrl}/student/login</a></p>
+              <p style="font-size:12px;color:#94a3b8;margin-top:20px">This is an automated email. Please do not reply.</p>
+            </div>
+          </div>`,
+        });
+        console.log(`[Admission Confirmation Email] Sent to: ${email}`);
+      } catch (mailErr) {
+        console.error('[Admission Email Error]', mailErr.message);
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: verifiedPaymentStatus === 'paid'
@@ -484,6 +555,44 @@ router.post('/public/apply', upload.fields([
       studentId: student._id,
       paymentStatus: verifiedPaymentStatus,
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Send OTP to partner center email for public cash admission
+router.post('/public/send-center-otp', async (req, res) => {
+  try {
+    const { partnerId } = req.body;
+    if (!partnerId) return res.status(400).json({ success: false, message: 'Partner center is required' });
+
+    const partner = await Partner.findById(partnerId);
+    if (!partner || !partner.email) {
+      return res.status(400).json({ success: false, message: 'Partner center email not found' });
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+    if (!router.publicAdmissionOtps) router.publicAdmissionOtps = new Map();
+    router.publicAdmissionOtps.set(partnerId, {
+      hash: otpHash,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+    });
+
+    await sendEmail({
+      email: partner.email,
+      subject: 'Admission OTP - Cash Payment Verification',
+      message: `OTP for student admission cash payment verification: ${otp}. Valid for 5 minutes.`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:400px;margin:0 auto;padding:20px">
+        <h2 style="color:#4f46e5">Cash Payment Verification</h2>
+        <p>A student is taking admission at your center with cash payment. Use this OTP to confirm:</p>
+        <div style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#4f46e5;text-align:center;padding:20px;background:#f0f0ff;border-radius:12px;margin:15px 0">${otp}</div>
+        <p style="color:#666;font-size:12px">Valid for 5 minutes. Do not share with anyone.</p>
+      </div>`,
+    });
+
+    res.json({ success: true, message: `OTP sent to ${partner.email}` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -595,8 +704,20 @@ router.post('/partner-center/submit', protect, upload.fields([
     const partnerId = req.user.partnerId;
     const fullName = req.body.fullName || req.body.name;
     const phone = req.body.phone;
+    const studentEmail = req.body.email;
     if (!fullName || !phone || !courseId) {
       return res.status(400).json({ success: false, message: 'Name, phone, and course are required' });
+    }
+
+    // Duplicate registration check
+    const dupFilter = { $or: [{ phone }] };
+    if (studentEmail) dupFilter.$or.push({ email: studentEmail.toLowerCase() });
+    const existingStudent = await Student.findOne(dupFilter);
+    if (existingStudent) {
+      return res.status(409).json({
+        success: false,
+        message: `This student is already registered. Application No: ${existingStudent.applicationNo}, Student ID: ${existingStudent.studentIdNo || 'N/A'}. Duplicate registration is not allowed.`,
+      });
     }
 
     const course = await Course.findById(courseId);
@@ -728,6 +849,48 @@ router.post('/partner-center/submit', protect, upload.fields([
         partnerId,
         isActive: true,
       });
+    }
+
+    // Send admission confirmation email to student
+    if (req.body.email) {
+      try {
+        const org = await OrgHomepage.findOne();
+        const orgName = org?.settings?.orgName || 'Lili Organization';
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+        const partnerRec = await Partner.findById(partnerId).lean();
+
+        await sendEmail({
+          email: req.body.email.toLowerCase(),
+          subject: `Admission Confirmed: ${student.fullName} - ${orgName}`,
+          message: `Dear ${student.fullName}, your admission has been confirmed. Application No: ${student.applicationNo}, Student ID: ${student.studentIdNo}. Course: ${course.name} at ${partnerRec?.instituteName || 'Institute'}. Login at ${clientUrl}/student/login`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+            <div style="background:#4f46e5;color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+              <h1 style="margin:0;font-size:22px">Admission Confirmed!</h1>
+              <p style="margin:4px 0 0;opacity:0.9">${orgName}</p>
+            </div>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 12px 12px;padding:24px">
+              <p>Dear <strong>${student.fullName}</strong>,</p>
+              <p>Congratulations! Your admission has been successfully confirmed.</p>
+              <div style="background:#f8fafc;border-radius:8px;padding:16px;margin:16px 0">
+                <table style="width:100%;font-size:14px;color:#334155">
+                  <tr><td style="color:#64748b;padding:4px 0">Application No:</td><td style="font-weight:bold">${student.applicationNo}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Student ID:</td><td style="font-weight:bold">${student.studentIdNo || 'Auto-Assigned'}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Course:</td><td style="font-weight:bold">${course.name}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Institute:</td><td style="font-weight:bold">${partnerRec?.instituteName || 'N/A'}</td></tr>
+                  ${totalFee > 0 ? `<tr><td style="color:#64748b;padding:4px 0">Total Fee:</td><td style="font-weight:bold">₹${totalFee}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Paid:</td><td style="font-weight:bold;color:#15803d">₹${paidAmt}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Pending:</td><td style="font-weight:bold;color:#b45309">₹${pendingAmt}</td></tr>` : ''}
+                </table>
+              </div>
+              <p>You can login to your student portal at <a href="${clientUrl}/student/login" style="color:#4f46e5;font-weight:bold">${clientUrl}/student/login</a></p>
+              <p style="font-size:12px;color:#94a3b8;margin-top:20px">This is an automated email. Please do not reply.</p>
+            </div>
+          </div>`,
+        });
+        console.log(`[Admission Confirmation Email] Sent to: ${req.body.email}`);
+      } catch (mailErr) {
+        console.error('[Admission Email Error]', mailErr.message);
+      }
     }
 
     res.status(201).json({

@@ -32,6 +32,7 @@ export const createAdmissionOrder = (data) => API.post('/students/public/create-
 export const submitPublicAdmission = (formData) => API.post('/students/public/apply', formData);
 export const getPublicAdmissionReceipt = (applicationNo) => API.get(`/students/public/receipt/${applicationNo}`);
 export const sendAdmissionOtp = () => API.post('/students/partner-center/send-otp');
+export const sendPublicCenterOtp = (data) => API.post('/students/public/send-center-otp', data);
 export const submitPartnerCenterAdmission = (formData) => API.post('/students/partner-center/submit', formData);
 export const getCourseBatches = (courseId, partnerId) => API.get(`/students/public/batches/${courseId}`, { params: { partnerId } });
 export const assignStudentBatch = (data) => API.post('/students/public/assign-batch', data);

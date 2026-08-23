@@ -458,6 +458,38 @@ router.put('/:id/status', protect, superAdminOnly, async (req, res) => {
       await User.updateMany({ partnerId: partner._id }, { isActive: false });
     } else if (status === 'active') {
       await User.updateOne({ partnerId: partner._id, role: 'partner' }, { isActive: true });
+
+      // Send approval confirmation email to partner
+      try {
+        const org = await OrgHomepage.findOne();
+        const orgName = org?.settings?.orgName || 'Lili Organization';
+        const themeColor = org?.settings?.themeColor || '#2563eb';
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
+        await sendEmail({
+          email: partner.email,
+          subject: `Partner Approved: ${partner.instituteName} - ${orgName}`,
+          message: `Dear ${partner.ownerName}, your partner center ${partner.instituteName} has been approved. You can now login at ${clientUrl}/partner/login`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+            <div style="background:${themeColor};color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+              <h1 style="margin:0;font-size:22px">Partner Center Approved!</h1>
+              <p style="margin:4px 0 0;opacity:0.9">${orgName}</p>
+            </div>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 12px 12px;padding:24px">
+              <p>Dear <strong>${partner.ownerName}</strong>,</p>
+              <p>Congratulations! Your partner center <strong>${partner.instituteName}</strong> has been approved and is now active.</p>
+              <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin:16px 0;text-align:center">
+                <span style="color:#15803d;font-weight:bold;font-size:16px">Your center is now live and ready to accept admissions!</span>
+              </div>
+              <p>You can login to your partner portal at <a href="${clientUrl}/partner/login" style="color:${themeColor};font-weight:bold">${clientUrl}/partner/login</a></p>
+              <p style="font-size:12px;color:#94a3b8;margin-top:20px">This is an automated email. Please do not reply.</p>
+            </div>
+          </div>`,
+        });
+        console.log(`[Partner Approval Email] Sent to: ${partner.email}`);
+      } catch (mailErr) {
+        console.error('[Partner Approval Email Error]', mailErr.message);
+      }
     }
     res.json({ success: true, partner });
   } catch (error) {

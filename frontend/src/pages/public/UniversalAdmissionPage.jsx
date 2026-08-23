@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getPublicPartners, getPublicCourses, submitPublicAdmission, createAdmissionOrder, getOrgHomepagePublic } from '../../api';
+import { getPublicPartners, getPublicCourses, submitPublicAdmission, createAdmissionOrder, getOrgHomepagePublic, sendPublicCenterOtp } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -153,6 +153,9 @@ export default function UniversalAdmissionPage() {
 
   const [paymentMode, setPaymentMode] = useState('online_razorpay'); // 'online_razorpay' | 'pay_at_center'
   const [paidAmount, setPaidAmount] = useState(0);
+  const [centerOtp, setCenterOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
 
   useEffect(() => {
     Promise.all([getPublicPartners(), getPublicCourses(), getOrgHomepagePublic()])
@@ -345,6 +348,7 @@ export default function UniversalAdmissionPage() {
       // Append payment details
       data.append('paymentMode', paymentDetails.paymentMode || paymentMode);
       data.append('paidAmount', paymentDetails.paidAmount !== undefined ? paymentDetails.paidAmount : (paymentMode === 'online_razorpay' ? (paidAmount || registrationFee) : paidAmount));
+      if (paymentMode === 'pay_at_center' && centerOtp) data.append('otp', centerOtp);
       if (paymentDetails.razorpayOrderId) data.append('razorpayOrderId', paymentDetails.razorpayOrderId);
       if (paymentDetails.razorpayPaymentId) data.append('razorpayPaymentId', paymentDetails.razorpayPaymentId);
       if (paymentDetails.razorpaySignature) data.append('razorpaySignature', paymentDetails.razorpaySignature);
@@ -415,11 +419,32 @@ export default function UniversalAdmissionPage() {
     }
   };
 
+  const handleSendCenterOtp = async () => {
+    if (!formData.partnerId) {
+      showError('Please select a center first');
+      return;
+    }
+    setOtpSending(true);
+    try {
+      const res = await sendPublicCenterOtp({ partnerId: formData.partnerId });
+      showSuccess(res.data.message || 'OTP sent to center email');
+      setOtpSent(true);
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to send OTP');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (agreedDeclarations.length < DECLARATION_ITEMS.length) {
       return showError('Please agree to all 10 declaration rules before submitting.');
+    }
+
+    if (paymentMode === 'pay_at_center' && !centerOtp) {
+      return showError('Please enter the OTP sent to the center email to confirm cash payment admission.');
     }
 
     if (paymentMode === 'online_razorpay' && window.Razorpay && registrationFee > 0) {
@@ -1624,6 +1649,48 @@ export default function UniversalAdmissionPage() {
                         ₹{Math.max(0, courseTotalFee - paidAmount)}
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* OTP Verification for Cash Payment at Center */}
+                {paymentMode === 'pay_at_center' && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-amber-600" />
+                      <span className="text-xs font-bold text-amber-800">Center OTP Verification Required</span>
+                    </div>
+                    <p className="text-[11px] text-amber-700 leading-snug">
+                      Cash payment ke liye center ke email par OTP bheja jayega. Center wale ko OTP milenga, usko yahan dalne ke bad hi admission confirm hoga.
+                    </p>
+                    {!otpSent ? (
+                      <button
+                        type="button"
+                        onClick={handleSendCenterOtp}
+                        disabled={otpSending || !formData.partnerId}
+                        className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition-all disabled:opacity-50"
+                      >
+                        {otpSending ? 'Sending OTP...' : 'Send OTP to Center Email'}
+                      </button>
+                    ) : (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          maxLength="6"
+                          value={centerOtp}
+                          onChange={(e) => setCenterOtp(e.target.value.replace(/\D/g, ''))}
+                          placeholder="Enter 6-digit OTP"
+                          className="w-full px-3 py-2.5 border border-amber-300 rounded-xl bg-white text-slate-800 text-sm font-bold tracking-widest text-center focus:outline-none focus:border-amber-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendCenterOtp}
+                          disabled={otpSending}
+                          className="text-[10px] text-amber-600 hover:underline font-bold"
+                        >
+                          Resend OTP
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
