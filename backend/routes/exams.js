@@ -2,10 +2,11 @@ const express = require('express');
 const Exam = require('../models/Exam');
 const Student = require('../models/Student');
 const { protect, partnerOrAdmin } = require('../middleware/auth');
+const requireAddon = require('../middleware/addonGate');
 
 const router = express.Router();
 
-router.get('/', protect, partnerOrAdmin, async (req, res) => {
+router.get('/', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
@@ -67,7 +68,7 @@ router.get('/student/available', protect, async (req, res) => {
   }
 });
 
-router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
+router.get('/:id', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id).populate('batchId courseId').populate('results.studentId', 'fullName phone');
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
@@ -80,7 +81,7 @@ router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
-router.post('/', protect, partnerOrAdmin, async (req, res) => {
+router.post('/', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     if (req.user.role !== 'partner') {
       return res.status(403).json({ success: false, message: 'Only partners can create exams' });
@@ -98,7 +99,7 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
-router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
+router.put('/:id', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
@@ -112,7 +113,7 @@ router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
-router.delete('/:id', protect, partnerOrAdmin, async (req, res) => {
+router.delete('/:id', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
@@ -126,7 +127,7 @@ router.delete('/:id', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
-router.post('/:id/results', protect, partnerOrAdmin, async (req, res) => {
+router.post('/:id/results', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     const { results } = req.body;
     const exam = await Exam.findById(req.params.id);
@@ -294,7 +295,7 @@ router.post('/:id/submit', protect, async (req, res) => {
 });
 
 // Get exam analytics for partner
-router.get('/:id/analytics', protect, partnerOrAdmin, async (req, res) => {
+router.get('/:id/analytics', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id)
       .populate('submissions.studentId', 'fullName phone')
@@ -376,7 +377,7 @@ router.get('/:id/analytics', protect, partnerOrAdmin, async (req, res) => {
 });
 
 // Manual grade subjective answers
-router.put('/:id/submissions/:studentId/grade', protect, partnerOrAdmin, async (req, res) => {
+router.put('/:id/submissions/:studentId/grade', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
   try {
     const { grades } = req.body; // [{ questionId, marksAwarded }]
     const exam = await Exam.findById(req.params.id);

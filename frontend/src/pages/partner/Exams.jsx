@@ -25,6 +25,7 @@ export default function PartnerExams() {
   const [batches, setBatches] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [locked, setLocked] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [showResults, setShowResults] = useState(null);
   const [results, setResults] = useState({});
@@ -50,7 +51,10 @@ export default function PartnerExams() {
   });
 
   const load = () => {
-    getExams().then(res => { setExams(res.data.exams); setLoading(false); }).catch(() => setLoading(false));
+    getExams().then(res => { setExams(res.data.exams); setLoading(false); }).catch((err) => {
+      if (err.response?.status === 403 && err.response?.data?.addonRequired) { setLocked(true); }
+      setLoading(false);
+    });
     getBatches().then(res => setBatches(res.data.batches)).catch(() => {});
     getCourses().then(res => setCourses(res.data.courses)).catch(() => {});
   };
@@ -332,6 +336,23 @@ export default function PartnerExams() {
       </div>
     </form>
   );
+
+  if (locked) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center max-w-md space-y-4">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto">
+            <Lock className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">Exam & Test System</h2>
+          <p className="text-gray-500">This is a premium add-on feature. Create online exams with MCQ, True/False, subjective questions, auto-grading, anti-cheat, and analytics.</p>
+          <a href="/partner/addons" className="btn-primary inline-flex items-center gap-2 px-6 py-3">
+            <Package className="w-5 h-5" /> Go to Add-on Store
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
