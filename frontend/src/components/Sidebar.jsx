@@ -134,7 +134,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       links: [
         { to: '/partner/courses', icon: BookOpen, label: 'Courses' },
         { to: '/partner/attendance', icon: Calendar, label: 'Attendance' },
-        ...(activeAddons.has('exam_system') ? [{ to: '/partner/exams', icon: ClipboardList, label: 'Exams & Tests' }] : []),
+        { to: '/partner/exams', icon: ClipboardList, label: 'Exams & Tests' },
         { to: '/partner/certificates', icon: Award, label: 'Certificates' },
       ],
     },

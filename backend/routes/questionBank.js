@@ -1,12 +1,11 @@
 const express = require('express');
 const QuestionBank = require('../models/QuestionBank');
 const { protect, partnerOrAdmin } = require('../middleware/auth');
-const requireAddon = require('../middleware/addonGate');
 
 const router = express.Router();
 
 // Get all questions (with filters)
-router.get('/', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
+router.get('/', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
@@ -30,7 +29,7 @@ router.get('/', protect, partnerOrAdmin, requireAddon('exam_system'), async (req
 });
 
 // Get categories
-router.get('/categories', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
+router.get('/categories', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
@@ -45,7 +44,7 @@ router.get('/categories', protect, partnerOrAdmin, requireAddon('exam_system'), 
 });
 
 // Get tags
-router.get('/tags', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
+router.get('/tags', protect, partnerOrAdmin, async (req, res) => {
   try {
     let filter = {};
     if (req.user.role === 'partner') {
@@ -60,7 +59,7 @@ router.get('/tags', protect, partnerOrAdmin, requireAddon('exam_system'), async 
 });
 
 // Create a question
-router.post('/', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
+router.post('/', protect, partnerOrAdmin, async (req, res) => {
   try {
     if (req.user.role !== 'partner') {
       return res.status(403).json({ success: false, message: 'Only partners can create questions' });
@@ -73,7 +72,7 @@ router.post('/', protect, partnerOrAdmin, requireAddon('exam_system'), async (re
 });
 
 // Bulk create (for CSV import)
-router.post('/bulk', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
+router.post('/bulk', protect, partnerOrAdmin, async (req, res) => {
   try {
     if (req.user.role !== 'partner') {
       return res.status(403).json({ success: false, message: 'Only partners can import questions' });
@@ -92,7 +91,7 @@ router.post('/bulk', protect, partnerOrAdmin, requireAddon('exam_system'), async
 });
 
 // Update a question
-router.put('/:id', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
+router.put('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const question = await QuestionBank.findById(req.params.id);
     if (!question) return res.status(404).json({ success: false, message: 'Question not found' });
@@ -107,7 +106,7 @@ router.put('/:id', protect, partnerOrAdmin, requireAddon('exam_system'), async (
 });
 
 // Delete a question
-router.delete('/:id', protect, partnerOrAdmin, requireAddon('exam_system'), async (req, res) => {
+router.delete('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const question = await QuestionBank.findById(req.params.id);
     if (!question) return res.status(404).json({ success: false, message: 'Question not found' });
