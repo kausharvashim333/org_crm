@@ -40,6 +40,7 @@ export default function PartnerExams() {
   const [showImportCSV, setShowImportCSV] = useState(false);
   const [csvText, setCsvText] = useState('');
   const [showGradeModal, setShowGradeModal] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
   const { showSuccess, showError } = useToast();
 
   const [formData, setFormData] = useState({
@@ -325,7 +326,10 @@ export default function PartnerExams() {
         </div>
       </div>
 
-      <button type="submit" className="btn-primary w-full">{isEdit ? 'Update Exam' : 'Create Exam'}</button>
+      <div className="flex items-center justify-between">
+        <button type="button" onClick={() => setShowPreview(true)} className="flex items-center gap-2 px-4 py-2 border border-indigo-200 text-indigo-600 rounded-xl text-sm font-medium hover:bg-indigo-50 transition-all"><Eye className="w-4 h-4" /> Preview Exam</button>
+        <button type="submit" className="btn-primary flex items-center gap-2">{isEdit ? 'Update Exam' : 'Create Exam'}</button>
+      </div>
     </form>
   );
 
@@ -477,6 +481,11 @@ export default function PartnerExams() {
           <ManualGrading examId={showGradeModal.exam._id} onGrade={handleManualGrade} />
         </Modal>
       )}
+
+      {/* Exam Preview Modal */}
+      <Modal isOpen={showPreview} onClose={() => setShowPreview(false)} title="Student Exam Preview" size="xl">
+        <ExamPreview formData={formData} />
+      </Modal>
     </div>
   );
 }
@@ -748,6 +757,142 @@ function ManualGrading({ examId, onGrade }) {
           }} className="btn-primary w-full">Save Grades</button>
         </div>
       )}
+    </div>
+  );
+}
+
+function ExamPreview({ formData }) {
+  const [currentQ, setCurrentQ] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [flagged, setFlagged] = useState(new Set());
+  const questions = formData.questions || [];
+  const settings = formData.examSettings || {};
+  const totalMarks = questions.reduce((sum, q) => sum + (q.marks || 0), 0);
+
+  if (!questions.length) {
+    return (
+      <div className="text-center py-12 text-slate-400">
+        <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+        <p className="text-sm font-medium">No questions added yet to preview</p>
+        <p className="text-xs mt-1">Add some questions first, then click Preview</p>
+      </div>
+    );
+  }
+
+  const q = questions[currentQ];
+  const answeredCount = Object.keys(answers).filter(k => answers[k] !== '' && answers[k] !== undefined).length;
+  const formatTime = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+  return (
+    <div className="space-y-0 -mt-2">
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-2">
+        <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+        <p className="text-xs text-amber-700 font-medium">This is a preview of how students will see this exam. Answers are not saved.</p>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-sm font-bold text-slate-800">{formData.name || 'Untitled Exam'}</h3>
+          <p className="text-xs text-slate-400">{questions.length} questions · {totalMarks} marks</p>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm">
+          <Clock className="w-4 h-4" />
+          {formatTime((settings.durationMinutes || 60) * 60)}
+        </div>
+      </div>
+
+      {settings.instructions && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-amber-800">{settings.instructions}</p>
+        </div>
+      )}
+
+      <div className="flex gap-4">
+        <div className="flex-1 bg-white border border-slate-200 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">Question {currentQ + 1} of {questions.length}</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-400">{q.marks} mark{(q.marks || 0) > 1 ? 's' : ''}</span>
+              <button onClick={() => setFlagged(prev => { const n = new Set(prev); n.has(currentQ) ? n.delete(currentQ) : n.add(currentQ); return n; })}
+                className={`p-1.5 rounded-lg ${flagged.has(currentQ) ? 'bg-amber-100 text-amber-600' : 'text-slate-300 hover:text-amber-500'}`}>
+                <Flag className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-4 text-sm font-medium text-slate-800 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: q.questionText || 'No question text' }} />
+
+          {q.type === 'mcq' && (
+            <div className="space-y-2">
+              {q.options?.map((opt, oi) => (
+                <label key={oi} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${answers[currentQ] === oi ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                  <input type="radio" name={`preview-${currentQ}`} checked={answers[currentQ] === oi} onChange={() => setAnswers(a => ({ ...a, [currentQ]: oi }))} className="w-4 h-4 text-indigo-600" />
+                  <span className="text-sm text-slate-700">{opt || `Option ${oi + 1}`}</span>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {q.type === 'true_false' && (
+            <div className="flex items-center gap-4">
+              <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-all ${answers[currentQ] === 0 ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200'}`}>
+                <input type="radio" name={`preview-tf-${currentQ}`} checked={answers[currentQ] === 0} onChange={() => setAnswers(a => ({ ...a, [currentQ]: 0 }))} className="w-4 h-4 text-indigo-600" />
+                <span className="text-sm font-medium">True</span>
+              </label>
+              <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border cursor-pointer transition-all ${answers[currentQ] === 1 ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200'}`}>
+                <input type="radio" name={`preview-tf-${currentQ}`} checked={answers[currentQ] === 1} onChange={() => setAnswers(a => ({ ...a, [currentQ]: 1 }))} className="w-4 h-4 text-indigo-600" />
+                <span className="text-sm font-medium">False</span>
+              </label>
+            </div>
+          )}
+
+          {q.type === 'subjective' && (
+            <textarea rows={4} placeholder="Student will type their answer here..." value={answers[currentQ] || ''} onChange={(e) => setAnswers(a => ({ ...a, [currentQ]: e.target.value }))} className="input-field text-sm w-full" />
+          )}
+
+          {(q.type === 'mcq' || q.type === 'true_false') && (
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-emerald-500" />
+              <p className="text-xs text-slate-500">Correct answer: <span className="font-bold text-emerald-600">{q.type === 'true_false' ? (q.correctOptionIndex === 0 ? 'True' : 'False') : (q.options?.[q.correctOptionIndex] || 'N/A')}</span></p>
+            </div>
+          )}
+          {q.explanation && (
+            <div className="mt-2 bg-blue-50 rounded-lg p-2 text-xs text-blue-600"><span className="font-bold">Explanation:</span> {q.explanation}</div>
+          )}
+
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+            <button onClick={() => setCurrentQ(c => Math.max(0, c - 1))} disabled={currentQ === 0} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 disabled:opacity-30">
+              <ChevronUp className="w-4 h-4 rotate-90" /> Previous
+            </button>
+            <span className="text-xs text-slate-400">{answeredCount} answered</span>
+            <button onClick={() => setCurrentQ(c => Math.min(questions.length - 1, c + 1))} disabled={currentQ === questions.length - 1} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 disabled:opacity-30">
+              Next <ChevronDown className="w-4 h-4 rotate-90" />
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden lg:block w-48 bg-white border border-slate-200 rounded-xl p-3 h-fit sticky top-0">
+          <p className="text-xs font-bold text-slate-500 mb-2">Navigator</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {questions.map((_, i) => (
+              <button key={i} onClick={() => setCurrentQ(i)}
+                className={`w-8 h-8 rounded-lg text-xs font-bold flex items-center justify-center transition-all
+                  ${i === currentQ ? 'bg-indigo-600 text-white' :
+                    answers[i] !== undefined && answers[i] !== '' ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' :
+                    flagged.has(i) ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                    'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 space-y-1.5 text-[10px] text-slate-400">
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300" /> Answered</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-amber-100 border border-amber-300" /> Flagged</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-slate-100" /> Unanswered</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
