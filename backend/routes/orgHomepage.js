@@ -409,7 +409,7 @@ router.get('/public', async (req, res) => {
     if (homepage && homepage.settings && homepage.settings.logo) {
       const logoPath = homepage.settings.logo;
       if (logoPath.startsWith('/uploads/')) {
-        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
         homepage.settings.logo = `${baseUrl}${logoPath}`;
       }
     }

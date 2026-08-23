@@ -92,7 +92,7 @@ export default function OrgFranchisePage() {
             <Reveal>
               <div className="flex items-center justify-center gap-3 mb-2">
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg" />
+                  <img src={orgLogo} alt={orgName} className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg" onError={(e) => { const img = e.target; if (!img.dataset.retried && orgLogo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = orgLogo.substring(orgLogo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
                 ) : (
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: themeColor }}>
                     <GraduationCap className="w-7 h-7 text-white" />
@@ -389,7 +389,7 @@ export default function OrgFranchisePage() {
                       className="group flex flex-col items-center gap-3 bg-white rounded-2xl p-5 border border-slate-200 hover:shadow-lg hover:border-slate-300 transition-all"
                     >
                       {p.logo ? (
-                        <img src={p.logo} alt={p.instituteName} className="w-16 h-16 rounded-xl object-cover border border-slate-200" />
+                        <img src={p.logo} alt={p.instituteName} className="w-16 h-16 rounded-xl object-cover border border-slate-200" onError={(e) => { const img = e.target; if (!img.dataset.retried && p.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = p.logo.substring(p.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
                       ) : (
                         <div className="w-16 h-16 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${p.themeColor || themeColor}15`, border: `1px solid ${p.themeColor || themeColor}20` }}>
                           <Building className="w-8 h-8" style={{ color: p.themeColor || themeColor }} />

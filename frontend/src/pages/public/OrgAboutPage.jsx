@@ -72,7 +72,7 @@ export default function OrgAboutPage() {
             <Reveal>
               <div className="flex items-center justify-center gap-3 mb-2">
                 {orgLogo ? (
-                  <img src={orgLogo} alt={orgName} className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg" />
+                  <img src={orgLogo} alt={orgName} className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg" onError={(e) => { const img = e.target; if (!img.dataset.retried && orgLogo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = orgLogo.substring(orgLogo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
                 ) : (
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-white/10 border border-white/20">
                     <GraduationCap className="w-7 h-7 text-white" />

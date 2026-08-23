@@ -41,7 +41,7 @@ export default function FranchisesList() {
       <section className="py-12 px-4 max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-2">
           {logo ? (
-            <img src={logo} alt={orgName} className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
+            <img src={logo} alt={orgName} className="w-12 h-12 rounded-xl object-cover border border-slate-200" onError={(e) => { const img = e.target; if (!img.dataset.retried && logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = logo.substring(logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
           ) : (
             <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: themeColor }}>
               <GraduationCap className="w-6 h-6 text-white" />
@@ -71,7 +71,7 @@ export default function FranchisesList() {
             {filtered.map(p => (
               <Link key={p._id} to={`/institute/${p.slug}`} className="card hover:shadow-md transition-shadow group">
                 <div className="flex items-center gap-3 mb-3">
-                  {p.logo ? <img src={p.logo} alt={p.instituteName} className="w-12 h-12 rounded-lg object-cover" /> : <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: p.themeColor || '#2563eb' }}><GraduationCap className="w-6 h-6 text-white" /></div>}
+                  {p.logo ? <img src={p.logo} alt={p.instituteName} className="w-12 h-12 rounded-lg object-cover" onError={(e) => { const img = e.target; if (!img.dataset.retried && p.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = p.logo.substring(p.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} /> : <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: p.themeColor || '#2563eb' }}><GraduationCap className="w-6 h-6 text-white" /></div>}
                   <div>
                     <h3 className="font-semibold group-hover:text-primary-600 transition-colors">{p.instituteName}</h3>
                     <p className="text-xs text-gray-500">{p.tagline || 'Training Institute'}</p>

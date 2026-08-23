@@ -97,7 +97,7 @@ router.get('/public', async (req, res) => {
       .select('instituteName slug city state address pincode phone alternatePhone email logo themeColor tagline franchiseId status showInAdmissionForm')
       .sort({ createdAt: -1 });
 
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const partnersWithFullLogo = partners.map(p => {
       const partnerObj = p.toObject();
       if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
@@ -156,7 +156,7 @@ router.get('/public/receipt/:param', async (req, res) => {
     if (orgHomepage && orgHomepage.settings && orgHomepage.settings.logo) {
       const logoPath = orgHomepage.settings.logo;
       if (logoPath.startsWith('/uploads/')) {
-        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
         orgHomepage.settings.logo = `${baseUrl}${logoPath}`;
       }
     }
@@ -174,7 +174,7 @@ router.get('/public/receipt/:param', async (req, res) => {
 router.get('/', protect, superAdminOnly, async (req, res) => {
   try {
     const partners = await Partner.find().sort({ createdAt: -1 });
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     const partnersWithLogo = partners.map(p => {
       const obj = p.toObject();
       if (obj.logo && obj.logo.startsWith('/uploads/')) {
@@ -199,7 +199,7 @@ router.get('/:id', protect, async (req, res) => {
     }
     const partnerObj = partner.toObject();
     if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
       partnerObj.logo = `${baseUrl}${partnerObj.logo}`;
     }
     res.json({ success: true, partner: partnerObj });
@@ -218,7 +218,7 @@ router.get('/slug/:slug', async (req, res) => {
     const homepage = await Homepage.findOne({ partnerId: partner._id });
 
     const partnerObj = partner.toObject();
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
       partnerObj.logo = `${baseUrl}${partnerObj.logo}`;
     }
@@ -440,7 +440,7 @@ router.post('/:id/upload-logo', protect, (req, res, next) => {
     if (!partner) {
       return res.status(404).json({ success: false, message: 'Partner not found' });
     }
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     res.json({ success: true, message: 'Logo uploaded successfully!', logo: `${baseUrl}${logoPath}`, partner });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

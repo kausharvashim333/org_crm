@@ -30,11 +30,16 @@ export default function Footer({ homepageData }) {
                   alt="logo"
                   className="w-10 h-10 rounded-xl object-cover border border-slate-800"
                   onError={(e) => {
-                    if (!e.target.dataset.retried && logo.startsWith('/uploads/')) {
-                      e.target.dataset.retried = 'true';
-                      e.target.src = `/api${logo}`;
+                    const img = e.target;
+                    if (!img.dataset.retried && logo.startsWith('/uploads/')) {
+                      img.dataset.retried = 'true';
+                      img.src = `/api${logo}`;
+                    } else if (!img.dataset.retried2 && logo.includes('/uploads/')) {
+                      img.dataset.retried2 = 'true';
+                      const path = logo.substring(logo.indexOf('/uploads/'));
+                      img.src = `/api${path}`;
                     } else {
-                      e.target.style.display = 'none';
+                      img.style.display = 'none';
                     }
                   }}
                 />

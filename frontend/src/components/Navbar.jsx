@@ -209,11 +209,19 @@ export default function Navbar({ activePage }) {
               alt="logo"
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-slate-100 shadow-xs"
               onError={(e) => {
-                if (!e.target.dataset.retried && logo.startsWith('/uploads/')) {
-                  e.target.dataset.retried = 'true';
-                  e.target.src = `/api${logo}`;
+                const img = e.target;
+                if (!img.dataset.retried && logo.startsWith('/uploads/')) {
+                  img.dataset.retried = 'true';
+                  img.src = `/api${logo}`;
+                } else if (!img.dataset.retried2 && logo.includes('/uploads/')) {
+                  img.dataset.retried2 = 'true';
+                  const path = logo.substring(logo.indexOf('/uploads/'));
+                  img.src = `/api${path}`;
+                } else if (!img.dataset.retried3 && logo.startsWith('/uploads/')) {
+                  img.dataset.retried3 = 'true';
+                  img.src = logo;
                 } else {
-                  e.target.style.display = 'none';
+                  img.style.display = 'none';
                 }
               }}
             />

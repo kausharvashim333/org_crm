@@ -86,7 +86,7 @@ router.post('/login', async (req, res) => {
       if (partner) {
         partner = partner.toObject();
         if (partner.logo && partner.logo.startsWith('/uploads/')) {
-          const baseUrl = `${req.protocol}://${req.get('host')}`;
+          const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
           partner.logo = `${baseUrl}${partner.logo}`;
         }
       }
@@ -120,7 +120,7 @@ router.get('/me', protect, async (req, res) => {
       if (partner) {
         partner = partner.toObject();
         if (partner.logo && partner.logo.startsWith('/uploads/')) {
-          const baseUrl = `${req.protocol}://${req.get('host')}`;
+          const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
           partner.logo = `${baseUrl}${partner.logo}`;
         }
       }
@@ -469,7 +469,7 @@ router.post('/google-login', async (req, res) => {
       if (partner) {
         partner = partner.toObject();
         if (partner.logo && partner.logo.startsWith('/uploads/')) {
-          const baseUrl = `${req.protocol}://${req.get('host')}`;
+          const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
           partner.logo = `${baseUrl}${partner.logo}`;
         }
       }
