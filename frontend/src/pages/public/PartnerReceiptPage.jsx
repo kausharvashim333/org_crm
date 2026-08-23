@@ -70,10 +70,9 @@ export default function PartnerReceiptPage() {
   const planName = payment.planName || proposal.partnershipPlan || 'Authorized Study Center Plan';
   const paidAmount = payment.paidAmount || payment.planFee || 0;
 
-  // Verification QR Code encoding essential registry details
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-    `FRANCHISE AFFILIATION RECEIPT | ORG: ${orgName} | CENTER: ${partner.instituteName} | CODE: ${partner.franchiseId} | OWNER: ${partner.ownerName} | STATUS: ${isPaid ? 'PAID & REGISTERED' : 'SUBMITTED PENDING'} | CITY: ${partner.city}`
-  )}`;
+  // Verification QR Code — links to public verification page
+  const verifyUrl = `${window.location.origin}/verify-franchise/${partner.franchiseId || franchiseId}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(verifyUrl)}`;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
