@@ -39,7 +39,16 @@ export default function FranchisesList() {
       <Navbar activePage="franchises" />
 
       <section className="py-12 px-4 max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2" style={{ color: themeColor }}>Our Partner Centers</h1>
+        <div className="flex items-center gap-3 mb-2">
+          {logo ? (
+            <img src={logo} alt={orgName} className="w-12 h-12 rounded-xl object-cover border border-slate-200" />
+          ) : (
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: themeColor }}>
+              <GraduationCap className="w-6 h-6 text-white" />
+            </div>
+          )}
+          <h1 className="text-3xl font-bold" style={{ color: themeColor }}>Our Partner Centers</h1>
+        </div>
         <p className="text-gray-500 mb-8">Find a {orgName} partner center near you</p>
 
         <div className="flex gap-4 mb-6">

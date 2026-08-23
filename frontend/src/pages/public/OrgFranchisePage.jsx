@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getOrgHomepagePublic } from '../../api';
+import { getOrgHomepagePublic, getPublicPartners } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import SEO from '../../components/SEO';
@@ -52,11 +52,13 @@ function SectionHeading({ title, subtitle, themeColor, light = false }) {
 export default function OrgFranchisePage() {
   const [hp, setHp] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [partners, setPartners] = useState([]);
 
   useEffect(() => {
     getOrgHomepagePublic()
       .then(res => { setHp(res.data.homepage); setLoading(false); })
       .catch(() => setLoading(false));
+    getPublicPartners().then(res => setPartners(res.data?.partners || [])).catch(() => {});
   }, []);
 
   if (loading) return (
@@ -67,6 +69,7 @@ export default function OrgFranchisePage() {
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
   const orgName = hp?.settings?.orgName || 'Skill India';
+  const orgLogo = hp?.settings?.logo;
   const stats = hp?.stats || {};
   const franchise = hp?.franchise || { benefits: [], steps: [], plans: [] };
   const plans = (franchise.plans || []).filter(p => p.isActive !== false);
@@ -87,9 +90,18 @@ export default function OrgFranchisePage() {
 
           <div className="max-w-5xl mx-auto text-center relative z-10 px-4 py-24 space-y-8">
             <Reveal>
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold uppercase tracking-wider text-white/90">
-                <Handshake className="w-4 h-4" style={{ color: themeColor }} /> {orgName} Partner Network
-              </span>
+              <div className="flex items-center justify-center gap-3 mb-2">
+                {orgLogo ? (
+                  <img src={orgLogo} alt={orgName} className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg" />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: themeColor }}>
+                    <GraduationCap className="w-7 h-7 text-white" />
+                  </div>
+                )}
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold uppercase tracking-wider text-white/90">
+                  <Handshake className="w-4 h-4" style={{ color: themeColor }} /> {orgName} Partner Network
+                </span>
+              </div>
             </Reveal>
             <Reveal delay={100}>
               <h1 className="text-4xl md:text-7xl font-black tracking-tight leading-[1.1] text-white">
@@ -363,6 +375,44 @@ export default function OrgFranchisePage() {
             </div>
           </div>
         </section>
+
+        {/* Our Partner Centers Section */}
+        {partners.length > 0 && (
+          <section className="py-20 px-4 bg-white border-t border-slate-200/60">
+            <div className="max-w-6xl mx-auto">
+              <Reveal><SectionHeading title="Our Partner Centers" subtitle={`Join ${partners.length}+ established partner centers across India`} themeColor={themeColor} /></Reveal>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {partners.slice(0, 10).map((p, i) => (
+                  <Reveal key={p._id} delay={i * 50}>
+                    <Link
+                      to={`/institute/${p.slug}`}
+                      className="group flex flex-col items-center gap-3 bg-white rounded-2xl p-5 border border-slate-200 hover:shadow-lg hover:border-slate-300 transition-all"
+                    >
+                      {p.logo ? (
+                        <img src={p.logo} alt={p.instituteName} className="w-16 h-16 rounded-xl object-cover border border-slate-200" />
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${p.themeColor || themeColor}15`, border: `1px solid ${p.themeColor || themeColor}20` }}>
+                          <Building className="w-8 h-8" style={{ color: p.themeColor || themeColor }} />
+                        </div>
+                      )}
+                      <div className="text-center">
+                        <h4 className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-2">{p.instituteName}</h4>
+                        <p className="text-[10px] text-slate-500 mt-0.5">{p.city}, {p.state}</p>
+                      </div>
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
+              {partners.length > 10 && (
+                <div className="text-center mt-8">
+                  <Link to="/franchises" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm border transition-all hover:bg-slate-50" style={{ borderColor: themeColor, color: themeColor }}>
+                    View All Centers <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Bottom CTA Banner - Premium Redesign */}
         <section className="py-24 text-white relative overflow-hidden" style={{ backgroundColor: themeColor }}>

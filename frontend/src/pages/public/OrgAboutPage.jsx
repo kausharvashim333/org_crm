@@ -54,6 +54,7 @@ export default function OrgAboutPage() {
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
   const orgName = hp?.settings?.orgName || 'Skill India';
+  const orgLogo = hp?.settings?.logo;
   const about = hp?.about || {};
   const stats = hp?.stats || {};
   const certifications = hp?.certifications || {};
@@ -69,9 +70,18 @@ export default function OrgAboutPage() {
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, white 2px, transparent 2px)', backgroundSize: '32px 32px' }} />
           <div className="max-w-4xl mx-auto relative z-10 space-y-6">
             <Reveal>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/15 border border-white/20 backdrop-blur-md text-white">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Established Education Networks</span>
+              <div className="flex items-center justify-center gap-3 mb-2">
+                {orgLogo ? (
+                  <img src={orgLogo} alt={orgName} className="w-14 h-14 rounded-2xl object-cover border border-white/20 shadow-lg" />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-white/10 border border-white/20">
+                    <GraduationCap className="w-7 h-7 text-white" />
+                  </div>
+                )}
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/15 border border-white/20 backdrop-blur-md text-white">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Established Education Networks</span>
+                </div>
               </div>
             </Reveal>
             <Reveal delay={100}>
