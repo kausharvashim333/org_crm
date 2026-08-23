@@ -357,32 +357,6 @@ export default function PartnerLogin() {
             </p>
           </div>
 
-          {/* Registered Partner Center Display Banner */}
-          {partner && (
-            <div className="mb-6 bg-slate-900 text-white rounded-2xl p-4 border border-slate-800 shadow-md flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white overflow-hidden flex-shrink-0">
-                {partner.logo && typeof partner.logo === 'string' && partner.logo.trim() !== '' && partner.logo !== 'undefined' ? (
-                  <img src={partner.logo} alt="logo" className="w-full h-full object-cover" onError={(e) => { const img = e.target; if (!img.dataset.retried && partner.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = partner.logo.substring(partner.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
-                ) : (
-                  <Building2 className="w-6 h-6 text-blue-400" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-blue-300 bg-blue-500/20 border border-blue-400/30 px-2 py-0.5 rounded-full">
-                    {partner.franchiseId || partner.code || 'REGISTERED CENTER'}
-                  </span>
-                </div>
-                <h3 className="font-extrabold text-sm text-white mt-1 truncate">
-                  {partner.instituteName}
-                </h3>
-                {partner.city && (
-                  <p className="text-xs text-slate-400 truncate">📍 {partner.city}, {partner.state}</p>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -503,7 +477,7 @@ export default function PartnerLogin() {
           <div className="mt-6 text-center pt-5 border-t border-slate-100 space-y-3">
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               <Link 
-                to={partner ? `/institute/${partner.slug}/contact` : "/contact"} 
+                to="/contact" 
                 className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-xs font-bold border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all text-slate-650"
               >
                 <Mail className="w-3.5 h-3.5" /> Admission Inquiry
