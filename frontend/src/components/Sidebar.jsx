@@ -125,6 +125,8 @@ export default function Sidebar({ role, isOpen, onClose }) {
       icon: BookOpen,
       links: [
         { to: '/partner/courses', icon: BookOpen, label: 'Courses' },
+        { to: '/partner/attendance', icon: Calendar, label: 'Attendance' },
+        { to: '/partner/exams', icon: ClipboardList, label: 'Exams & Tests' },
         { to: '/partner/certificates', icon: Award, label: 'Certificates' },
       ],
     },

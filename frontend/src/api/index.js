@@ -99,7 +99,11 @@ export const getExams = (params) => API.get('/exams', { params });
 export const getExam = (id) => API.get(`/exams/${id}`);
 export const createExam = (data) => API.post('/exams', data);
 export const updateExam = (id, data) => API.put(`/exams/${id}`, data);
+export const deleteExam = (id) => API.delete(`/exams/${id}`);
 export const submitExamResults = (id, results) => API.post(`/exams/${id}/results`, { results });
+export const getStudentAvailableExams = () => API.get('/exams/student/available');
+export const getExamQuestions = (id) => API.get(`/exams/${id}/questions`);
+export const submitExamAnswers = (id, data) => API.post(`/exams/${id}/submit`, data);
 
 export const getProjects = (params) => API.get('/projects', { params });
 export const getProject = (id) => API.get(`/projects/${id}`);

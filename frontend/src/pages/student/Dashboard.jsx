@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getStudentLmsDashboard, changePassword, updateStudentLmsProfile } from '../../api';
+import { getStudentLmsDashboard, changePassword, updateStudentLmsProfile, getStudentAvailableExams } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { 
   BookOpen, PlayCircle, Award, CheckCircle2, LogOut, GraduationCap, ArrowRight, User, 
@@ -109,6 +109,12 @@ export default function StudentDashboard() {
     loadDashboard();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'exams') {
+      getStudentAvailableExams().then(res => setAvailableExams(res.data.exams || [])).catch(() => {});
+    }
+  }, [activeTab]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -212,6 +218,7 @@ export default function StudentDashboard() {
   const exams = dashboardData?.exams || [];
   const notifications = dashboardData?.notifications || [];
   const [showNotifications, setShowNotifications] = useState(false);
+  const [availableExams, setAvailableExams] = useState([]);
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const orgSettings = dashboardData?.orgSettings;
@@ -294,7 +301,7 @@ export default function StudentDashboard() {
             { id: 'courses', label: 'My Courses', icon: BookOpen, count: courses.length },
             { id: 'materials', label: 'Study Materials', icon: FileText, count: materials.length },
             { id: 'attendance', label: 'My Attendance', icon: Calendar, count: attendance.length },
-            { id: 'exams', label: 'Exam Results', icon: ClipboardList, count: exams.length },
+            { id: 'exams', label: 'Exams & Tests', icon: ClipboardList, count: exams.length },
             { id: 'fees', label: 'Fee Receipts', icon: CreditCard, count: fees.length },
             { id: 'certificates', label: 'My Certificates', icon: Award, count: certificates.length },
             { id: 'profile', label: 'My Profile & Settings', icon: User },
@@ -362,7 +369,7 @@ export default function StudentDashboard() {
                 {activeTab === 'courses' && '📚 My Enrolled Courses'}
                 {activeTab === 'materials' && '📁 Study Materials & eBook Notes'}
                 {activeTab === 'attendance' && '📅 My Attendance Records'}
-                {activeTab === 'exams' && '📝 Exam Results & Grades'}
+                {activeTab === 'exams' && '📝 Exams & Tests'}
                 {activeTab === 'fees' && '💳 Fee Receipts & Ledger'}
                 {activeTab === 'certificates' && '🎓 My QR Verifiable Certificates'}
                 {activeTab === 'profile' && '⚙️ My Profile & Security Settings'}
@@ -673,66 +680,117 @@ export default function StudentDashboard() {
             <div className="space-y-4 animate-fadeIn">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                  <ClipboardList className="w-5 h-5 text-indigo-600" /> Exam Results & Grades
+                  <ClipboardList className="w-5 h-5 text-indigo-600" /> Exams & Tests
                 </h3>
-                <span className="text-xs text-slate-400 font-medium">{exams.length} results</span>
               </div>
 
-              {/* Summary */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm text-center">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exams Taken</p>
-                  <p className="text-2xl font-black text-indigo-600">{exams.length}</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 border border-emerald-200/80 shadow-sm text-center bg-emerald-50/20">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Passed</p>
-                  <p className="text-2xl font-black text-emerald-600">{exams.filter(e => e.status === 'pass').length}</p>
-                </div>
-                <div className="bg-white rounded-2xl p-4 border border-red-200/80 shadow-sm text-center bg-red-50/20">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Failed</p>
-                  <p className="text-2xl font-black text-red-500">{exams.filter(e => e.status === 'fail').length}</p>
-                </div>
-              </div>
-
-              {/* Exam Results Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {exams.length === 0 ? (
-                  <div className="col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-12 text-center">
-                    <ClipboardList className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-sm text-slate-400 font-medium">No exam results declared yet</p>
+              {/* Available Exams */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2"><Clock className="w-4 h-4 text-indigo-500" /> Available Tests</h4>
+                {availableExams.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8 text-center">
+                    <ClipboardList className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                    <p className="text-sm text-slate-400 font-medium">No tests available right now</p>
                   </div>
-                ) : exams.map((exam, i) => {
-                  const percentage = exam.maxMarks > 0 ? ((exam.marksObtained / exam.maxMarks) * 100).toFixed(1) : 0;
-                  const isPass = exam.status === 'pass';
-                  return (
-                    <div key={i} className={`bg-white rounded-3xl p-5 border shadow-sm space-y-3 ${isPass ? 'border-emerald-200/80' : 'border-red-200/80'}`}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-bold text-sm text-slate-900">{exam.name}</h4>
-                          <p className="text-[11px] text-slate-500">{exam.courseName} · {exam.examType}</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {availableExams.map((ex, i) => (
+                      <div key={i} className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-bold text-sm text-slate-900">{ex.name}</h4>
+                            <p className="text-[11px] text-slate-500">{ex.courseName} · {ex.examType}</p>
+                          </div>
+                          {ex.hasSubmitted ? (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">SUBMITTED</span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">PENDING</span>
+                          )}
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-black border ${isPass ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
-                          {exam.status?.toUpperCase()}
-                        </span>
+                        <div className="flex items-center gap-4 text-xs text-slate-500">
+                          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {ex.durationMinutes} min</span>
+                          <span className="flex items-center gap-1"><ClipboardList className="w-3.5 h-3.5" /> {ex.questionCount} Qs</span>
+                          <span>Max: {ex.maxMarks}</span>
+                        </div>
+                        {ex.hasSubmitted && ex.submission ? (
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                            <div className="text-sm">
+                              <span className="font-bold text-slate-800">{ex.submission.totalMarksAwarded}/{ex.maxMarks}</span>
+                              <span className="text-slate-400 ml-2">Grade: {ex.submission.grade}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${ex.submission.status === 'pass' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                              {ex.submission.status?.toUpperCase()}
+                            </span>
+                          </div>
+                        ) : (
+                          <button onClick={() => navigate(`/student/exam/${ex._id}`)} className="btn-primary w-full text-sm flex items-center justify-center gap-2">
+            <PlayCircle className="w-4 h-4" /> Start Exam
+                          </button>
+                        )}
                       </div>
-                      <div className="flex items-end justify-between pt-2 border-t border-slate-100">
-                        <div className="space-y-0.5">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase">Marks</p>
-                          <p className="text-lg font-black text-slate-900">{exam.marksObtained}/{exam.maxMarks}</p>
-                        </div>
-                        <div className="space-y-0.5 text-right">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase">Grade</p>
-                          <p className={`text-2xl font-black ${isPass ? 'text-emerald-600' : 'text-red-500'}`}>{exam.grade || 'F'}</p>
-                        </div>
-                        <div className="space-y-0.5 text-right">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase">%</p>
-                          <p className="text-lg font-black text-indigo-600">{percentage}%</p>
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-slate-400">Conducted: {new Date(exam.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Exam Results Summary */}
+              <div className="border-t pt-4 space-y-3">
+                <h4 className="text-sm font-bold text-slate-700">Past Results</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm text-center">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Exams Taken</p>
+                    <p className="text-2xl font-black text-indigo-600">{exams.length}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 border border-emerald-200/80 shadow-sm text-center bg-emerald-50/20">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Passed</p>
+                    <p className="text-2xl font-black text-emerald-600">{exams.filter(e => e.status === 'pass').length}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl p-4 border border-red-200/80 shadow-sm text-center bg-red-50/20">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Failed</p>
+                    <p className="text-2xl font-black text-red-500">{exams.filter(e => e.status === 'fail').length}</p>
+                  </div>
+                </div>
+
+                {/* Exam Results Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {exams.length === 0 ? (
+                    <div className="col-span-2 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 text-center">
+                      <ClipboardList className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                      <p className="text-sm text-slate-400 font-medium">No exam results declared yet</p>
                     </div>
-                  );
-                })}
+                  ) : exams.map((exam, i) => {
+                    const percentage = exam.maxMarks > 0 ? ((exam.marksObtained / exam.maxMarks) * 100).toFixed(1) : 0;
+                    const isPass = exam.status === 'pass';
+                    return (
+                      <div key={i} className={`bg-white rounded-2xl p-4 border shadow-sm space-y-2 ${isPass ? 'border-emerald-200/80' : 'border-red-200/80'}`}>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-bold text-sm text-slate-900">{exam.name}</h4>
+                            <p className="text-[11px] text-slate-500">{exam.courseName} · {exam.examType}</p>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black border ${isPass ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                            {exam.status?.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex items-end justify-between pt-2 border-t border-slate-100">
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">Marks</p>
+                            <p className="text-base font-black text-slate-900">{exam.marksObtained}/{exam.maxMarks}</p>
+                          </div>
+                          <div className="space-y-0.5 text-right">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">Grade</p>
+                            <p className={`text-xl font-black ${isPass ? 'text-emerald-600' : 'text-red-500'}`}>{exam.grade || 'F'}</p>
+                          </div>
+                          <div className="space-y-0.5 text-right">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase">%</p>
+                            <p className="text-base font-black text-indigo-600">{percentage}%</p>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-slate-400">Conducted: {new Date(exam.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}

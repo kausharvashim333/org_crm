@@ -78,6 +78,7 @@ const StudentDashboard = lazy(() => import('./pages/student/Dashboard'));
 const StudentCoursePlayer = lazy(() => import('./pages/student/CoursePlayer'));
 const StudentAssessment = lazy(() => import('./pages/student/Assessment'));
 const CertificateView = lazy(() => import('./pages/student/CertificateView'));
+const StudentTakeExam = lazy(() => import('./pages/student/TakeExam'));
 
 function PageLoader() {
   return (
@@ -212,6 +213,7 @@ export default function App() {
         <Route path="/student/courses/:courseId" element={<StudentCoursePlayer />} />
         <Route path="/student/course/:courseId/assessment" element={<StudentAssessment />} />
         <Route path="/student/certificate/:certificateId" element={<CertificateView />} />
+        <Route path="/student/exam/:examId" element={<StudentTakeExam />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
