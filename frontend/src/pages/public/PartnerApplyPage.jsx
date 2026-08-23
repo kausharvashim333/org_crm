@@ -5,7 +5,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import {
   Sparkles, Send, Mail, Check, ArrowLeft, Building2, User, MapPin, Laptop, Briefcase, HelpCircle,
-  Award, Zap, Crown, CreditCard, ShieldCheck, CheckCircle2, IndianRupee, AlertCircle
+  Award, Zap, Crown, CreditCard, ShieldCheck, CheckCircle2, IndianRupee, AlertCircle, FileText
 } from 'lucide-react';
 
 export default function PartnerApplyPage() {
