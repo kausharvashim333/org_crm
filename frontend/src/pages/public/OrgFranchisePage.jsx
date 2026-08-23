@@ -173,25 +173,11 @@ export default function OrgFranchisePage() {
           </section>
         )}
 
-        {/* Dynamic Partnership Plans Section - Premium Redesign */}
+        {/* Dynamic Partnership Plans Section */}
         {plans.length > 0 && (
-          <section className="py-24 px-4 bg-slate-900 relative overflow-hidden" id="partnership-plans">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_60%,transparent_100%)] opacity-20"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-10" style={{ backgroundColor: themeColor, filter: 'blur(120px)' }}></div>
-            <div className="max-w-7xl mx-auto relative z-10">
-              <Reveal>
-                <div className="text-center mb-16">
-                  <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-slate-800 border border-slate-700 text-white/90 text-xs font-black uppercase tracking-wider mb-4">
-                    <Sparkles className="w-3.5 h-3.5" style={{ color: themeColor }} /> Institutional Partner Models
-                  </span>
-                  <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
-                    Choose Your Partnership Plan
-                  </h2>
-                  <p className="text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                    Transparent, one-time investment packages with zero monthly royalty, complete course curriculum, and student management CRM.
-                  </p>
-                </div>
-              </Reveal>
+          <section className="py-24 px-4 bg-white" id="partnership-plans">
+            <div className="max-w-7xl mx-auto">
+              <Reveal><SectionHeading title="Choose Your Partnership Plan" subtitle="Transparent, one-time investment packages with zero monthly royalty, complete course curriculum, and student management CRM." themeColor={themeColor} /></Reveal>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
                 {plans.map((plan, idx) => {
@@ -203,43 +189,44 @@ export default function OrgFranchisePage() {
                   return (
                     <Reveal key={idx} delay={idx * 100} className="h-full">
                       <div
-                        className={`h-full flex flex-col rounded-3xl transition-all duration-300 relative overflow-hidden ${
+                        className={`h-full flex flex-col rounded-2xl transition-all duration-300 relative overflow-hidden border ${
                           isPopular
-                            ? 'bg-white text-slate-900 shadow-2xl ring-2 ring-white/50 scale-[1.03] z-10'
-                            : 'bg-slate-800 border border-slate-700 text-white hover:bg-slate-750 hover:border-slate-600'
+                            ? 'bg-white text-slate-900 shadow-xl border-2 z-10'
+                            : 'bg-white text-slate-900 border-slate-200 hover:border-slate-300 hover:shadow-lg'
                         }`}
+                        style={isPopular ? { borderColor: themeColor } : {}}
                       >
                         {isPopular && (
-                          <div className="text-center text-xs font-black uppercase tracking-widest py-2 flex items-center justify-center gap-1.5 text-white" style={{ background: `linear-gradient(90deg, ${themeColor}, ${themeColor}dd)` }}>
+                          <div className="text-center text-xs font-black uppercase tracking-widest py-2 flex items-center justify-center gap-1.5 text-white" style={{ backgroundColor: themeColor }}>
                             <Crown className="w-3.5 h-3.5 text-yellow-300" /> {plan.badge || 'Most Recommended'}
                           </div>
                         )}
 
                         <div className="p-7 flex-1 flex flex-col">
                           <div className="flex items-center justify-between gap-2 mb-3">
-                            <h3 className={`text-xl font-black ${isPopular ? 'text-slate-900' : 'text-white'}`}>
+                            <h3 className="text-xl font-black text-slate-900">
                               {plan.name}
                             </h3>
                             {!isPopular && plan.badge && (
-                              <span className="px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-white/80 text-[10px] font-black uppercase tracking-wider">
+                              <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-wider">
                                 {plan.badge}
                               </span>
                             )}
                           </div>
 
                           {plan.tagline && (
-                            <p className={`text-xs font-medium leading-relaxed mb-5 ${isPopular ? 'text-slate-500' : 'text-slate-400'}`}>
+                            <p className="text-xs font-medium leading-relaxed mb-5 text-slate-500">
                               {plan.tagline}
                             </p>
                           )}
 
-                          <div className={`p-5 rounded-2xl mb-5 space-y-2 ${isPopular ? 'bg-slate-50 border border-slate-100' : 'bg-slate-800 border border-slate-700'}`}>
+                          <div className="p-5 rounded-xl mb-5 space-y-2 bg-slate-50 border border-slate-100">
                             <div className="flex items-baseline gap-2">
-                              <span className={`text-3xl sm:text-4xl font-black ${isPopular ? 'text-slate-900' : 'text-white'}`}>
+                              <span className="text-3xl sm:text-4xl font-black text-slate-900">
                                 ₹{plan.fee?.toLocaleString('en-IN')}
                               </span>
                               {plan.originalFee > plan.fee && (
-                                <span className={`text-sm font-semibold line-through ${isPopular ? 'text-slate-400' : 'text-slate-500'}`}>
+                                <span className="text-sm font-semibold line-through text-slate-400">
                                   ₹{plan.originalFee?.toLocaleString('en-IN')}
                                 </span>
                               )}
@@ -249,30 +236,30 @@ export default function OrgFranchisePage() {
                                 </span>
                               )}
                             </div>
-                            <p className={`text-[11px] font-semibold ${isPopular ? 'text-slate-500' : 'text-slate-400'}`}>
+                            <p className="text-[11px] font-semibold text-slate-500">
                               One-time Setup & Affiliation Fee
                             </p>
                           </div>
 
                           <div className="grid grid-cols-2 gap-2 mb-5 text-xs">
-                            <div className={`p-3 rounded-xl border ${isPopular ? 'bg-indigo-50 border-indigo-100' : 'bg-slate-800 border-slate-700'}`}>
-                              <span className={`text-[10px] font-bold block uppercase ${isPopular ? 'text-indigo-900/70' : 'text-slate-400'}`}>Royalty</span>
-                              <strong className={`font-black text-xs ${isPopular ? 'text-indigo-950' : 'text-white'}`}>{plan.royaltyPercentage || 'Zero Royalty'}</strong>
+                            <div className="p-3 rounded-xl border bg-slate-50 border-slate-100">
+                              <span className="text-[10px] font-bold block uppercase text-slate-400">Royalty</span>
+                              <strong className="font-black text-xs text-slate-900">{plan.royaltyPercentage || 'Zero Royalty'}</strong>
                             </div>
-                            <div className={`p-3 rounded-xl border ${isPopular ? 'bg-slate-100 border-slate-200' : 'bg-slate-800 border-slate-700'}`}>
-                              <span className={`text-[10px] font-bold block uppercase ${isPopular ? 'text-slate-500' : 'text-slate-400'}`}>Cert. Cost</span>
-                              <strong className={`font-black text-xs ${isPopular ? 'text-slate-900' : 'text-white'}`}>{plan.certificateShare || '₹150 / Student'}</strong>
+                            <div className="p-3 rounded-xl border bg-slate-50 border-slate-100">
+                              <span className="text-[10px] font-bold block uppercase text-slate-400">Cert. Cost</span>
+                              <strong className="font-black text-xs text-slate-900">{plan.certificateShare || '₹150 / Student'}</strong>
                             </div>
                           </div>
 
                           <div className="space-y-2.5 flex-1 mb-6">
-                            <p className={`text-xs font-bold uppercase tracking-wider border-b pb-2 ${isPopular ? 'text-slate-900 border-slate-100' : 'text-white/80 border-white/10'}`}>
+                            <p className="text-xs font-bold uppercase tracking-wider border-b pb-2 text-slate-900 border-slate-100">
                               What's Included:
                             </p>
                             <ul className="space-y-2">
                               {(plan.features || []).map((feature, fi) => (
-                                <li key={fi} className={`flex items-start gap-2.5 text-xs font-medium leading-snug ${isPopular ? 'text-slate-700' : 'text-slate-300'}`}>
-                                  <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <li key={fi} className="flex items-start gap-2.5 text-xs font-medium leading-snug text-slate-700">
+                                  <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: `${themeColor}15`, color: themeColor }}>
                                     <Check className="w-3 h-3 stroke-[3]" />
                                   </div>
                                   <span>{feature}</span>
@@ -283,12 +270,12 @@ export default function OrgFranchisePage() {
 
                           <Link
                             to={plan.buttonLink ? `${plan.buttonLink}?plan=${encodeURIComponent(plan.name)}` : `/franchise/apply?plan=${encodeURIComponent(plan.name)}`}
-                            className={`w-full py-4 px-6 rounded-2xl font-black text-xs sm:text-sm text-center flex items-center justify-center gap-2 transition-all hover:scale-[1.02] ${
+                            className={`w-full py-4 px-6 rounded-xl font-black text-xs sm:text-sm text-center flex items-center justify-center gap-2 transition-all hover:scale-[1.02] ${
                               isPopular
                                 ? 'text-white shadow-lg'
-                                : 'bg-white/10 hover:bg-white/20 border border-white/20 text-white'
+                                : 'text-white'
                             }`}
-                            style={isPopular ? { backgroundColor: themeColor, boxShadow: `0 8px 30px ${themeColor}40` } : {}}
+                            style={{ backgroundColor: themeColor, boxShadow: isPopular ? `0 8px 30px ${themeColor}40` : `0 4px 14px ${themeColor}25` }}
                           >
                             {plan.buttonText || 'Apply for this Plan'} <ArrowRight className="w-4 h-4" />
                           </Link>
@@ -300,19 +287,20 @@ export default function OrgFranchisePage() {
               </div>
 
               <Reveal delay={200}>
-                <div className="mt-12 p-5 rounded-2xl bg-slate-800 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                <div className="mt-12 p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0" style={{ color: themeColor }}>
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${themeColor}12`, border: `1px solid ${themeColor}20`, color: themeColor }}>
                       <ShieldCheck className="w-6 h-6" />
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-sm text-white">Need Custom Institutional Setup or State Partnership?</h4>
-                      <p className="text-xs text-slate-400">Contact our partner counseling experts directly for tailored agreements and territorial booking.</p>
+                      <h4 className="font-extrabold text-sm text-slate-800">Need Custom Institutional Setup or State Partnership?</h4>
+                      <p className="text-xs text-slate-500">Contact our partner counseling experts directly for tailored agreements and territorial booking.</p>
                     </div>
                   </div>
                   <Link
                     to="/contact"
-                    className="px-6 py-2.5 rounded-xl border border-white/20 hover:bg-white/10 text-white text-xs font-bold whitespace-nowrap transition-all"
+                    className="px-6 py-2.5 rounded-xl border font-bold text-xs whitespace-nowrap transition-all hover:bg-slate-100"
+                    style={{ borderColor: themeColor, color: themeColor }}
                   >
                     Talk to Counselor
                   </Link>
