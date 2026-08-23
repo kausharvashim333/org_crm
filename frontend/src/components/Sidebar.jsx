@@ -5,10 +5,10 @@ import {
   Calendar, FileText, Globe, Settings, LogOut, Building2, Briefcase,
   Bell, Award, FolderOpen, ChevronDown, MessageSquare, Megaphone, Image,
   Info, BarChart3, Camera, MessageCircle, ClipboardList, MousePointerClick,
-  Contact, Palette, ShieldCheck, UserCheck, History, Lock, X, ShoppingBag, Tag
+  Contact, Palette, ShieldCheck, UserCheck, History, Lock, X, ShoppingBag, Tag, Package
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { getNotifications, markAllNotificationsRead, getOrgHomepagePublic } from '../api';
+import { getNotifications, markAllNotificationsRead, getOrgHomepagePublic, getMyAddons } from '../api';
 
 export default function Sidebar({ role, isOpen, onClose }) {
   const { user, logout } = useAuth();
@@ -18,10 +18,17 @@ export default function Sidebar({ role, isOpen, onClose }) {
   const [notifications, setNotifications] = useState([]);
   const [orgSettings, setOrgSettings] = useState(null);
   const [openCategory, setOpenCategory] = useState(null);
+  const [activeAddons, setActiveAddons] = useState(new Set());
 
   useEffect(() => {
     if (user) {
       getNotifications().then(res => setNotifications(res.data.notifications)).catch(() => {});
+      if (role === 'partner') {
+        getMyAddons().then(res => {
+          const keys = new Set(res.data.addons.map(a => a.addonKey));
+          setActiveAddons(keys);
+        }).catch(() => {});
+      }
     }
     if (role === 'super_admin') {
       getOrgHomepagePublic().then(res => setOrgSettings(res.data.homepage?.settings)).catch(() => {});
@@ -65,6 +72,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       links: [
         { to: '/admin/orders', icon: ShoppingBag, label: 'All Orders & Invoices' },
         { to: '/admin/coupons', icon: Tag, label: 'Discount Coupons' },
+        { to: '/admin/addons', icon: Package, label: 'Add-on Manager' },
       ],
     },
     {
@@ -126,7 +134,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       links: [
         { to: '/partner/courses', icon: BookOpen, label: 'Courses' },
         { to: '/partner/attendance', icon: Calendar, label: 'Attendance' },
-        { to: '/partner/exams', icon: ClipboardList, label: 'Exams & Tests' },
+        ...(activeAddons.has('exam_system') ? [{ to: '/partner/exams', icon: ClipboardList, label: 'Exams & Tests' }] : []),
         { to: '/partner/certificates', icon: Award, label: 'Certificates' },
       ],
     },
@@ -137,6 +145,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
         { to: '/partner/staff', icon: UserCog, label: 'Staff' },
         { to: '/partner/inquiries', icon: Bell, label: 'Inquiries' },
         { to: '/partner/homepage', icon: Globe, label: 'Edit Homepage' },
+        { to: '/partner/addons', icon: Package, label: 'Add-on Store' },
         { to: '/partner/settings', icon: Settings, label: 'Settings' },
       ],
     },

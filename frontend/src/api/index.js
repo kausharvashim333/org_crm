@@ -228,3 +228,15 @@ export const createStaffUser = (data) => API.post('/rbac/staff-users', data);
 export const getAuditLogs = () => API.get('/rbac/audit-logs');
 export const getSecurityExport = () => API.get('/rbac/security/export');
 
+// Add-ons
+export const getAddons = () => API.get('/addons');
+export const getMyAddons = () => API.get('/addons/my');
+export const purchaseAddonOrder = (data) => API.post('/addons/purchase-order', data);
+export const verifyAddonPayment = (data) => API.post('/addons/verify-payment', data);
+export const getAdminAddons = () => API.get('/addons/admin');
+export const createAddon = (data) => API.post('/addons/admin', data);
+export const updateAddon = (id, data) => API.put(`/addons/admin/${id}`, data);
+export const deleteAddon = (id) => API.delete(`/addons/admin/${id}`);
+export const getAddonPurchases = () => API.get('/addons/admin/purchases');
+export const adminActivateAddon = (data) => API.post('/addons/admin/activate', data);
+export const adminDeactivateAddon = (id) => API.put(`/addons/admin/deactivate/${id}`);

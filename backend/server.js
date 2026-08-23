@@ -152,6 +152,7 @@ app.use('/api/student-lms', require('./routes/studentLms'));
 app.use('/api/rbac', require('./routes/rbac'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/coupons', require('./routes/coupons'));
+app.use('/api/addons', require('./routes/addons'));
 
 // Centralized Error Handler (Prevent Stack Trace Leakage)
 app.use((err, req, res, next) => {
