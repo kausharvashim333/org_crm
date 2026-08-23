@@ -96,7 +96,17 @@ router.get('/public', async (req, res) => {
     const partners = await Partner.find({ status: 'active' })
       .select('instituteName slug city state address pincode phone alternatePhone email logo themeColor tagline franchiseId status showInAdmissionForm')
       .sort({ createdAt: -1 });
-    res.json({ success: true, partners });
+
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const partnersWithFullLogo = partners.map(p => {
+      const partnerObj = p.toObject();
+      if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
+        partnerObj.logo = `${baseUrl}${partnerObj.logo}`;
+      }
+      return partnerObj;
+    });
+
+    res.json({ success: true, partners: partnersWithFullLogo });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -164,7 +174,15 @@ router.get('/public/receipt/:param', async (req, res) => {
 router.get('/', protect, superAdminOnly, async (req, res) => {
   try {
     const partners = await Partner.find().sort({ createdAt: -1 });
-    res.json({ success: true, count: partners.length, partners });
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const partnersWithLogo = partners.map(p => {
+      const obj = p.toObject();
+      if (obj.logo && obj.logo.startsWith('/uploads/')) {
+        obj.logo = `${baseUrl}${obj.logo}`;
+      }
+      return obj;
+    });
+    res.json({ success: true, count: partners.length, partners: partnersWithLogo });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -179,7 +197,12 @@ router.get('/:id', protect, async (req, res) => {
     if (req.user.role === 'partner' && req.user.partnerId.toString() !== req.params.id) {
       return res.status(403).json({ success: false, message: 'Not authorized to view this partner' });
     }
-    res.json({ success: true, partner });
+    const partnerObj = partner.toObject();
+    if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      partnerObj.logo = `${baseUrl}${partnerObj.logo}`;
+    }
+    res.json({ success: true, partner: partnerObj });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -193,7 +216,14 @@ router.get('/slug/:slug', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Institute not found' });
     }
     const homepage = await Homepage.findOne({ partnerId: partner._id });
-    res.json({ success: true, partner, homepage });
+
+    const partnerObj = partner.toObject();
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
+      partnerObj.logo = `${baseUrl}${partnerObj.logo}`;
+    }
+
+    res.json({ success: true, partner: partnerObj, homepage });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -410,7 +440,8 @@ router.post('/:id/upload-logo', protect, (req, res, next) => {
     if (!partner) {
       return res.status(404).json({ success: false, message: 'Partner not found' });
     }
-    res.json({ success: true, message: 'Logo uploaded successfully!', logo: logoPath, partner });
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    res.json({ success: true, message: 'Logo uploaded successfully!', logo: `${baseUrl}${logoPath}`, partner });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

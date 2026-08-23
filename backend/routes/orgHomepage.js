@@ -406,6 +406,13 @@ const createDefaultIfMissing = async (lean = false) => {
 router.get('/public', async (req, res) => {
   try {
     const homepage = await createDefaultIfMissing(true);
+    if (homepage && homepage.settings && homepage.settings.logo) {
+      const logoPath = homepage.settings.logo;
+      if (logoPath.startsWith('/uploads/')) {
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        homepage.settings.logo = `${baseUrl}${logoPath}`;
+      }
+    }
     res.json({ success: true, homepage });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
