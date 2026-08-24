@@ -117,6 +117,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       icon: Users,
       links: [
         { to: '/partner/admission', icon: FileText, label: 'New Admission' },
+        { to: '/partner/pending-approvals', icon: ShieldCheck, label: 'Pending Approvals' },
         { to: '/partner/students', icon: Users, label: 'All Students' },
         { to: '/partner/batches', icon: Calendar, label: 'Batches' },
       ],

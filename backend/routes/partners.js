@@ -94,7 +94,7 @@ const createDefaultHomepage = async (partnerId, themeColor) => {
 router.get('/public', async (req, res) => {
   try {
     const partners = await Partner.find({ status: 'active' })
-      .select('instituteName slug city state address pincode phone alternatePhone email logo themeColor tagline franchiseId status showInAdmissionForm')
+      .select('instituteName slug city state address pincode phone alternatePhone email logo themeColor tagline franchiseId status showInAdmissionForm upiId paymentQrImage')
       .sort({ createdAt: -1 });
 
     const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
@@ -221,6 +221,9 @@ router.get('/slug/:slug', async (req, res) => {
     const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
       partnerObj.logo = `${baseUrl}${partnerObj.logo}`;
+    }
+    if (partnerObj.paymentQrImage && partnerObj.paymentQrImage.startsWith('/uploads/')) {
+      partnerObj.paymentQrImage = `${baseUrl}${partnerObj.paymentQrImage}`;
     }
 
     res.json({ success: true, partner: partnerObj, homepage });
@@ -378,8 +381,8 @@ router.put('/:id', protect, async (req, res) => {
     }
     const isSuperAdmin = ['super_admin', 'superadmin', 'admin', 'staff'].includes(req.user?.role);
     const allowedFields = isSuperAdmin
-      ? ['instituteName', 'ownerName', 'email', 'phone', 'password', 'address', 'city', 'state', 'pincode', 'agreementStartDate', 'agreementEndDate', 'status', 'tagline', 'themeColor', 'logo', 'loginBgImage', 'socialLinks', 'description', 'establishedYear', 'alternatePhone', 'aadhaarNumber', 'panNumber', 'landmark', 'mapsLink', 'premisesType', 'totalArea', 'classrooms', 'computers', 'securityDeposit', 'franchiseFee', 'bankDetails', 'gstNumber', 'documents', 'references', 'showInAdmissionForm', 'centerType', 'paymentInfo', 'proposalDetails']
-      : ['phone', 'address', 'city', 'state', 'pincode', 'tagline', 'logo', 'loginBgImage', 'socialLinks', 'description', 'establishedYear', 'alternatePhone', 'landmark', 'mapsLink', 'socialLinks'];
+      ? ['instituteName', 'ownerName', 'email', 'phone', 'password', 'address', 'city', 'state', 'pincode', 'agreementStartDate', 'agreementEndDate', 'status', 'tagline', 'themeColor', 'logo', 'loginBgImage', 'socialLinks', 'description', 'establishedYear', 'alternatePhone', 'aadhaarNumber', 'panNumber', 'landmark', 'mapsLink', 'premisesType', 'totalArea', 'classrooms', 'computers', 'securityDeposit', 'franchiseFee', 'bankDetails', 'gstNumber', 'documents', 'references', 'showInAdmissionForm', 'centerType', 'paymentInfo', 'proposalDetails', 'upiId', 'paymentQrImage']
+      : ['phone', 'address', 'city', 'state', 'pincode', 'tagline', 'logo', 'loginBgImage', 'socialLinks', 'description', 'establishedYear', 'alternatePhone', 'landmark', 'mapsLink', 'socialLinks', 'upiId', 'paymentQrImage'];
 
     const updates = {};
     allowedFields.forEach(field => {
@@ -442,6 +445,34 @@ router.post('/:id/upload-logo', protect, (req, res, next) => {
     }
     const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     res.json({ success: true, message: 'Logo uploaded successfully!', logo: `${baseUrl}${logoPath}`, partner });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Partner Payment QR Upload Route
+router.post('/:id/upload-payment-qr', protect, (req, res, next) => {
+  upload.single('paymentQr')(req, res, (err) => {
+    if (err) {
+      console.error('[PARTNER QR UPLOAD ERROR]', err.message);
+      return res.status(400).json({ success: false, message: err.message || 'QR upload failed' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    if (req.user.role === 'partner' && req.user.partnerId?.toString() !== req.params.id) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload a QR image file' });
+    }
+    const qrPath = `/uploads/${req.file.filename}`;
+    const partner = await Partner.findByIdAndUpdate(req.params.id, { paymentQrImage: qrPath }, { new: true });
+    if (!partner) {
+      return res.status(404).json({ success: false, message: 'Partner not found' });
+    }
+    res.json({ success: true, message: 'Payment QR uploaded successfully!', paymentQrImage: qrPath, partner });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

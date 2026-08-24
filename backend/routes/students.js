@@ -388,7 +388,15 @@ router.post('/public/apply', upload.fields([
 
     // Verify Razorpay signature if online payment made
     let verifiedPaymentStatus = 'pending';
-    if (paymentMode === 'online_razorpay' && razorpayOrderId && razorpayPaymentId && razorpaySignature) {
+    let isUpiQrPayment = paymentMode === 'online_upi_qr';
+    let transactionId = req.body.transactionId || '';
+
+    if (isUpiQrPayment) {
+      if (!transactionId || transactionId.trim().length < 6) {
+        return res.status(400).json({ success: false, message: 'Valid transaction ID is required for UPI QR payment' });
+      }
+      verifiedPaymentStatus = 'pending_verification';
+    } else if (paymentMode === 'online_razorpay' && razorpayOrderId && razorpayPaymentId && razorpaySignature) {
       const generatedSignature = crypto
         .createHmac('sha256', razorpayKeySecret)
         .update(`${razorpayOrderId}|${razorpayPaymentId}`)
@@ -444,19 +452,20 @@ router.post('/public/apply', upload.fields([
       graduationDetails: parseObj(graduationDetails),
       declarationsAgreed: declarationsAgreed === 'true' || declarationsAgreed === true,
       applicationNo,
-      approvalStatus: verifiedPaymentStatus === 'paid' ? 'approved' : 'pending',
+      approvalStatus: isUpiQrPayment ? 'pending' : (verifiedPaymentStatus === 'paid' ? 'approved' : 'pending'),
       admissionType: 'public_online',
-      status: 'active',
+      status: isUpiQrPayment ? 'inactive' : 'active',
       totalFee: 0,
       pendingFee: 0,
       uploadedDocuments: [],
       paymentInfo: {
         paymentMode,
-        paidAmount: verifiedPaymentStatus === 'paid' ? paidAmount : 0,
+        paidAmount: isUpiQrPayment ? (Number(paidAmount) || 0) : (verifiedPaymentStatus === 'paid' ? paidAmount : 0),
         paymentStatus: verifiedPaymentStatus,
         razorpayOrderId,
         razorpayPaymentId,
         razorpaySignature,
+        transactionId: isUpiQrPayment ? transactionId.trim() : undefined,
         paidAt: verifiedPaymentStatus === 'paid' ? new Date() : undefined,
       },
     };
@@ -501,7 +510,7 @@ router.post('/public/apply', upload.fields([
     const courseForFee = await Course.findById(courseId);
     const courseFee = courseForFee?.fee || courseForFee?.studentFee || 0;
     if (courseFee > 0) {
-      const paidAmtPublic = verifiedPaymentStatus === 'paid' ? paidAmount : 0;
+      const paidAmtPublic = isUpiQrPayment ? (Number(paidAmount) || 0) : (verifiedPaymentStatus === 'paid' ? paidAmount : 0);
       await Fee.create({
         partnerId,
         studentId: student._id,
@@ -509,12 +518,12 @@ router.post('/public/apply', upload.fields([
         totalFee: courseFee,
         paidAmount: paidAmtPublic,
         pendingAmount: Math.max(0, courseFee - paidAmtPublic),
-        status: paidAmtPublic >= courseFee ? 'paid' : paidAmtPublic > 0 ? 'partial' : 'pending',
+        status: isUpiQrPayment ? 'pending_verification' : (paidAmtPublic >= courseFee ? 'paid' : paidAmtPublic > 0 ? 'partial' : 'pending'),
         payments: paidAmtPublic > 0 ? [{
           amount: paidAmtPublic,
-          mode: 'online',
+          mode: isUpiQrPayment ? 'upi_qr' : 'online',
           receiptNo: `RCP-${Date.now()}`,
-          remarks: 'Online admission payment',
+          remarks: isUpiQrPayment ? `UPI QR payment - TxnID: ${transactionId.trim()}` : 'Online admission payment',
         }] : [],
       });
       student.totalFee = courseFee;
@@ -522,7 +531,62 @@ router.post('/public/apply', upload.fields([
       await student.save();
     }
 
-    // Create student User account for portal login
+    // For UPI QR payments: send "form submitted for approval" email, skip user creation
+    if (isUpiQrPayment) {
+      if (email) {
+        try {
+          const org = await OrgHomepage.findOne();
+          const orgName = org?.settings?.orgName || 'Lili Organization';
+          const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+          const partnerRec = await Partner.findById(partnerId).lean();
+          const courseRec = await Course.findById(courseId).lean();
+
+          await sendEmail({
+            email: email.toLowerCase(),
+            subject: `Admission Form Submitted for Approval - ${orgName}`,
+            message: `Dear ${student.fullName}, your admission form has been submitted successfully and is pending approval from ${partnerRec?.instituteName || 'the institute'}. Application No: ${student.applicationNo}. You will receive a confirmation email once approved.`,
+            html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+              <div style="background:#2563eb;color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+                <h1 style="margin:0;font-size:22px">Admission Form Submitted!</h1>
+                <p style="margin:4px 0 0;opacity:0.9">${orgName}</p>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 12px 12px;padding:24px">
+                <p>Dear <strong>${student.fullName}</strong>,</p>
+                <p>Aapka admission form successfully submit ho gaya hai aur <strong>${partnerRec?.instituteName || 'institute'}</strong> ke approval ke liye bhej diya gaya hai.</p>
+                <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:16px;margin:16px 0;text-align:center">
+                  <span style="color:#92400e;font-weight:bold;font-size:14px">⏳ Approval Pending</span>
+                  <p style="color:#78350f;font-size:12px;margin:8px 0 0">Institute aapke payment ko verify karke admission confirm karega. Confirmation email aapko mil jayega.</p>
+                </div>
+                <div style="background:#f8fafc;border-radius:8px;padding:16px;margin:16px 0">
+                  <table style="width:100%;font-size:14px;color:#334155">
+                    <tr><td style="color:#64748b;padding:4px 0">Application No:</td><td style="font-weight:bold">${student.applicationNo}</td></tr>
+                    <tr><td style="color:#64748b;padding:4px 0">Course:</td><td style="font-weight:bold">${courseRec?.name || 'N/A'}</td></tr>
+                    <tr><td style="color:#64748b;padding:4px 0">Institute:</td><td style="font-weight:bold">${partnerRec?.instituteName || 'N/A'}</td></tr>
+                    <tr><td style="color:#64748b;padding:4px 0">Transaction ID:</td><td style="font-weight:bold">${transactionId.trim()}</td></tr>
+                    ${student.totalFee > 0 ? `<tr><td style="color:#64748b;padding:4px 0">Amount Paid:</td><td style="font-weight:bold">₹${student.paymentInfo?.paidAmount || 0}</td></tr>` : ''}
+                  </table>
+                </div>
+                <p style="font-size:12px;color:#94a3b8;margin-top:20px">This is an automated email. Please do not reply.</p>
+              </div>
+            </div>`,
+          });
+          console.log(`[Approval Pending Email] Sent to: ${email}`);
+        } catch (mailErr) {
+          console.error('[Approval Pending Email Error]', mailErr.message);
+        }
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Admission form submitted successfully! Institute approval pending. Aapko confirmation email mil jayega jab institute admission approve karega.',
+        applicationNo: student.applicationNo,
+        studentId: student._id,
+        paymentStatus: 'pending_verification',
+        approvalStatus: 'pending',
+      });
+    }
+
+    // Create student User account for portal login (only for non-UPI-QR admissions)
     const studentEmail = (email || `${phone}@student.local`).toLowerCase();
     const existingUser = await User.findOne({ email: studentEmail });
     if (!existingUser) {
@@ -627,6 +691,177 @@ router.post('/public/send-center-otp', async (req, res) => {
     });
 
     res.json({ success: true, message: `OTP sent to ${partner.email}` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Get pending approval admissions for partner
+router.get('/pending-approvals', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'partner' || !req.user.partnerId) {
+      return res.status(403).json({ success: false, message: 'Partner access required' });
+    }
+    const students = await Student.find({
+      partnerId: req.user.partnerId,
+      approvalStatus: 'pending',
+      admissionType: 'public_online',
+    })
+      .populate('courseId', 'name code fee')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({ success: true, count: students.length, students });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Partner approve/reject pending admission
+router.put('/:id/admission-approval', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'partner' || !req.user.partnerId) {
+      return res.status(403).json({ success: false, message: 'Partner access required' });
+    }
+
+    const { action } = req.body;
+    if (!action || !['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ success: false, message: 'Action must be "approve" or "reject"' });
+    }
+
+    const student = await Student.findById(req.params.id);
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+    if (student.partnerId.toString() !== req.user.partnerId.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+    if (student.approvalStatus !== 'pending') {
+      return res.status(400).json({ success: false, message: `Admission is already ${student.approvalStatus}` });
+    }
+
+    if (action === 'reject') {
+      student.approvalStatus = 'rejected';
+      student.status = 'inactive';
+      await student.save();
+      await Fee.updateMany({ studentId: student._id }, { status: 'failed' });
+
+      if (student.email) {
+        try {
+          const org = await OrgHomepage.findOne();
+          const orgName = org?.settings?.orgName || 'Lili Organization';
+          const partnerRec = await Partner.findById(student.partnerId).lean();
+
+          await sendEmail({
+            email: student.email.toLowerCase(),
+            subject: `Admission Update - ${partnerRec?.instituteName || 'Institute'} - ${orgName}`,
+            message: `Dear ${student.fullName}, we regret to inform you that your admission application (${student.applicationNo}) could not be approved. Please contact the institute for more details.`,
+            html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+              <div style="background:#dc2626;color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+                <h1 style="margin:0;font-size:22px">Admission Update</h1>
+                <p style="margin:4px 0 0;opacity:0.9">${orgName}</p>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 12px 12px;padding:24px">
+                <p>Dear <strong>${student.fullName}</strong>,</p>
+                <p>We regret to inform you that your admission application (<strong>${student.applicationNo}</strong>) at <strong>${partnerRec?.instituteName || 'the institute'}</strong> could not be approved at this time.</p>
+                <p>Please contact the institute directly for more information.</p>
+                <p style="font-size:12px;color:#94a3b8;margin-top:20px">This is an automated email. Please do not reply.</p>
+              </div>
+            </div>`,
+          });
+        } catch (mailErr) {
+          console.error('[Rejection Email Error]', mailErr.message);
+        }
+      }
+
+      return res.json({ success: true, message: 'Admission rejected. Student has been notified.' });
+    }
+
+    // Approve
+    student.approvalStatus = 'approved';
+    student.status = 'active';
+    student.paymentInfo.paymentStatus = 'paid';
+    student.paymentInfo.paidAt = new Date();
+    await student.save();
+    await Fee.updateMany({ studentId: student._id, status: 'pending_verification' }, { status: 'paid' });
+
+    // Create student User account
+    const studentEmail = (student.email || `${student.phone}@student.local`).toLowerCase();
+    let studentUser = await User.findOne({ email: studentEmail });
+    let loginEmail = studentEmail;
+    let loginPassword = student.phone || 'student123';
+
+    if (!studentUser) {
+      studentUser = await User.create({
+        name: student.fullName,
+        email: studentEmail,
+        password: loginPassword,
+        phone: student.phone,
+        role: 'student',
+        partnerId: student.partnerId,
+        isActive: true,
+      });
+    }
+    if (studentUser && !student.userId) {
+      student.userId = studentUser._id;
+      await student.save();
+    }
+
+    // Send confirmation email with login credentials
+    if (student.email) {
+      try {
+        const org = await OrgHomepage.findOne();
+        const orgName = org?.settings?.orgName || 'Lili Organization';
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+        const partnerRec = await Partner.findById(student.partnerId).lean();
+        const courseRec = student.courseId?.[0] ? await Course.findById(student.courseId[0]).lean() : null;
+
+        await sendEmail({
+          email: student.email.toLowerCase(),
+          subject: `Admission Confirmed: ${student.fullName} - ${orgName}`,
+          message: `Dear ${student.fullName}, your admission has been confirmed! Application No: ${student.applicationNo}, Student ID: ${student.studentIdNo}. Login at ${clientUrl}/student/login with email: ${loginEmail} and password: ${loginPassword}`,
+          html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+            <div style="background:#16a34a;color:#fff;padding:24px;border-radius:12px 12px 0 0;text-align:center">
+              <h1 style="margin:0;font-size:22px">Admission Confirmed!</h1>
+              <p style="margin:4px 0 0;opacity:0.9">${orgName}</p>
+            </div>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:0 0 12px 12px;padding:24px">
+              <p>Dear <strong>${student.fullName}</strong>,</p>
+              <p>Congratulations! Aapka admission successfully confirm ho gaya hai. Institute ne aapki payment verify karke admission approve kar diya hai.</p>
+              <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin:16px 0;text-align:center">
+                <span style="color:#15803d;font-weight:bold;font-size:16px">Admission Approved!</span>
+              </div>
+              <div style="background:#f8fafc;border-radius:8px;padding:16px;margin:16px 0">
+                <table style="width:100%;font-size:14px;color:#334155">
+                  <tr><td style="color:#64748b;padding:4px 0">Application No:</td><td style="font-weight:bold">${student.applicationNo}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Student ID:</td><td style="font-weight:bold">${student.studentIdNo || 'Auto-Assigned'}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Course:</td><td style="font-weight:bold">${courseRec?.name || 'N/A'}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Institute:</td><td style="font-weight:bold">${partnerRec?.instituteName || 'N/A'}</td></tr>
+                  ${student.totalFee > 0 ? `<tr><td style="color:#64748b;padding:4px 0">Total Fee:</td><td style="font-weight:bold">₹${student.totalFee}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Paid:</td><td style="font-weight:bold;color:#15803d">₹${student.paymentInfo?.paidAmount || 0}</td></tr>
+                  <tr><td style="color:#64748b;padding:4px 0">Pending:</td><td style="font-weight:bold;color:#b45309">₹${student.pendingFee}</td></tr>` : ''}
+                </table>
+              </div>
+              <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:16px 0">
+                <p style="margin:0 0 8px;font-weight:bold;color:#1e40af">Your Login Credentials:</p>
+                <table style="width:100%;font-size:13px;color:#334155">
+                  <tr><td style="color:#64748b;padding:2px 0">Login URL:</td><td><a href="${clientUrl}/student/login" style="color:#2563eb">${clientUrl}/student/login</a></td></tr>
+                  <tr><td style="color:#64748b;padding:2px 0">Email:</td><td style="font-weight:bold">${loginEmail}</td></tr>
+                  <tr><td style="color:#64748b;padding:2px 0">Password:</td><td style="font-weight:bold">${loginPassword}</td></tr>
+                </table>
+              </div>
+              <p style="font-size:12px;color:#dc2626;margin-top:12px">Security: Please change your password after first login.</p>
+              <p style="font-size:12px;color:#94a3b8;margin-top:20px">This is an automated email. Please do not reply.</p>
+            </div>
+          </div>`,
+        });
+        console.log(`[Admission Approval Email] Sent to: ${student.email}`);
+      } catch (mailErr) {
+        console.error('[Admission Approval Email Error]', mailErr.message);
+      }
+    }
+
+    res.json({ success: true, message: 'Admission approved successfully! Student has been notified with login credentials.', student });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -151,11 +151,12 @@ export default function UniversalAdmissionPage() {
     signature: null,
   });
 
-  const [paymentMode, setPaymentMode] = useState('online_razorpay'); // 'online_razorpay' | 'pay_at_center'
+  const [paymentMode, setPaymentMode] = useState('online_razorpay'); // 'online_razorpay' | 'pay_at_center' | 'online_upi_qr'
   const [paidAmount, setPaidAmount] = useState(0);
   const [centerOtp, setCenterOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpSending, setOtpSending] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
 
   useEffect(() => {
     Promise.all([getPublicPartners(), getPublicCourses(), getOrgHomepagePublic()])
@@ -352,6 +353,7 @@ export default function UniversalAdmissionPage() {
       data.append('paymentMode', paymentDetails.paymentMode || paymentMode);
       data.append('paidAmount', paymentDetails.paidAmount !== undefined ? paymentDetails.paidAmount : (paymentMode === 'online_razorpay' ? (paidAmount || registrationFee) : paidAmount));
       if (paymentMode === 'pay_at_center' && centerOtp) data.append('otp', centerOtp);
+      if (paymentMode === 'online_upi_qr' && transactionId) data.append('transactionId', transactionId);
       if (paymentDetails.razorpayOrderId) data.append('razorpayOrderId', paymentDetails.razorpayOrderId);
       if (paymentDetails.razorpayPaymentId) data.append('razorpayPaymentId', paymentDetails.razorpayPaymentId);
       if (paymentDetails.razorpaySignature) data.append('razorpaySignature', paymentDetails.razorpaySignature);
@@ -448,6 +450,14 @@ export default function UniversalAdmissionPage() {
 
     if (paymentMode === 'pay_at_center' && !centerOtp) {
       return showError('Please enter the OTP sent to the center email to confirm cash payment admission.');
+    }
+
+    if (paymentMode === 'online_upi_qr') {
+      if (!transactionId || transactionId.trim().length < 6) {
+        return showError('Kripya sahi transaction ID enter karein (kam se kam 6 digit).');
+      }
+      await performSubmission({ paymentMode: 'online_upi_qr', paidAmount: paidAmount || registrationFee });
+      return;
     }
 
     if (paymentMode === 'online_razorpay' && window.Razorpay && registrationFee > 0) {
@@ -1573,7 +1583,7 @@ export default function UniversalAdmissionPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   
                   {/* Option 1: Razorpay Online Payment */}
                   <label
@@ -1591,18 +1601,45 @@ export default function UniversalAdmissionPage() {
                         }`}>
                           {paymentMode === 'online_razorpay' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </span>
-                        <strong className="text-xs font-bold text-slate-900">⚡ Online Payment (Instant)</strong>
+                        <strong className="text-xs font-bold text-slate-900">⚡ Online Payment</strong>
                       </div>
                       <span className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase">
-                        Recommended
+                        Instant
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-snug pl-6">
-                      UPI (Google Pay, PhonePe, Paytm), QR Code, Debit/Credit Card, Net Banking. Instant Roll No allotment.
+                      UPI, Card, Net Banking via Razorpay. Instant confirmation.
                     </p>
                   </label>
 
-                  {/* Option 2: Pay Offline at Center */}
+                  {/* Option 2: Institute UPI QR */}
+                  <label
+                    onClick={() => setPaymentMode('online_upi_qr')}
+                    className={`relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                      paymentMode === 'online_upi_qr'
+                        ? 'border-indigo-600 bg-white shadow-md shadow-indigo-600/10 ring-2 ring-indigo-100'
+                        : 'border-slate-200 bg-white/70 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                          paymentMode === 'online_upi_qr' ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-400'
+                        }`}>
+                          {paymentMode === 'online_upi_qr' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </span>
+                        <strong className="text-xs font-bold text-slate-900">📱 Institute QR Pay</strong>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold uppercase">
+                        UPI
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug pl-6">
+                      Institute ka QR scan karein, pay karein, transaction ID enter karein. Institute approve karega.
+                    </p>
+                  </label>
+
+                  {/* Option 3: Pay Offline at Center */}
                   <label
                     onClick={() => setPaymentMode('pay_at_center')}
                     className={`relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
@@ -1652,6 +1689,67 @@ export default function UniversalAdmissionPage() {
                         ₹{Math.max(0, courseTotalFee - paidAmount)}
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* Institute UPI QR Payment Section */}
+                {paymentMode === 'online_upi_qr' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs font-bold text-blue-800">Institute Payment QR</span>
+                    </div>
+
+                    {(() => {
+                      const selectedPartner = partners.find(p => p._id === formData.partnerId);
+                      const upiId = selectedPartner?.upiId;
+                      const qrImg = selectedPartner?.paymentQrImage;
+                      const fixUrl = (url) => { if (!url) return ''; if (url.startsWith('/uploads/')) return `/api${url}`; return url; };
+
+                      if (!upiId && !qrImg) {
+                        return (
+                          <div className="text-center py-4">
+                            <p className="text-xs text-slate-500">Is institute ka payment QR abhi setup nahi hai. Kripya "Online Payment" ya "Pay at Center" select karein.</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <>
+                          <div className="flex flex-col items-center gap-3">
+                            {qrImg ? (
+                              <img src={fixUrl(qrImg)} alt="Payment QR" className="w-48 h-48 object-contain rounded-xl border-2 border-blue-200 bg-white p-2" onError={(e) => { const img = e.target; if (!img.dataset.retried && qrImg.includes('/uploads/')) { img.dataset.retried = 'true'; const path = qrImg.substring(qrImg.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
+                            ) : upiId ? (
+                              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(selectedPartner?.instituteName || 'Institute')}`} alt="UPI QR" className="w-48 h-48 object-contain rounded-xl border-2 border-blue-200 bg-white p-2" />
+                            ) : null}
+
+                            {upiId && (
+                              <div className="text-center">
+                                <span className="text-[10px] text-slate-500 block">UPI ID</span>
+                                <span className="text-sm font-bold text-slate-800">{upiId}</span>
+                              </div>
+                            )}
+
+                            <div className="bg-white rounded-lg px-4 py-2 border border-blue-200 text-center w-full">
+                              <span className="text-[10px] text-slate-500 block">Amount to Pay</span>
+                              <strong className="text-lg font-black text-blue-700">₹{paidAmount || registrationFee}</strong>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-xs font-bold text-slate-700">Transaction / UTR ID *</label>
+                            <input
+                              type="text"
+                              value={transactionId}
+                              onChange={(e) => setTransactionId(e.target.value.trim())}
+                              placeholder="Enter 12-digit transaction ID (e.g. 987654321012)"
+                              className="w-full px-3 py-2.5 border border-blue-300 rounded-xl bg-white text-slate-800 text-sm font-bold focus:outline-none focus:border-blue-500"
+                            />
+                            <p className="text-[10px] text-slate-500">Payment karne ke bad apne UPI app me se transaction ID copy karein aur yahan enter karein. Institute verify karke admission approve karega.</p>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
 

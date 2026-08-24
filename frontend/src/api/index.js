@@ -19,6 +19,7 @@ export const getPartnerBySlug = (slug) => API.get(`/partners/slug/${slug}`);
 export const createPartner = (data) => API.post('/partners', data);
 export const updatePartner = (id, data) => API.put(`/partners/${id}`, data);
 export const uploadPartnerLogo = (id, formData) => API.post(`/partners/${id}/upload-logo`, formData);
+export const uploadPartnerPaymentQr = (id, formData) => API.post(`/partners/${id}/upload-payment-qr`, formData);
 export const updatePartnerStatus = (id, status) => API.put(`/partners/${id}/status`, { status });
 export const deletePartner = (id) => API.delete(`/partners/${id}`);
 
@@ -34,6 +35,8 @@ export const getPublicAdmissionReceipt = (applicationNo) => API.get(`/students/p
 export const sendAdmissionOtp = () => API.post('/students/partner-center/send-otp');
 export const sendPublicCenterOtp = (data) => API.post('/students/public/send-center-otp', data);
 export const submitPartnerCenterAdmission = (formData) => API.post('/students/partner-center/submit', formData);
+export const getPendingApprovals = () => API.get('/students/pending-approvals');
+export const approveRejectAdmission = (id, action) => API.put(`/students/${id}/admission-approval`, { action });
 export const getCourseBatches = (courseId, partnerId) => API.get(`/students/public/batches/${courseId}`, { params: { partnerId } });
 export const assignStudentBatch = (data) => API.post('/students/public/assign-batch', data);
 export const payStudentFee = (data) => API.post('/students/public/pay-fee', data);

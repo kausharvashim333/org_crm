@@ -73,6 +73,7 @@ const PartnerInquiries = lazy(() => import('./pages/partner/Inquiries'));
 const PartnerHomepage = lazy(() => import('./pages/partner/HomepageEditor'));
 const PartnerSettings = lazy(() => import('./pages/partner/Settings'));
 const PartnerAdmissionPage = lazy(() => import('./pages/partner/PartnerAdmissionPage'));
+const PartnerPendingApprovals = lazy(() => import('./pages/partner/PendingApprovals'));
 const PartnerAddons = lazy(() => import('./pages/partner/Addons'));
 
 // Student Pages (Lazy)
@@ -206,6 +207,7 @@ export default function App() {
                 <Route path="inquiries" element={<PartnerInquiries />} />
                 <Route path="homepage" element={<PartnerHomepage />} />
                 <Route path="settings" element={<PartnerSettings />} />
+                <Route path="pending-approvals" element={<PartnerPendingApprovals />} />
                 <Route path="addons" element={<PartnerAddons />} />
               </Routes>
             </AdminLayout>

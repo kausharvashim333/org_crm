@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { changePassword, updateProfile, updatePartner, uploadPartnerLogo } from '../../api';
+import { changePassword, updateProfile, updatePartner, uploadPartnerLogo, uploadPartnerPaymentQr } from '../../api';
 import { useToast } from '../../context/ToastContext';
-import { Building2, Upload, User, Lock, Globe, Camera, Check } from 'lucide-react';
+import { Building2, Upload, User, Lock, Globe, Camera, Check, QrCode, CreditCard } from 'lucide-react';
 
 export default function PartnerSettings() {
   const { user, setUser } = useAuth();
@@ -23,7 +23,13 @@ export default function PartnerSettings() {
     description: user?.partner?.description || '',
     establishedYear: user?.partner?.establishedYear || '',
     socialLinks: user?.partner?.socialLinks || { facebook: '', instagram: '', youtube: '', whatsapp: '' },
+    upiId: user?.partner?.upiId || '',
   });
+
+  // Payment QR upload state
+  const [qrFile, setQrFile] = useState(null);
+  const [qrPreview, setQrPreview] = useState(user?.partner?.paymentQrImage || '');
+  const [uploadingQr, setUploadingQr] = useState(false);
 
   const handleProfile = async (e) => {
     e.preventDefault();
@@ -55,6 +61,35 @@ export default function PartnerSettings() {
       showSuccess('Institute details updated successfully!');
     } catch (error) {
       showError('Failed to update institute details');
+    }
+  };
+
+  const handleQrChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setQrFile(file);
+      setQrPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleQrUpload = async (e) => {
+    e.preventDefault();
+    if (!qrFile) return showError('Kripya QR image select karein');
+    setUploadingQr(true);
+    try {
+      const formData = new FormData();
+      formData.append('paymentQr', qrFile);
+      const res = await uploadPartnerPaymentQr(user.partnerId, formData);
+      showSuccess('Payment QR Uploaded Successfully!');
+      setQrPreview(res.data.paymentQrImage);
+      if (user.partner) {
+        setUser({ ...user, partner: { ...user.partner, paymentQrImage: res.data.paymentQrImage } });
+      }
+      setQrFile(null);
+    } catch (error) {
+      showError(error.response?.data?.message || 'Failed to upload payment QR');
+    } finally {
+      setUploadingQr(false);
     }
   };
 
@@ -354,6 +389,84 @@ export default function PartnerSettings() {
           </form>
         </div>
 
+      </div>
+
+      {/* Payment QR Settings */}
+      <div className="card p-6 border border-slate-200/80 shadow-sm rounded-2xl bg-white space-y-4">
+        <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+          <CreditCard className="w-5 h-5 text-indigo-600" />
+          <h3 className="font-bold text-slate-800 text-base">Admission Payment QR / UPI Settings</h3>
+        </div>
+        <p className="text-xs text-slate-500">Jab student online admission form bharega aur payment karega, to ye UPI ID / QR code usko dikhega. Student payment karke transaction ID enter karega, form aapke approval ke liye aayega.</p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* UPI ID Input */}
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">UPI ID (Optional)</label>
+              <input
+                type="text"
+                value={partnerData.upiId}
+                onChange={(e) => setPartnerData({ ...partnerData, upiId: e.target.value })}
+                className="input-field text-sm"
+                placeholder="e.g. institute@okaxis, institute@paytm"
+              />
+              <p className="text-[10px] text-slate-400 mt-1">UPI ID enter karne par QR code automatically generate hoga.</p>
+            </div>
+            <button
+              onClick={handleInstitute}
+              className="btn-primary py-2.5 px-6 text-xs font-bold flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500"
+            >
+              <Check className="w-4 h-4" /> Save UPI ID
+            </button>
+
+            {partnerData.upiId && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs font-bold text-emerald-700">UPI ID set: {partnerData.upiId}</span>
+              </div>
+            )}
+          </div>
+
+          {/* QR Image Upload */}
+          <div className="space-y-3">
+            <label className="block text-xs font-bold text-slate-700 mb-1">Upload QR Code Image (Optional)</label>
+            <form onSubmit={handleQrUpload} className="space-y-3 flex flex-col items-center text-center">
+              <div className="relative group">
+                <div className="w-40 h-40 rounded-2xl bg-slate-100 border-2 border-dashed border-indigo-300 p-1 flex items-center justify-center overflow-hidden shadow-inner">
+                  {qrPreview ? (
+                    <img src={qrPreview.startsWith('/uploads/') ? `/api${qrPreview}` : qrPreview} alt="Payment QR" className="w-full h-full object-contain rounded-xl" onError={(e) => { const img = e.target; if (!img.dataset.retried && qrPreview.includes('/uploads/')) { img.dataset.retried = 'true'; const path = qrPreview.substring(qrPreview.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
+                  ) : (
+                    <div className="text-slate-400 p-2">
+                      <QrCode className="w-12 h-12 mx-auto mb-1 text-slate-300" />
+                      <span className="text-[11px] block">No QR Uploaded</span>
+                    </div>
+                  )}
+                </div>
+                <label className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-lg cursor-pointer transition-all hover:scale-110">
+                  <Camera className="w-4 h-4" />
+                  <input type="file" accept="image/*" onChange={handleQrChange} className="hidden" />
+                </label>
+              </div>
+              {qrFile && (
+                <div className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
+                  Selected: {qrFile.name}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={uploadingQr || !qrFile}
+                className="btn-primary py-2.5 px-6 text-xs font-bold flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+              >
+                {uploadingQr ? (
+                  <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Uploading QR...</>
+                ) : (
+                  <><Upload className="w-4 h-4" /> Save QR Image</>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

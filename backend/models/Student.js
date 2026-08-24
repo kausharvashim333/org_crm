@@ -104,12 +104,13 @@ const studentSchema = new mongoose.Schema({
     uploadedAt: { type: Date, default: Date.now },
   }],
   paymentInfo: {
-    paymentMode: { type: String, enum: ['online_razorpay', 'pay_at_center', 'free'], default: 'pay_at_center' },
+    paymentMode: { type: String, enum: ['online_razorpay', 'pay_at_center', 'online_upi_qr', 'free'], default: 'pay_at_center' },
     paidAmount: { type: Number, default: 0 },
-    paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+    paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'pending_verification'], default: 'pending' },
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },
     razorpaySignature: { type: String },
+    transactionId: { type: String },
     paidAt: { type: Date },
   },
 }, { timestamps: true });
