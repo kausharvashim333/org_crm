@@ -111,6 +111,27 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
+// Get pending approval admissions for partner (must be before /:id route)
+router.get('/pending-approvals', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'partner' || !req.user.partnerId) {
+      return res.status(403).json({ success: false, message: 'Partner access required' });
+    }
+    const students = await Student.find({
+      partnerId: req.user.partnerId,
+      approvalStatus: 'pending',
+      admissionType: 'public_online',
+    })
+      .populate('courseId', 'name code fee')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({ success: true, count: students.length, students });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
   try {
     const student = await Student.findById(req.params.id)
@@ -706,27 +727,6 @@ router.post('/public/send-center-otp', async (req, res) => {
     });
 
     res.json({ success: true, message: `OTP sent to ${partner.email}` });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Get pending approval admissions for partner
-router.get('/pending-approvals', protect, async (req, res) => {
-  try {
-    if (req.user.role !== 'partner' || !req.user.partnerId) {
-      return res.status(403).json({ success: false, message: 'Partner access required' });
-    }
-    const students = await Student.find({
-      partnerId: req.user.partnerId,
-      approvalStatus: 'pending',
-      admissionType: 'public_online',
-    })
-      .populate('courseId', 'name code fee')
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.json({ success: true, count: students.length, students });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
