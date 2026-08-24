@@ -159,7 +159,9 @@ router.get('/partner', protect, partnerOrAdmin, async (req, res) => {
     const totalStaff = await Staff.countDocuments({ partnerId, status: 'active' });
     const totalCourses = await Course.countDocuments({ $or: [{ partnerId }, { isStandard: true }], isActive: true });
     const pendingFees = await Fee.aggregate([
-      { $match: { partnerId, studentId: { $ne: null }, status: { $in: ['pending', 'partial'] } } },
+      { $match: { partnerId, status: { $in: ['pending', 'partial'] } } },
+      { $lookup: { from: 'students', localField: 'studentId', foreignField: '_id', as: 'student' } },
+      { $unwind: '$student' },
       { $group: { _id: null, total: { $sum: '$pendingAmount' } } },
     ]);
     const monthlyCollection = await Fee.aggregate([
