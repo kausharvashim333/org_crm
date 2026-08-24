@@ -15,7 +15,7 @@ router.get('/', protect, async (req, res) => {
     }
     if (req.query.status) filter.status = req.query.status;
     const certificates = await Certificate.find(filter)
-      .populate('studentId', 'fullName phone')
+      .populate('studentId', 'fullName phone photo')
       .populate('courseId', 'name')
       .populate('partnerId', 'instituteName')
       .sort({ createdAt: -1 });
@@ -120,7 +120,7 @@ router.put('/bulk-approve', protect, superAdminOnly, async (req, res) => {
 router.get('/verify/:code', async (req, res) => {
   try {
     const cert = await Certificate.findOne({ verificationCode: req.params.code, status: 'issued' })
-      .populate('studentId', 'fullName')
+      .populate('studentId', 'fullName photo')
       .populate('courseId', 'name')
       .populate('partnerId', 'instituteName');
     if (!cert) return res.status(404).json({ success: false, message: 'Certificate not found or invalid' });

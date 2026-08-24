@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getStudentCertificate } from '../../api';
+import { getStudentCertificate, getOrgHomepagePublic } from '../../api';
 import { Printer, Download, ArrowLeft, Award, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export default function CertificateView() {
   const { certificateId } = useParams();
   const [loading, setLoading] = useState(true);
   const [cert, setCert] = useState(null);
+  const [orgData, setOrgData] = useState(null);
 
   useEffect(() => {
     getStudentCertificate(certificateId)
@@ -17,6 +18,7 @@ export default function CertificateView() {
       .catch(err => {
         setLoading(false);
       });
+    getOrgHomepagePublic().then(res => setOrgData(res.data.homepage)).catch(() => {});
   }, [certificateId]);
 
   const handlePrint = () => {
@@ -34,6 +36,8 @@ export default function CertificateView() {
   const student = cert.studentId || {};
   const course = cert.courseId || {};
   const partner = cert.partnerId || {};
+  const orgName = orgData?.settings?.orgName || 'Training Institute';
+  const orgLogo = orgData?.settings?.logo || '';
   const formattedDate = cert.issueDate ? new Date(cert.issueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString();
 
   return (
@@ -75,10 +79,19 @@ export default function CertificateView() {
             {/* Header / Logo */}
             <div className="space-y-1">
               <div className="inline-flex items-center justify-center gap-2 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-indigo-900 text-white flex items-center justify-center font-bold text-lg font-sans">
-                  Lili
+                <div className="w-10 h-10 rounded-xl bg-indigo-900 text-white flex items-center justify-center font-bold text-lg font-sans overflow-hidden">
+                  {orgLogo ? (
+                    <img
+                      src={orgLogo.startsWith('/uploads/') ? `/api${orgLogo}` : orgLogo}
+                      alt="Org Logo"
+                      className="w-full h-full object-cover"
+                      onError={(e) => { const img = e.target; if (!img.dataset.retried && orgLogo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = orgLogo.substring(orgLogo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }}
+                    />
+                  ) : (
+                    <Award className="w-5 h-5" />
+                  )}
                 </div>
-                <span className="font-extrabold text-2xl text-indigo-950 font-sans tracking-tight">Lili Organization</span>
+                <span className="font-extrabold text-2xl text-indigo-950 font-sans tracking-tight">{orgName}</span>
               </div>
               <p className="text-xs uppercase tracking-widest text-indigo-900 font-sans font-bold">
                 {partner.centerName || 'Computer & Vocational Skill Training Institute'}
@@ -138,7 +151,7 @@ export default function CertificateView() {
                   Authorized Signatory
                 </div>
                 <p className="font-bold text-gray-800">Director / Controller of Exams</p>
-                <p className="text-[10px] text-gray-500">Lili Organization</p>
+                <p className="text-[10px] text-gray-500">{orgName}</p>
               </div>
             </div>
           </div>

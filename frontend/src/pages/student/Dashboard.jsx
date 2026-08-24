@@ -116,8 +116,8 @@ export default function StudentDashboard() {
   }, [activeTab]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('student_token');
+    localStorage.removeItem('student_user');
     navigate('/student/login');
   };
 
@@ -222,8 +222,8 @@ export default function StudentDashboard() {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const orgSettings = dashboardData?.orgSettings;
-  const orgLogo = orgSettings?.logo || '/uploads/logo-1783236511925-286536357.jpeg';
-  const orgName = orgSettings?.orgName || 'Lili Organization';
+  const orgLogo = orgSettings?.logo || '';
+  const orgName = orgSettings?.orgName || 'Training Institute';
 
   const partnerLogo = partner?.logo || orgLogo;
   const partnerName = partner?.instituteName || orgName;
@@ -375,7 +375,7 @@ export default function StudentDashboard() {
                 {activeTab === 'profile' && '⚙️ My Profile & Security Settings'}
               </h1>
               <p className="text-[11px] text-slate-500 hidden sm:block font-medium">
-                {partner ? `${partnerName} · Student LMS` : 'Lili Organization - Direct Online Learning'}
+                {partner ? `${partnerName} · Student LMS` : `${orgName} - Direct Online Learning`}
               </p>
             </div>
           </div>
@@ -929,8 +929,23 @@ export default function StudentDashboard() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white font-black text-2xl flex items-center justify-center overflow-hidden shadow-lg border-2 border-indigo-100 shrink-0">
-                        {user?.photo ? (
-                          <img src={user.photo} alt="Student Avatar" className="w-full h-full object-cover" />
+                        {(student?.photo || user?.avatar) ? (
+                          <img
+                            src={(student?.photo || user?.avatar || '').startsWith('/uploads/') ? `/api${student?.photo || user?.avatar}` : (student?.photo || user?.avatar)}
+                            alt="Student Avatar"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const img = e.target;
+                              const src = student?.photo || user?.avatar || '';
+                              if (!img.dataset.retried && src.includes('/uploads/')) {
+                                img.dataset.retried = 'true';
+                                const path = src.substring(src.indexOf('/uploads/'));
+                                img.src = `/api${path}`;
+                              } else {
+                                img.style.display = 'none';
+                              }
+                            }}
+                          />
                         ) : (
                           (user?.name || 'S').charAt(0)
                         )}

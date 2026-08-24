@@ -41,7 +41,14 @@ export default function PartnerDashboard() {
     try {
       if (type === 'students') {
         const res = await getStudents({ limit: 1000 });
-        exportToCSV(res.data.students, 'students_export.csv', ['fullName', 'phone', 'email', 'status', 'courseId']);
+        const mapped = res.data.students.map(s => ({
+          fullName: s.fullName,
+          phone: s.phone,
+          email: s.email || '',
+          status: s.status,
+          courses: (Array.isArray(s.courseId) ? s.courseId : [s.courseId]).filter(Boolean).map(c => typeof c === 'object' ? (c.name || '') : '').join('; '),
+        }));
+        exportToCSV(mapped, 'students_export.csv', ['fullName', 'phone', 'email', 'status', 'courses']);
       } else if (type === 'fees') {
         const res = await getFees({ limit: 1000 });
         exportToCSV(res.data.fees, 'fees_export.csv', ['studentId', 'totalAmount', 'paidAmount', 'status', 'createdAt']);

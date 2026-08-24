@@ -132,9 +132,22 @@ export default function AdmissionReceiptPage() {
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
             {orgLogo ? (
               <img
-                src={orgLogo}
+                src={orgLogo.startsWith('/uploads/') ? `/api${orgLogo}` : orgLogo}
                 alt="Org Watermark"
                 className="w-[460px] h-[460px] max-w-[70%] max-h-[70%] object-contain opacity-[0.06] grayscale contrast-125 select-none print:opacity-[0.08]"
+                onError={(e) => {
+                  const img = e.target;
+                  if (!img.dataset.retried && orgLogo.includes('/uploads/')) {
+                    img.dataset.retried = 'true';
+                    const path = orgLogo.substring(orgLogo.indexOf('/uploads/'));
+                    img.src = `/api${path}`;
+                  } else if (!img.dataset.retried2 && !orgLogo.startsWith('/uploads/')) {
+                    img.dataset.retried2 = 'true';
+                    img.src = `/api${orgLogo}`;
+                  } else {
+                    img.style.display = 'none';
+                  }
+                }}
               />
             ) : (
               <Building2 className="w-[450px] h-[450px] text-indigo-950 opacity-[0.04]" />

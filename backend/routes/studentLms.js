@@ -274,7 +274,7 @@ router.post('/submit-assessment', protect, async (req, res) => {
 router.get('/certificate/:id', protect, async (req, res) => {
   try {
     const certificate = await Certificate.findById(req.params.id)
-      .populate('studentId', 'fullName phone email rollNumber fatherName')
+      .populate('studentId', 'fullName phone email photo rollNumber fatherName')
       .populate('courseId', 'name code duration durationMonths category')
       .populate('partnerId', 'centerName address city state code logo');
 

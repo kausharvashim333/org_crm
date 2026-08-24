@@ -3,7 +3,10 @@ import { getCertificates, approveCertificate, bulkApproveCertificates, rejectCer
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
+import Pagination from '../../components/Pagination';
 import { Check, X, Award, CheckCircle } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 15;
 
 export default function AdminCertificates() {
   const [certs, setCerts] = useState([]);
@@ -14,6 +17,7 @@ export default function AdminCertificates() {
   const [showBulkApprove, setShowBulkApprove] = useState(false);
   const [bulkData, setBulkData] = useState({ grade: 'A', percentage: 0 });
   const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const { showSuccess, showError } = useToast();
   const [approveData, setApproveData] = useState({ grade: '', percentage: 0 });
   const [rejectReason, setRejectReason] = useState('');
@@ -64,6 +68,7 @@ export default function AdminCertificates() {
   };
 
   const requestedCerts = certs.filter(c => c.status === 'requested');
+  const paginatedCerts = certs.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6">
@@ -77,6 +82,7 @@ export default function AdminCertificates() {
       </div>
       <div className="card">
         {loading ? <div className="text-center py-8 text-gray-400">Loading...</div> : (
+          <>
           <Table headers={['', 'Student', 'Institute', 'Course', 'Status', 'Cert No', 'Requested', 'Actions']}>
             {requestedCerts.length > 0 && (
               <TableRow>
@@ -88,7 +94,7 @@ export default function AdminCertificates() {
                 </TableCell>
               </TableRow>
             )}
-            {certs.map(c => (
+            {paginatedCerts.map(c => (
               <TableRow key={c._id}>
                 <TableCell>
                   {c.status === 'requested' && (
@@ -112,6 +118,16 @@ export default function AdminCertificates() {
               </TableRow>
             ))}
           </Table>
+          {certs.length > ITEMS_PER_PAGE && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(certs.length / ITEMS_PER_PAGE)}
+              onPageChange={setCurrentPage}
+              totalItems={certs.length}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
+          )}
+          </>
         )}
       </div>
 

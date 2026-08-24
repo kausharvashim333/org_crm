@@ -405,7 +405,25 @@ export default function PartnerStudents() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-xs">
                         {s.photo ? (
-                          <img src={s.photo} alt={s.fullName} className="w-full h-full object-cover" />
+                          <img
+                            src={s.photo.startsWith('/uploads/') ? `/api${s.photo}` : s.photo}
+                            alt={s.fullName}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const img = e.target;
+                              if (!img.dataset.retried && s.photo.includes('/uploads/')) {
+                                img.dataset.retried = 'true';
+                                const path = s.photo.substring(s.photo.indexOf('/uploads/'));
+                                img.src = `/api${path}`;
+                              } else if (!img.dataset.retried2 && !s.photo.startsWith('/uploads/')) {
+                                img.dataset.retried2 = 'true';
+                                img.src = s.photo;
+                              } else {
+                                img.style.display = 'none';
+                                img.parentElement.querySelector('span')?.style.removeProperty('display');
+                              }
+                            }}
+                          />
                         ) : (
                           <span className="font-extrabold text-indigo-700 text-sm">
                             {s.fullName?.charAt(0).toUpperCase()}

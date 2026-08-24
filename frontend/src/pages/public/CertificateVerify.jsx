@@ -4,7 +4,7 @@ import { verifyCertificate, getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import SEO from '../../components/SEO';
-import { GraduationCap, Award, Search, CheckCircle, XCircle, Menu, X } from 'lucide-react';
+import { GraduationCap, Award, Search, CheckCircle, XCircle, Menu, X, User } from 'lucide-react';
 
 export default function CertificateVerify() {
   const [searchParams] = useSearchParams();
@@ -64,6 +64,18 @@ export default function CertificateVerify() {
               <div className="text-center">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                 <h2 className="text-xl font-bold text-green-600 mb-4">Certificate Verified!</h2>
+                {result.studentId?.photo && (
+                  <div className="flex justify-center mb-4">
+                    <div className="w-20 h-24 rounded-lg bg-slate-100 border-2 border-green-600 p-0.5 overflow-hidden shadow-sm">
+                      <img
+                        src={result.studentId.photo.startsWith('/uploads/') ? `/api${result.studentId.photo}` : result.studentId.photo}
+                        alt={result.studentId?.fullName || 'Student'}
+                        className="w-full h-full object-cover rounded"
+                        onError={(e) => { const img = e.target; if (!img.dataset.retried && result.studentId.photo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = result.studentId.photo.substring(result.studentId.photo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }}
+                      />
+                    </div>
+                  </div>
+                )}
                 <div className="text-left space-y-2 max-w-md mx-auto">
                   <div className="flex justify-between border-b py-2"><span className="text-gray-500">Certificate No:</span><span className="font-medium">{result.certificateNo}</span></div>
                   <div className="flex justify-between border-b py-2"><span className="text-gray-500">Student Name:</span><span className="font-medium">{result.studentId?.fullName}</span></div>
