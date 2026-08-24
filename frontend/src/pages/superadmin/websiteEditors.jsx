@@ -1374,6 +1374,26 @@ export function CtaEditor({ homepage, onSave }) {
 
 export function ContactEditor({ homepage, onSave }) {
   const [data, setData] = useState(homepage.contact || { socialLinks: {} });
+  const [newPhone, setNewPhone] = useState('');
+
+  const addPhone = () => {
+    if (!newPhone.trim()) return;
+    const phones = [...(data.additionalPhones || []), newPhone.trim()];
+    setData({ ...data, additionalPhones: phones });
+    setNewPhone('');
+  };
+
+  const removePhone = (i) => {
+    const phones = (data.additionalPhones || []).filter((_, idx) => idx !== i);
+    setData({ ...data, additionalPhones: phones });
+  };
+
+  const editPhone = (i, val) => {
+    const phones = [...(data.additionalPhones || [])];
+    phones[i] = val;
+    setData({ ...data, additionalPhones: phones });
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Contact Information</h3>
@@ -1381,9 +1401,26 @@ export function ContactEditor({ homepage, onSave }) {
       <Field label="Subtitle"><input type="text" value={data.subtitle || ''} onChange={(e) => setData({ ...data, subtitle: e.target.value })} className="input-field" /></Field>
       <div className="grid grid-cols-2 gap-4">
         <Field label="Email"><input type="email" value={data.email || ''} onChange={(e) => setData({ ...data, email: e.target.value })} className="input-field" /></Field>
-        <Field label="Phone"><input type="text" value={data.phone || ''} onChange={(e) => setData({ ...data, phone: e.target.value })} className="input-field" /></Field>
+        <Field label="Primary Phone"><input type="text" value={data.phone || ''} onChange={(e) => setData({ ...data, phone: e.target.value })} className="input-field" /></Field>
       </div>
       <Field label="Address"><input type="text" value={data.address || ''} onChange={(e) => setData({ ...data, address: e.target.value })} className="input-field" /></Field>
+
+      <div className="border-t pt-3">
+        <h4 className="font-medium text-sm mb-2">Additional Phone Numbers</h4>
+        <div className="space-y-2 mb-3">
+          {(data.additionalPhones || []).map((p, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <input type="text" value={p} onChange={(e) => editPhone(i, e.target.value)} className="input-field flex-1" placeholder="e.g. +91 9876543210" />
+              <button type="button" onClick={() => removePhone(i)} className="text-red-600 hover:text-red-800" title="Remove"><Trash2 className="w-4 h-4" /></button>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input type="text" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addPhone(); } }} className="input-field flex-1" placeholder="Add another phone number" />
+          <button type="button" onClick={addPhone} className="btn-secondary flex items-center gap-1 whitespace-nowrap"><Plus className="w-4 h-4" /> Add</button>
+        </div>
+      </div>
+
       <div className="border-t pt-3">
         <h4 className="font-medium text-sm mb-1">Google Map Embed</h4>
         <p className="text-xs text-gray-500 mb-2">Go to <a href="https://www.google.com/maps" target="_blank" rel="noreferrer" className="text-blue-600 underline">Google Maps</a> → search your location → click "Share" → "Embed a map" → copy the <code className="bg-gray-100 px-1 rounded text-xs">src="..."</code> URL and paste it below.</p>

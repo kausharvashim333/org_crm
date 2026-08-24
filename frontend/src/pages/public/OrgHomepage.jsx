@@ -1094,6 +1094,7 @@ export default function OrgHomepage() {
                   <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-3">
                     {[
                       { icon: Phone, val: hp.contact?.phone || '+91 9999999999', label: 'Call Support' },
+                      ...((hp.contact?.additionalPhones || []).map((p, idx) => ({ icon: Phone, val: p, label: `Alternate Phone ${idx + 1}` }))),
                       { icon: Mail, val: hp.contact?.email || 'contact@example.com', label: 'Email Department' },
                       { icon: MapPin, val: hp.contact?.address || 'Central Headquarters, India', label: 'Head Office Address' },
                     ].map((c, i) => (

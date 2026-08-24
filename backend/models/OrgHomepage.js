@@ -165,6 +165,7 @@ const orgHomepageSchema = new mongoose.Schema({
     show: { type: Boolean, default: true },
     email: { type: String, default: 'contact@example.com' },
     phone: { type: String, default: '9999999999' },
+    additionalPhones: [{ type: String }],
     address: { type: String, default: 'India' },
     mapEmbed: { type: String },
     socialLinks: {
