@@ -4,6 +4,11 @@ let isRedirecting = false;
 
 const API = axios.create({
   baseURL: '/api',
+  headers: {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  },
 });
 
 API.interceptors.request.use((config) => {
