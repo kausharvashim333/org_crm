@@ -905,10 +905,13 @@ export function FranchiseEditor({ homepage, onSave }) {
   );
 }
 
-export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
+export function CertificationsEditor({ homepage, onSave, onAdd, onDelete, onUpdate }) {
   const [data, setData] = useState(homepage.certifications || { items: [] });
   const [newItem, setNewItem] = useState({ name: '', logo: '', description: '' });
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editItem, setEditItem] = useState({ name: '', logo: '', description: '' });
+  const [uploadingEditLogo, setUploadingEditLogo] = useState(false);
   const { showSuccess, showError } = useToast();
 
   const handleLogoUpload = async (e) => {
@@ -930,6 +933,37 @@ export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
     }
   };
 
+  const handleEditLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
+    setUploadingEditLogo(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await uploadOrgImage(fd);
+      setEditItem(prev => ({ ...prev, logo: res.data.imageUrl }));
+      showSuccess('Logo uploaded');
+    } catch (err) {
+      showError(getUploadErrorMessage(err));
+    } finally {
+      setUploadingEditLogo(false);
+      e.target.value = '';
+    }
+  };
+
+  const startEdit = (index, item) => {
+    setEditingIndex(index);
+    setEditItem({ name: item.name || '', logo: item.logo || '', description: item.description || '' });
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (onUpdate) onUpdate(editingIndex, editItem);
+    setEditingIndex(null);
+    setEditItem({ name: '', logo: '', description: '' });
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">Certifications & Affiliations</h3>
@@ -939,12 +973,36 @@ export function CertificationsEditor({ homepage, onSave, onAdd, onDelete }) {
       <div className="border-t pt-4">
         <div className="space-y-2 mb-4">
           {(data.items || []).map((c, i) => (
-            <div key={i} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-              <div className="flex items-center gap-3">
-                {c.logo && <img src={c.logo} alt={c.name} className="w-10 h-10 rounded object-cover border" />}
-                <div><p className="text-sm font-medium">{c.name}</p><p className="text-xs text-gray-500">{c.description}</p></div>
-              </div>
-              <button onClick={() => onDelete(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+            <div key={i} className="bg-gray-50 p-3 rounded-lg">
+              {editingIndex === i ? (
+                <form onSubmit={handleSaveEdit} className="space-y-2">
+                  <input type="text" required placeholder="Certification Name" value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })} className="input-field" />
+                  <div className="flex gap-2 items-center">
+                    <input type="text" placeholder="Logo URL (optional)" value={editItem.logo} onChange={(e) => setEditItem({ ...editItem, logo: e.target.value })} className="input-field flex-1" />
+                    <label className="btn-secondary flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                      <Upload className="w-4 h-4" /> {uploadingEditLogo ? 'Uploading...' : 'Upload Logo'}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleEditLogoUpload} disabled={uploadingEditLogo} />
+                    </label>
+                  </div>
+                  {editItem.logo && <img src={editItem.logo} alt="preview" className="w-12 h-12 rounded object-cover border" />}
+                  <input type="text" placeholder="Description" value={editItem.description} onChange={(e) => setEditItem({ ...editItem, description: e.target.value })} className="input-field" />
+                  <div className="flex gap-2">
+                    <button type="submit" className="btn-primary flex items-center gap-2 text-xs"><Save className="w-4 h-4" /> Save Changes</button>
+                    <button type="button" onClick={() => setEditingIndex(null)} className="btn-secondary text-xs">Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {c.logo && <img src={c.logo} alt={c.name} className="w-10 h-10 rounded object-cover border" />}
+                    <div><p className="text-sm font-medium">{c.name}</p><p className="text-xs text-gray-500">{c.description}</p></div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => startEdit(i, c)} className="text-blue-600 hover:text-blue-800" title="Edit"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => onDelete(i)} className="text-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -2304,6 +2362,234 @@ export function CategoriesEditor({ homepage, onSave }) {
 
       <button onClick={() => onSave({ show, items })} className="btn-primary flex items-center gap-2">
         <Save className="w-4 h-4" /> Save Categories
+      </button>
+    </div>
+  );
+}
+
+export function CertificateTemplateEditor({ homepage, onSave }) {
+  const tpl = homepage.certificateTemplate || {};
+  const [data, setData] = useState({
+    backgroundUrl: tpl.backgroundUrl || '',
+    orgLogoUrl: tpl.orgLogoUrl || '',
+    logoWidth: tpl.logoWidth || 120,
+    logoHeight: tpl.logoHeight || 120,
+    logoPosition: tpl.logoPosition || 'center',
+    primaryColor: tpl.primaryColor || '#1e40af',
+    secondaryColor: tpl.secondaryColor || '#0f172a',
+    accentColor: tpl.accentColor || '#ca8a04',
+    titleText: tpl.titleText || 'Certificate of Completion',
+    titleFontSize: tpl.titleFontSize || 32,
+    titleColor: tpl.titleColor || '#1e40af',
+    bodyFontSize: tpl.bodyFontSize || 16,
+    bodyColor: tpl.bodyColor || '#1e293b',
+    studentNameFontSize: tpl.studentNameFontSize || 28,
+    studentNameColor: tpl.studentNameColor || '#0f172a',
+    borderColor: tpl.borderColor || '#ca8a04',
+    borderWidth: tpl.borderWidth || 3,
+    showWatermark: tpl.showWatermark !== false,
+    watermarkText: tpl.watermarkText || '',
+    showSignature: tpl.showSignature !== false,
+    signatureLabel: tpl.signatureLabel || 'Authorized Signatory',
+    showDate: tpl.showDate !== false,
+    showGrade: tpl.showGrade !== false,
+    showVerificationCode: tpl.showVerificationCode !== false,
+    footerText: tpl.footerText || 'This certificate can be verified online at our official website',
+  });
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const { showSuccess, showError } = useToast();
+
+  const handleBgUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
+    setUploadingBg(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await uploadOrgImage(fd);
+      setData(prev => ({ ...prev, backgroundUrl: res.data.imageUrl }));
+      showSuccess('Background uploaded');
+    } catch (err) {
+      showError(getUploadErrorMessage(err));
+    } finally {
+      setUploadingBg(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!validateFileSize(file, showError)) { e.target.value = ''; return; }
+    setUploadingLogo(true);
+    const fd = new FormData();
+    fd.append('image', file);
+    try {
+      const res = await uploadOrgImage(fd);
+      setData(prev => ({ ...prev, orgLogoUrl: res.data.imageUrl }));
+      showSuccess('Logo uploaded');
+    } catch (err) {
+      showError(getUploadErrorMessage(err));
+    } finally {
+      setUploadingLogo(false);
+      e.target.value = '';
+    }
+  };
+
+  const numField = (key, label, min, max) => (
+    <Field label={label}>
+      <input type="number" min={min} max={max} value={data[key]} onChange={(e) => setData({ ...data, [key]: +e.target.value })} className="input-field" />
+    </Field>
+  );
+
+  const colorField = (key, label) => (
+    <Field label={label}>
+      <div className="flex gap-2 items-center">
+        <input type="color" value={data[key]} onChange={(e) => setData({ ...data, [key]: e.target.value })} className="w-10 h-10 rounded border cursor-pointer" />
+        <input type="text" value={data[key]} onChange={(e) => setData({ ...data, [key]: e.target.value })} className="input-field flex-1" />
+      </div>
+    </Field>
+  );
+
+  const toggleField = (key, label) => (
+    <label className="flex items-center gap-2 text-sm">
+      <input type="checkbox" checked={data[key]} onChange={(e) => setData({ ...data, [key]: e.target.checked })} /> {label}
+    </label>
+  );
+
+  return (
+    <div className="card space-y-5">
+      <div>
+        <h3 className="font-semibold text-base">Certificate Template Design</h3>
+        <p className="text-xs text-slate-500">Customize how certificates look when issued to students</p>
+      </div>
+
+      {/* Background & Logo */}
+      <div className="border-t pt-4 space-y-3">
+        <h4 className="text-sm font-bold text-slate-700">Background & Logo</h4>
+        <Field label="Background Image URL (optional)">
+          <div className="flex gap-2 items-center">
+            <input type="text" placeholder="Background image URL or upload" value={data.backgroundUrl} onChange={(e) => setData({ ...data, backgroundUrl: e.target.value })} className="input-field flex-1" />
+            <label className="btn-secondary flex items-center gap-2 cursor-pointer whitespace-nowrap">
+              <Upload className="w-4 h-4" /> {uploadingBg ? 'Uploading...' : 'Upload BG'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleBgUpload} disabled={uploadingBg} />
+            </label>
+          </div>
+        </Field>
+        {data.backgroundUrl && <img src={data.backgroundUrl} alt="bg preview" className="w-full h-32 object-cover rounded-lg border" />}
+
+        <Field label="Organization Logo URL (optional, overrides default logo on certificate)">
+          <div className="flex gap-2 items-center">
+            <input type="text" placeholder="Logo URL or upload" value={data.orgLogoUrl} onChange={(e) => setData({ ...data, orgLogoUrl: e.target.value })} className="input-field flex-1" />
+            <label className="btn-secondary flex items-center gap-2 cursor-pointer whitespace-nowrap">
+              <Upload className="w-4 h-4" /> {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploadingLogo} />
+            </label>
+          </div>
+        </Field>
+        {data.orgLogoUrl && <img src={data.orgLogoUrl} alt="logo preview" className="w-20 h-20 object-contain rounded border" />}
+
+        <div className="grid grid-cols-3 gap-3">
+          {numField('logoWidth', 'Logo Width (px)', 40, 300)}
+          {numField('logoHeight', 'Logo Height (px)', 40, 300)}
+          <Field label="Logo Position">
+            <select value={data.logoPosition} onChange={(e) => setData({ ...data, logoPosition: e.target.value })} className="input-field">
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </Field>
+        </div>
+      </div>
+
+      {/* Colors */}
+      <div className="border-t pt-4 space-y-3">
+        <h4 className="text-sm font-bold text-slate-700">Colors</h4>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {colorField('primaryColor', 'Primary Color')}
+          {colorField('secondaryColor', 'Secondary Color')}
+          {colorField('accentColor', 'Accent Color')}
+          {colorField('titleColor', 'Title Color')}
+          {colorField('studentNameColor', 'Student Name Color')}
+          {colorField('bodyColor', 'Body Text Color')}
+          {colorField('borderColor', 'Border Color')}
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {numField('borderWidth', 'Border Width (px)', 0, 10)}
+        </div>
+      </div>
+
+      {/* Text Content */}
+      <div className="border-t pt-4 space-y-3">
+        <h4 className="text-sm font-bold text-slate-700">Text Content</h4>
+        <Field label="Certificate Title"><input type="text" value={data.titleText} onChange={(e) => setData({ ...data, titleText: e.target.value })} className="input-field" /></Field>
+        <Field label="Footer Text"><input type="text" value={data.footerText} onChange={(e) => setData({ ...data, footerText: e.target.value })} className="input-field" /></Field>
+        <Field label="Watermark Text (optional)"><input type="text" placeholder="e.g. ORG NAME" value={data.watermarkText} onChange={(e) => setData({ ...data, watermarkText: e.target.value })} className="input-field" /></Field>
+        <Field label="Signature Label"><input type="text" value={data.signatureLabel} onChange={(e) => setData({ ...data, signatureLabel: e.target.value })} className="input-field" /></Field>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {numField('titleFontSize', 'Title Size', 16, 60)}
+          {numField('studentNameFontSize', 'Student Name Size', 16, 50)}
+          {numField('bodyFontSize', 'Body Size', 10, 30)}
+        </div>
+      </div>
+
+      {/* Display Toggles */}
+      <div className="border-t pt-4 space-y-2">
+        <h4 className="text-sm font-bold text-slate-700">Display Options</h4>
+        <div className="grid grid-cols-2 gap-2">
+          {toggleField('showWatermark', 'Show Watermark')}
+          {toggleField('showSignature', 'Show Signature Line')}
+          {toggleField('showDate', 'Show Issue Date')}
+          {toggleField('showGrade', 'Show Grade')}
+          {toggleField('showVerificationCode', 'Show Verification Code')}
+        </div>
+      </div>
+
+      {/* Live Preview */}
+      <div className="border-t pt-4">
+        <h4 className="text-sm font-bold text-slate-700 mb-2">Live Preview</h4>
+        <div className="relative w-full max-w-2xl mx-auto bg-white rounded-lg overflow-hidden shadow-lg" style={{ border: `${data.borderWidth}px solid ${data.borderColor}`, aspectRatio: '1.414 / 1' }}>
+          {data.backgroundUrl && (
+            <img src={data.backgroundUrl} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+          )}
+          {data.showWatermark && data.watermarkText && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="text-6xl font-black opacity-5" style={{ color: data.primaryColor, transform: 'rotate(-30deg)' }}>{data.watermarkText}</span>
+            </div>
+          )}
+          <div className="relative z-10 flex flex-col items-center justify-center h-full p-6 text-center">
+            {data.orgLogoUrl && (
+              <img src={data.orgLogoUrl} alt="logo" style={{ width: data.logoWidth, height: data.logoHeight }} className="object-contain mb-2" />
+            )}
+            <h2 style={{ fontSize: data.titleFontSize, color: data.titleColor }} className="font-black mb-1">{data.titleText}</h2>
+            <p style={{ fontSize: data.bodyFontSize, color: data.bodyColor }} className="mb-2">This is to certify that</p>
+            <p style={{ fontSize: data.studentNameFontSize, color: data.studentNameColor }} className="font-bold mb-2">Student Name</p>
+            <p style={{ fontSize: data.bodyFontSize, color: data.bodyColor }} className="mb-2">has successfully completed the course</p>
+            <p style={{ fontSize: data.bodyFontSize + 2, color: data.primaryColor }} className="font-bold mb-3">Course Name</p>
+            <div className="flex justify-between w-full max-w-md mt-auto">
+              <div className="text-left">
+                {data.showDate && <p style={{ fontSize: 12, color: data.bodyColor }}>Date: {new Date().toLocaleDateString()}</p>}
+                {data.showGrade && <p style={{ fontSize: 12, color: data.bodyColor }}>Grade: A</p>}
+              </div>
+              {data.showVerificationCode && (
+                <p style={{ fontSize: 10, color: data.bodyColor }} className="text-right">Code: ABC12345</p>
+              )}
+            </div>
+            {data.showSignature && (
+              <div className="mt-3">
+                <div style={{ borderTop: `1px solid ${data.secondaryColor}`, width: 150 }}></div>
+                <p style={{ fontSize: 10, color: data.bodyColor }} className="mt-1">{data.signatureLabel}</p>
+              </div>
+            )}
+            <p style={{ fontSize: 9, color: data.bodyColor }} className="mt-2 opacity-60">{data.footerText}</p>
+          </div>
+        </div>
+      </div>
+
+      <button onClick={() => onSave(data)} className="btn-primary flex items-center gap-2 w-full justify-center py-3">
+        <Save className="w-4 h-4" /> Save Certificate Template
       </button>
     </div>
   );

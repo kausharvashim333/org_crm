@@ -444,7 +444,7 @@ router.put('/', protect, superAdminOnly, async (req, res) => {
 router.put('/section/:section', protect, superAdminOnly, async (req, res) => {
   try {
     const { section } = req.params;
-    const allowedSections = ['hero', 'verticals', 'about', 'stats', 'courses', 'franchise', 'certifications', 'cta', 'gallery', 'testimonials', 'notices', 'contact', 'settings', 'layoutOrder', 'services', 'announcement', 'enquiryConfig', 'codeSeriesConfig', 'verifyWidget', 'categories'];
+    const allowedSections = ['hero', 'verticals', 'about', 'stats', 'courses', 'franchise', 'certifications', 'cta', 'gallery', 'testimonials', 'notices', 'contact', 'settings', 'layoutOrder', 'services', 'announcement', 'enquiryConfig', 'codeSeriesConfig', 'verifyWidget', 'categories', 'certificateTemplate'];
     if (!allowedSections.includes(section)) {
       return res.status(400).json({ success: false, message: 'Invalid section' });
     }
@@ -691,6 +691,24 @@ router.delete('/certifications/:index', protect, superAdminOnly, async (req, res
   try {
     const homepage = await createDefaultIfMissing();
     homepage.certifications.items.splice(parseInt(req.params.index), 1);
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/certifications/:index', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { name, logo, description } = req.body;
+    const idx = parseInt(req.params.index);
+    const homepage = await createDefaultIfMissing();
+    if (!homepage.certifications.items[idx]) {
+      return res.status(404).json({ success: false, message: 'Certification item not found' });
+    }
+    if (name !== undefined) homepage.certifications.items[idx].name = name;
+    if (logo !== undefined) homepage.certifications.items[idx].logo = logo;
+    if (description !== undefined) homepage.certifications.items[idx].description = description;
     await homepage.save();
     res.json({ success: true, homepage });
   } catch (error) {

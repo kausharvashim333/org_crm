@@ -213,6 +213,7 @@ export const deleteOrgNotice = (index) => API.delete(`/org-homepage/notices/${in
 export const updateOrgNotice = (index, data) => API.put(`/org-homepage/notices/${index}`, data);
 export const addOrgCertification = (data) => API.post('/org-homepage/certifications', data);
 export const deleteOrgCertification = (index) => API.delete(`/org-homepage/certifications/${index}`);
+export const updateOrgCertification = (index, data) => API.put(`/org-homepage/certifications/${index}`, data);
 export const addOrgService = (data) => API.post('/org-homepage/services', data);
 export const deleteOrgService = (index) => API.delete(`/org-homepage/services/${index}`);
 

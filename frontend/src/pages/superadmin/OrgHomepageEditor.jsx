@@ -8,7 +8,7 @@ import {
   addOrgFeature, deleteOrgFeature,
   updateOrgHomepage,
   addOrgNotice, deleteOrgNotice, updateOrgNotice,
-  addOrgCertification, deleteOrgCertification,
+  addOrgCertification, deleteOrgCertification, updateOrgCertification,
   addOrgService, deleteOrgService,
   addOrgVertical, deleteOrgVertical, updateOrgVertical,
   addOrgCustomSection, updateOrgCustomSection, deleteOrgCustomSection,
@@ -19,7 +19,7 @@ import { useToast } from '../../context/ToastContext';
 import { ExternalLink } from 'lucide-react';
 import {
   HeroEditor, AboutEditor, StatsEditor, FranchiseEditor,
-  CertificationsEditor, GalleryEditor, TestimonialsEditor,
+  CertificationsEditor, CertificateTemplateEditor, GalleryEditor, TestimonialsEditor,
   NoticesEditor, CtaEditor, ContactEditor, SettingsEditor,
   ServicesEditor, AnnouncementEditor, EnquiryConfigEditor,
   CodeSeriesEditor, VerticalsEditor, CustomSectionsEditor, CentersStripEditor,
@@ -33,6 +33,7 @@ const tabs = [
   { key: 'franchise', label: '⭐ Franchise & Partnership Plans' },
   { key: 'services', label: 'Services' },
   { key: 'custom', label: 'Custom Sections' },
+  { key: 'certs', label: 'Certificates & Affiliations' },
   { key: 'media', label: 'Media' },
   { key: 'layout', label: 'Section Order' },
   { key: 'settings', label: 'Settings' },
@@ -49,6 +50,7 @@ const sectionToTab = {
   gallery: 'media', testimonials: 'media', notices: 'media',
   announcement: 'settings', enquiryConfig: 'settings', contact: 'settings', settings: 'settings',
   verifyWidget: 'custom', categories: 'custom', layoutOrder: 'layout',
+  certifications: 'certs', certificateTemplate: 'certs',
 };
 
 export default function OrgHomepageEditor() {
@@ -133,7 +135,6 @@ export default function OrgHomepageEditor() {
         {activeTab === 'content' && <>
           <AboutEditor homepage={homepage} onSave={(d) => save('about', d)} onAddFeature={(d) => add(addOrgFeature, d, 'Feature added')} onDeleteFeature={(i) => del(deleteOrgFeature, i, 'Deleted')} />
           <StatsEditor homepage={homepage} onSave={(d) => save('stats', d)} onAdd={(d) => add(addOrgStat, d, 'Stat added')} onDelete={(i) => del(deleteOrgStat, i, 'Deleted')} />
-          <CertificationsEditor homepage={homepage} onSave={(d) => save('certifications', d)} onAdd={(d) => add(addOrgCertification, d, 'Certification added')} onDelete={(i) => del(deleteOrgCertification, i, 'Deleted')} />
         </>}
 
         {activeTab === 'verticals' && (
@@ -162,6 +163,20 @@ export default function OrgHomepageEditor() {
             onDeleteSection={(id) => del(deleteOrgCustomSection.bind(null, id), null, 'Section deleted')}
             onAddCard={(sectionId, d) => add(addOrgCustomCard.bind(null, sectionId), d, 'Card added')}
             onDeleteCard={(sectionId, cardIndex) => del(deleteOrgCustomCard.bind(null, sectionId), cardIndex, 'Card deleted')}
+          />
+        </>}
+
+        {activeTab === 'certs' && <>
+          <CertificationsEditor 
+            homepage={homepage} 
+            onSave={(d) => save('certifications', d)} 
+            onAdd={(d) => add(addOrgCertification, d, 'Certification added')} 
+            onDelete={(i) => del(deleteOrgCertification, i, 'Deleted')}
+            onUpdate={(i, d) => update(updateOrgCertification, i, d, 'Certification updated')}
+          />
+          <CertificateTemplateEditor 
+            homepage={homepage} 
+            onSave={(d) => save('certificateTemplate', d)} 
           />
         </>}
 
