@@ -221,6 +221,12 @@ export default function PublicPartnerAdmissionPage() {
     if (!formData.name || !formData.phone || !formData.dob) {
       return showError('Kripya Full Name, Phone Number aur Date of Birth bharein');
     }
+    if (!/^[6-9]\d{9}$/.test(formData.phone.trim())) {
+      return showError('Mobile Number galat hai. 10-digit valid Indian mobile number daolein (6-9 se shuru)');
+    }
+    if (formData.email && formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      return showError('Email Address galat hai. Sahi email format daolein (e.g. name@example.com)');
+    }
     if (!formData.fatherName) {
       return showError('Father Name zaroori hai');
     }
@@ -446,7 +452,8 @@ export default function PublicPartnerAdmissionPage() {
                           type="tel"
                           required
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                          maxLength={10}
                           placeholder="10-digit number"
                           className="input-field text-sm"
                         />

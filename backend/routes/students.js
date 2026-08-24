@@ -130,6 +130,30 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Partner ID is required to register a student.' });
     }
 
+    // Phone format validation
+    if (req.body.phone && !/^[6-9]\d{9}$/.test(String(req.body.phone).trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid mobile number. Please enter a valid 10-digit Indian mobile number starting with 6-9.' });
+    }
+
+    // Email format validation (if provided)
+    if (req.body.email && req.body.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(req.body.email.trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid email address. Please enter a valid email format (e.g. name@example.com).' });
+    }
+
+    // Duplicate registration check
+    if (req.body.phone || req.body.email) {
+      const dupFilter = { $or: [] };
+      if (req.body.phone) dupFilter.$or.push({ phone: String(req.body.phone).trim() });
+      if (req.body.email && req.body.email.trim()) dupFilter.$or.push({ email: req.body.email.toLowerCase().trim() });
+      const existingStudent = await Student.findOne(dupFilter);
+      if (existingStudent) {
+        return res.status(409).json({
+          success: false,
+          message: `This student is already registered. Application No: ${existingStudent.applicationNo}, Student ID: ${existingStudent.studentIdNo || 'N/A'}. Duplicate registration is not allowed.`,
+        });
+      }
+    }
+
     const studentIdNo = await generateStudentIdNo();
     const student = await Student.create({ ...req.body, partnerId, studentIdNo });
 
@@ -324,9 +348,19 @@ router.post('/public/apply', upload.fields([
       return res.status(400).json({ success: false, message: 'Please provide Center, Course, Name, and Phone number' });
     }
 
+    // Phone format validation
+    if (!/^[6-9]\d{9}$/.test(String(phone).trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid mobile number. Please enter a valid 10-digit Indian mobile number starting with 6-9.' });
+    }
+
+    // Email format validation (if provided)
+    if (email && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid email address. Please enter a valid email format (e.g. name@example.com).' });
+    }
+
     // Duplicate registration check: phone or email already exists
-    const dupFilter = { $or: [{ phone }] };
-    if (email) dupFilter.$or.push({ email: email.toLowerCase() });
+    const dupFilter = { $or: [{ phone: String(phone).trim() }] };
+    if (email && email.trim()) dupFilter.$or.push({ email: email.toLowerCase().trim() });
     const existingStudent = await Student.findOne(dupFilter);
     if (existingStudent) {
       return res.status(409).json({
@@ -709,9 +743,19 @@ router.post('/partner-center/submit', protect, upload.fields([
       return res.status(400).json({ success: false, message: 'Name, phone, and course are required' });
     }
 
+    // Phone format validation
+    if (!/^[6-9]\d{9}$/.test(String(phone).trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid mobile number. Please enter a valid 10-digit Indian mobile number starting with 6-9.' });
+    }
+
+    // Email format validation (if provided and not auto-generated)
+    if (req.body.email && req.body.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(req.body.email.trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid email address. Please enter a valid email format (e.g. name@example.com).' });
+    }
+
     // Duplicate registration check
-    const dupFilter = { $or: [{ phone }] };
-    if (studentEmail) dupFilter.$or.push({ email: studentEmail.toLowerCase() });
+    const dupFilter = { $or: [{ phone: String(phone).trim() }] };
+    if (req.body.email && req.body.email.trim()) dupFilter.$or.push({ email: req.body.email.toLowerCase().trim() });
     const existingStudent = await Student.findOne(dupFilter);
     if (existingStudent) {
       return res.status(409).json({

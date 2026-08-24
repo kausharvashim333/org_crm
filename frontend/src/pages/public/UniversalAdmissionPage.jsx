@@ -306,8 +306,11 @@ export default function UniversalAdmissionPage() {
     if (!formData.fullName.trim() || !formData.phone.trim()) {
       return showError('Full Name aur Mobile Number zaroori hain');
     }
-    if (formData.phone.length < 10) {
-      return showError('Mobile Number 10 digits ka hona chahiye');
+    if (!/^[6-9]\d{9}$/.test(formData.phone.trim())) {
+      return showError('Mobile Number galat hai. 10-digit valid Indian mobile number daalein (6-9 se shuru)');
+    }
+    if (formData.email && formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      return showError('Email Address galat hai. Sahi email format daolein (e.g. name@example.com)');
     }
     setStep(2);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -657,7 +660,7 @@ export default function UniversalAdmissionPage() {
                     type="tel"
                     name="phone"
                     value={formData.phone}
-                    onChange={handleInputChange}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
                     maxLength={10}
                     required
                     placeholder="10-digit mobile"
