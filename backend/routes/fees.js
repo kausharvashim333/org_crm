@@ -19,7 +19,8 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
       .populate('studentId', 'fullName phone')
       .populate('courseId', 'name')
       .sort({ createdAt: -1 });
-    res.json({ success: true, count: fees.length, fees });
+    const validFees = fees.filter(f => f.studentId);
+    res.json({ success: true, count: validFees.length, fees: validFees });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
