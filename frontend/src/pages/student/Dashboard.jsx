@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getStudentLmsDashboard, changePassword, updateStudentLmsProfile, getStudentAvailableExams, uploadStudentLmsDocument } from '../../api';
 import { useToast } from '../../context/ToastContext';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
 import { 
   BookOpen, PlayCircle, Award, CheckCircle2, LogOut, GraduationCap, ArrowRight, User, 
   FileText, Calendar, CreditCard, Download, ExternalLink, ShieldCheck, MapPin, Phone, 
   Mail, KeyRound, Clock, Sparkles, Building2, Check, AlertCircle, Menu, X, ChevronRight,
-  Edit3, Save, Lock, School, BookMarked, UserCheck, Shield, Bell, ClipboardList, TrendingUp
+  Edit3, Save, Lock, School, BookMarked, UserCheck, Shield, Bell, ClipboardList, TrendingUp,
+  BellRing
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -55,6 +57,7 @@ export default function StudentDashboard() {
 
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
+  const { supported, subscribed, requestPermission } = usePushNotifications();
 
   const populateProfileForm = (data) => {
     const s = data?.student || {};
@@ -413,6 +416,21 @@ export default function StudentDashboard() {
                 </div>
               )}
             </div>
+            {supported && !subscribed && (
+              <button
+                type="button"
+                onClick={requestPermission}
+                className="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-600 transition-colors cursor-pointer"
+                title="Enable push notifications"
+              >
+                <BellRing className="w-5 h-5" />
+              </button>
+            )}
+            {supported && subscribed && (
+              <span className="flex items-center gap-1 text-green-600 text-[10px] font-bold bg-green-50 px-2 py-1 rounded-lg border border-green-200">
+                <Bell className="w-3 h-3" /> On
+              </span>
+            )}
             <div className="text-right hidden sm:block">
               <p className="text-xs font-extrabold text-slate-900">{user?.name}</p>
               <p className="text-[10px] text-indigo-600 font-bold">{user?.studentIdNo}</p>

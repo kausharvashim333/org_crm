@@ -14,6 +14,7 @@ const upload = require('../middleware/upload');
 const { protect, partnerOrAdmin } = require('../middleware/auth');
 const { escapeRegex } = require('../utils/sanitize');
 const sendEmail = require('../utils/sendEmail');
+const { sendPushNotification, sendPushToAllPartners } = require('./pushNotifications');
 
 const router = express.Router();
 
@@ -612,6 +613,18 @@ router.post('/public/apply', upload.fields([
         }
       }
 
+      // Push notification to partner about new admission
+      if (student.partnerId) {
+        const partnerUser = await User.findOne({ partnerId: student.partnerId, role: 'partner' });
+        if (partnerUser) {
+          sendPushNotification(partnerUser._id, {
+            title: 'New Admission Pending Approval',
+            body: `${student.fullName} applied for admission. Application No: ${student.applicationNo}`,
+            url: '/partner/pending-approvals',
+          }).catch(() => {});
+        }
+      }
+
       return res.status(201).json({
         success: true,
         message: 'Admission form submitted successfully! Institute approval pending. Aapko confirmation email mil jayega jab institute admission approve karega.',
@@ -820,6 +833,15 @@ router.put('/:id/admission-approval', protect, async (req, res) => {
     if (studentUser && !student.userId) {
       student.userId = studentUser._id;
       await student.save();
+    }
+
+    // Push notification to student about admission approval
+    if (studentUser) {
+      sendPushNotification(studentUser._id, {
+        title: 'Admission Approved!',
+        body: `Congratulations ${student.fullName}! Your admission has been confirmed. Student ID: ${student.studentIdNo || 'N/A'}`,
+        url: '/student/dashboard',
+      }).catch(() => {});
     }
 
     // Send confirmation email with login credentials
@@ -1309,6 +1331,15 @@ router.post('/public/pay-fee', async (req, res) => {
     student.paymentInfo.paidAmount = fee.paidAmount;
     student.paymentInfo.paymentStatus = fee.status === 'paid' ? 'paid' : fee.status === 'partial' ? 'partial' : 'pending';
     await student.save();
+
+    // Push notification to student about fee payment
+    if (student.userId) {
+      sendPushNotification(student.userId, {
+        title: 'Fee Payment Recorded',
+        body: `₹${amount} payment received. Receipt No: ${receiptNo}. Pending: ₹${fee.pendingAmount}`,
+        url: '/student/dashboard',
+      }).catch(() => {});
+    }
 
     res.json({ success: true, message: 'Fee payment recorded', receiptNo, fee, student });
   } catch (error) {

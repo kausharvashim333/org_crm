@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getPartnerDashboard, getStudents, getFees, getInquiries } from '../../api';
 import { useAuth } from '../../context/AuthContext';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
 import StatCard from '../../components/StatCard';
-import { Users, GraduationCap, IndianRupee, UserCog, Bell, Award, Briefcase, BookOpen, ExternalLink, FileText, Sparkles, Download } from 'lucide-react';
+import { Users, GraduationCap, IndianRupee, UserCog, Bell, Award, Briefcase, BookOpen, ExternalLink, FileText, Sparkles, Download, BellRing } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -28,6 +29,7 @@ const exportToCSV = (data, filename, headers) => {
 
 export default function PartnerDashboard() {
   const { user } = useAuth();
+  const { supported, permission, subscribed, requestPermission } = usePushNotifications();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -78,6 +80,20 @@ export default function PartnerDashboard() {
           <p className="text-xs sm:text-sm text-slate-500 font-medium">{user?.partner?.instituteName} ({user?.partner?.centerType || 'Partner Center'})</p>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          {supported && !subscribed && (
+            <button
+              onClick={requestPermission}
+              className="flex items-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2.5 rounded-xl text-xs font-bold transition-all"
+              title="Enable push notifications"
+            >
+              <BellRing className="w-4 h-4" /> Enable Notifications
+            </button>
+          )}
+          {supported && subscribed && (
+            <span className="flex items-center gap-1.5 text-green-600 text-xs font-bold bg-green-50 px-3 py-2 rounded-xl border border-green-200">
+              <Bell className="w-3.5 h-3.5" /> Notifications On
+            </span>
+          )}
           <Link
             to="/partner/admission"
             className="flex-1 md:flex-none btn-primary py-2.5 px-5 text-xs font-extrabold flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white shadow-md rounded-xl transition-all hover:scale-102"

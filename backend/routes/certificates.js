@@ -1,6 +1,8 @@
 const express = require('express');
 const Certificate = require('../models/Certificate');
+const Student = require('../models/Student');
 const { protect, partnerOrAdmin, superAdminOnly } = require('../middleware/auth');
+const { sendPushNotification } = require('./pushNotifications');
 
 const router = express.Router();
 
@@ -64,6 +66,19 @@ router.put('/:id/approve', protect, superAdminOnly, async (req, res) => {
     cert.issueDate = new Date();
     cert.status = 'issued';
     await cert.save();
+
+    // Push notification to student about certificate issuance
+    if (cert.studentId) {
+      const student = await Student.findById(cert.studentId).select('userId fullName');
+      if (student && student.userId) {
+        sendPushNotification(student.userId, {
+          title: 'Certificate Issued!',
+          body: `Your certificate has been issued. Certificate No: ${cert.certificateNo}`,
+          url: '/student/dashboard',
+        }).catch(() => {});
+      }
+    }
+
     res.json({ success: true, certificate: cert });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -110,6 +125,18 @@ router.put('/bulk-approve', protect, superAdminOnly, async (req, res) => {
       await cert.save();
       certCount++;
       results.push(cert._id);
+
+      // Push notification to student about certificate issuance
+      if (cert.studentId) {
+        const student = await Student.findById(cert.studentId).select('userId fullName');
+        if (student && student.userId) {
+          sendPushNotification(student.userId, {
+            title: 'Certificate Issued!',
+            body: `Your certificate has been issued. Certificate No: ${cert.certificateNo}`,
+            url: '/student/dashboard',
+          }).catch(() => {});
+        }
+      }
     }
     res.json({ success: true, approved: results.length, message: `${results.length} certificate(s) issued successfully` });
   } catch (error) {

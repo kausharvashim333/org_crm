@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getMe } from '../api';
+import { subscribeToPush, isPushSupported } from '../api/push';
 
 const AuthContext = createContext();
 
@@ -48,6 +49,10 @@ export const AuthProvider = ({ children }) => {
         .then((res) => {
           setUser(res.data.user);
           localStorage.setItem(userKey, JSON.stringify(res.data.user));
+          // Auto-subscribe to push notifications
+          if (Notification.permission === 'granted') {
+            isPushSupported().then(ok => { if (ok) subscribeToPush().catch(() => {}); });
+          }
         })
         .catch((err) => {
           // Only clear token on 401 with actual token-invalid message.
@@ -85,6 +90,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem(tokenKey, userData.token);
     localStorage.setItem(userKey, JSON.stringify(userData.user));
     setUser(userData.user);
+    // Auto-subscribe to push notifications
+    if (Notification.permission === 'granted') {
+      isPushSupported().then(ok => { if (ok) subscribeToPush().catch(() => {}); });
+    }
   };
 
   const logout = () => {
