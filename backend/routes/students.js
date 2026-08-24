@@ -7,6 +7,9 @@ const Batch = require('../models/Batch');
 const Fee = require('../models/Fee');
 const Partner = require('../models/Partner');
 const User = require('../models/User');
+const Certificate = require('../models/Certificate');
+const StudentProgress = require('../models/StudentProgress');
+const Attendance = require('../models/Attendance');
 const upload = require('../middleware/upload');
 const { protect, partnerOrAdmin } = require('../middleware/auth');
 const { escapeRegex } = require('../utils/sanitize');
@@ -237,8 +240,20 @@ router.delete('/:id', protect, partnerOrAdmin, async (req, res) => {
     if (req.user.role === 'partner' && student.partnerId && req.user.partnerId && student.partnerId.toString() !== req.user.partnerId.toString()) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
+
+    const studentId = student._id;
+
+    await Fee.deleteMany({ studentId });
+    await Certificate.deleteMany({ studentId });
+    await StudentProgress.deleteMany({ studentId });
+
+    await Attendance.updateMany(
+      { 'records.studentId': studentId },
+      { $pull: { records: { studentId } } }
+    );
+
     await Student.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Student record deleted permanently' });
+    res.json({ success: true, message: 'Student record and related data (fees, certificates, progress, attendance) deleted permanently' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
