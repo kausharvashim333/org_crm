@@ -6,7 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import {
   GraduationCap, Building2, User, Upload, CheckCircle2, ChevronRight,
   ArrowLeft, Printer, Download, RefreshCw, Award, BookOpen, Check, Phone, Mail, MapPin,
-  UploadCloud, FileCheck, FileText, X
+  UploadCloud, FileCheck, FileText, X, Menu
 } from 'lucide-react';
 
 const RULES_CHECKLIST = [
@@ -32,6 +32,7 @@ export default function PublicPartnerAdmissionPage() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -111,6 +112,18 @@ export default function PublicPartnerAdmissionPage() {
   const { partner, homepage } = data;
   const themeColor = partner.themeColor || homepage?.settings?.themeColor || '#2563eb';
   const centerType = partner.centerType || 'Training Center';
+  const fontClass = homepage?.settings?.fontChoice === 'poppins' ? 'font-poppins' : homepage?.settings?.fontChoice === 'roboto' ? 'font-roboto' : 'font-inter';
+  const fixUrl = (url) => { if (!url) return ''; if (url.startsWith('/uploads/')) return `/api${url}`; return url; };
+
+  const navLinks = [
+    { label: 'Home', to: `/institute/${slug}` },
+    { label: 'Courses', to: `/institute/${slug}/courses` },
+    { label: 'About', to: `/institute/${slug}/about` },
+    { label: 'Faculty', to: `/institute/${slug}/faculty` },
+    { label: 'Gallery', to: `/institute/${slug}/gallery` },
+    { label: 'Notices', to: `/institute/${slug}/notices` },
+    { label: 'Contact', to: `/institute/${slug}/contact` },
+  ];
 
   // Calc Percentage & Division
   const calcMarks = (obt, max) => {
@@ -271,34 +284,36 @@ export default function PublicPartnerAdmissionPage() {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen flex flex-col justify-between font-sans">
+    <div className={`bg-slate-50 min-h-screen flex flex-col justify-between ${fontClass}`}>
       <div>
         {/* Institute Branding Header Navbar */}
-        <nav className="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-200">
+        <nav className="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link to={`/institute/${slug}`} className="flex items-center gap-2.5">
-              {partner.logo ? (
-                <img src={partner.logo} alt="logo" className="w-10 h-10 rounded-xl object-cover border border-slate-100" />
-              ) : (
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm text-white" style={{ backgroundColor: themeColor }}>
-                  <GraduationCap className="w-6 h-6" />
-                </div>
-              )}
+              {partner.logo ? <img src={fixUrl(partner.logo)} alt="logo" className="w-10 h-10 rounded-xl object-cover" onError={(e) => { const img = e.target; if (!img.dataset.retried && partner.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = partner.logo.substring(partner.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} /> : <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: themeColor }}><GraduationCap className="w-6 h-6 text-white" /></div>}
               <div>
                 <span className="font-black text-slate-900 text-lg tracking-tight block">{partner.instituteName}</span>
                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">{centerType}</span>
               </div>
             </Link>
 
-            <div className="flex items-center gap-4">
-              <Link to={`/institute/${slug}`} className="text-sm font-bold text-slate-600 hover:text-slate-900 hidden sm:block">Home</Link>
-              <Link to={`/institute/${slug}#courses`} className="text-sm font-bold text-slate-600 hover:text-slate-900 hidden sm:block">Courses</Link>
-              <Link to={`/institute/${slug}/contact`} className="text-sm font-bold text-slate-600 hover:text-slate-900 hidden sm:block">Contact</Link>
-              <Link to={`/institute/${slug}/login`} className="text-xs px-4 py-2 font-bold rounded-xl text-white shadow-md transition-all hover:opacity-90" style={{ backgroundColor: themeColor }}>
-                Student / Staff Login
-              </Link>
+            <div className="flex items-center gap-1">
+              {navLinks.map(l => <Link key={l.to} to={l.to} className="text-sm text-slate-600 hover:text-slate-900 hidden md:block px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors font-medium">{l.label}</Link>)}
+              <Link to={`/institute/${slug}/login`} className="text-sm px-4 py-2 rounded-xl text-white font-bold transition-all hover:scale-105 hidden sm:block" style={{ backgroundColor: themeColor }}>Login</Link>
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                {mobileMenuOpen ? <X className="w-5 h-5 text-slate-700" /> : <Menu className="w-5 h-5 text-slate-700" />}
+              </button>
             </div>
           </div>
+
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-slate-100 bg-white">
+              <div className="px-4 py-3 space-y-1">
+                {navLinks.map(l => <Link key={l.to} to={l.to} onClick={() => setMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-50 font-medium">{l.label}</Link>)}
+                <Link to={`/institute/${slug}/login`} className="block px-3 py-2.5 rounded-lg text-sm text-white font-bold text-center mt-2" style={{ backgroundColor: themeColor }}>Login</Link>
+              </div>
+            </div>
+          )}
         </nav>
 
         {/* Hero Title Banner */}
