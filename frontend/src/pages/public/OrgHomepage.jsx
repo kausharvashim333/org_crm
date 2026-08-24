@@ -1092,9 +1092,21 @@ export default function OrgHomepage() {
                 {/* Contact Information Cards */}
                 <Reveal className="lg:col-span-6 space-y-4">
                   <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-3">
+                    {/* Phone numbers - all in one box */}
+                    <div className="flex items-start gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-600 bg-indigo-50 shrink-0">
+                        <Phone className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Call Support</p>
+                        <p className="text-xs sm:text-sm font-semibold text-slate-800">{hp.contact?.phone || '+91 9999999999'}</p>
+                        {(hp.contact?.additionalPhones || []).map((p, idx) => (
+                          <p key={idx} className="text-xs sm:text-sm font-semibold text-slate-800">{p}</p>
+                        ))}
+                      </div>
+                    </div>
+
                     {[
-                      { icon: Phone, val: hp.contact?.phone || '+91 9999999999', label: 'Call Support' },
-                      ...((hp.contact?.additionalPhones || []).map((p, idx) => ({ icon: Phone, val: p, label: `Alternate Phone ${idx + 1}` }))),
                       { icon: Mail, val: hp.contact?.email || 'contact@example.com', label: 'Email Department' },
                       { icon: MapPin, val: hp.contact?.address || 'Central Headquarters, India', label: 'Head Office Address' },
                     ].map((c, i) => (
