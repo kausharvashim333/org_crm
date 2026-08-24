@@ -201,6 +201,7 @@ export const addOrgStat = (data) => API.post('/org-homepage/stats', data);
 export const deleteOrgStat = (index) => API.delete(`/org-homepage/stats/${index}`);
 export const addOrgFeature = (data) => API.post('/org-homepage/features', data);
 export const deleteOrgFeature = (index) => API.delete(`/org-homepage/features/${index}`);
+export const updateOrgFeature = (index, data) => API.put(`/org-homepage/features/${index}`, data);
 export const uploadOrgLogo = (formData) => API.post('/org-homepage/upload-logo', formData);
 export const uploadOrgFavicon = (formData) => API.post('/org-homepage/upload-favicon', formData);
 export const uploadOrgImage = (formData) => API.post('/org-homepage/upload-image', formData);

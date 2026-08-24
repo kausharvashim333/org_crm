@@ -593,6 +593,24 @@ router.delete('/features/:index', protect, superAdminOnly, async (req, res) => {
   }
 });
 
+router.put('/features/:index', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { icon, title, description } = req.body;
+    const idx = parseInt(req.params.index);
+    const homepage = await createDefaultIfMissing();
+    if (!homepage.about.features[idx]) {
+      return res.status(404).json({ success: false, message: 'Feature not found' });
+    }
+    if (icon !== undefined) homepage.about.features[idx].icon = icon;
+    if (title !== undefined) homepage.about.features[idx].title = title;
+    if (description !== undefined) homepage.about.features[idx].description = description;
+    await homepage.save();
+    res.json({ success: true, homepage });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Verticals
 router.post('/verticals', protect, superAdminOnly, async (req, res) => {
   try {

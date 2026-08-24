@@ -5,7 +5,7 @@ import {
   addOrgTestimonial, deleteOrgTestimonial, updateOrgTestimonial,
   addOrgGalleryPhoto, deleteOrgGalleryPhoto, toggleOrgGalleryFeatured,
   addOrgStat, deleteOrgStat,
-  addOrgFeature, deleteOrgFeature,
+  addOrgFeature, deleteOrgFeature, updateOrgFeature,
   updateOrgHomepage,
   addOrgNotice, deleteOrgNotice, updateOrgNotice,
   addOrgCertification, deleteOrgCertification, updateOrgCertification,
@@ -133,7 +133,7 @@ export default function OrgHomepageEditor() {
         </>}
 
         {activeTab === 'content' && <>
-          <AboutEditor homepage={homepage} onSave={(d) => save('about', d)} onAddFeature={(d) => add(addOrgFeature, d, 'Feature added')} onDeleteFeature={(i) => del(deleteOrgFeature, i, 'Deleted')} />
+          <AboutEditor homepage={homepage} onSave={(d) => save('about', d)} onAddFeature={(d) => add(addOrgFeature, d, 'Feature added')} onDeleteFeature={(i) => del(deleteOrgFeature, i, 'Deleted')} onUpdateFeature={(i, d) => update(updateOrgFeature, i, d, 'Feature updated')} />
           <StatsEditor homepage={homepage} onSave={(d) => save('stats', d)} onAdd={(d) => add(addOrgStat, d, 'Stat added')} onDelete={(i) => del(deleteOrgStat, i, 'Deleted')} />
         </>}
 

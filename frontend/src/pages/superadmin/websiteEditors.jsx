@@ -189,9 +189,26 @@ export function HeroEditor({ homepage, onSave }) {
   );
 }
 
-export function AboutEditor({ homepage, onSave, onAddFeature, onDeleteFeature }) {
+export function AboutEditor({ homepage, onSave, onAddFeature, onDeleteFeature, onUpdateFeature }) {
   const [data, setData] = useState(homepage.about || { features: [] });
   const [newFeature, setNewFeature] = useState({ icon: 'book', title: '', description: '' });
+  const [editingIdx, setEditingIdx] = useState(null);
+  const [editFeature, setEditFeature] = useState({ icon: 'book', title: '', description: '' });
+
+  const iconOptions = ['book', 'briefcase', 'users', 'award', 'monitor', 'building', 'wifi', 'target', 'heart'];
+
+  const startEdit = (i, f) => {
+    setEditingIdx(i);
+    setEditFeature({ icon: f.icon || 'book', title: f.title || '', description: f.description || '' });
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (onUpdateFeature) onUpdateFeature(editingIdx, editFeature);
+    setEditingIdx(null);
+    setEditFeature({ icon: 'book', title: '', description: '' });
+  };
+
   return (
     <div className="card space-y-4">
       <h3 className="font-semibold">About / Mission & Vision</h3>
@@ -205,17 +222,37 @@ export function AboutEditor({ homepage, onSave, onAddFeature, onDeleteFeature })
         <h4 className="font-medium text-sm mb-3">Why Choose Us Features</h4>
         <div className="space-y-2 mb-4">
           {(data.features || []).map((f, i) => (
-            <div key={i} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-              <div><p className="text-sm font-medium">{f.title}</p><p className="text-xs text-gray-500">{f.description}</p></div>
-              <button onClick={() => onDeleteFeature(i)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+            <div key={i} className="bg-gray-50 p-3 rounded-lg">
+              {editingIdx === i ? (
+                <form onSubmit={handleSaveEdit} className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                  <select value={editFeature.icon} onChange={(e) => setEditFeature({ ...editFeature, icon: e.target.value })} className="input-field text-xs">
+                    {iconOptions.map(ic => <option key={ic} value={ic}>{ic.charAt(0).toUpperCase() + ic.slice(1)}</option>)}
+                  </select>
+                  <input type="text" required placeholder="Title" value={editFeature.title} onChange={(e) => setEditFeature({ ...editFeature, title: e.target.value })} className="input-field text-xs" />
+                  <input type="text" required placeholder="Description" value={editFeature.description} onChange={(e) => setEditFeature({ ...editFeature, description: e.target.value })} className="input-field text-xs" />
+                  <div className="flex gap-1">
+                    <button type="submit" className="btn-primary text-xs px-3 py-1.5 flex-1 flex items-center gap-1"><Save className="w-3 h-3" /> Save</button>
+                    <button type="button" onClick={() => setEditingIdx(null)} className="btn-secondary text-xs px-3 py-1.5">Cancel</button>
+                  </div>
+                </form>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400 capitalize w-16">{f.icon}</span>
+                    <div><p className="text-sm font-medium">{f.title}</p><p className="text-xs text-gray-500">{f.description}</p></div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => startEdit(i, f)} className="text-blue-600 hover:text-blue-800" title="Edit"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => onDeleteFeature(i)} className="text-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
         <form onSubmit={(e) => { e.preventDefault(); onAddFeature(newFeature); setNewFeature({ icon: 'book', title: '', description: '' }); }} className="grid grid-cols-3 gap-2">
           <select value={newFeature.icon} onChange={(e) => setNewFeature({ ...newFeature, icon: e.target.value })} className="input-field">
-            <option value="book">Book</option><option value="briefcase">Briefcase</option><option value="users">Users</option>
-            <option value="award">Award</option><option value="monitor">Monitor</option><option value="building">Building</option>
-            <option value="wifi">WiFi</option><option value="target">Target</option><option value="heart">Heart</option>
+            {iconOptions.map(ic => <option key={ic} value={ic}>{ic.charAt(0).toUpperCase() + ic.slice(1)}</option>)}
           </select>
           <input type="text" required placeholder="Title" value={newFeature.title} onChange={(e) => setNewFeature({ ...newFeature, title: e.target.value })} className="input-field" />
           <input type="text" required placeholder="Description" value={newFeature.description} onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })} className="input-field" />
