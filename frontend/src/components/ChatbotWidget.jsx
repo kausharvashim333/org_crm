@@ -55,7 +55,7 @@ export default function ChatbotWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg hover:scale-110 transition-all flex items-center justify-center"
+          className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg hover:scale-110 transition-all flex items-center justify-center"
           title="Chat with AI Assistant"
         >
           <MessageCircle className="w-6 h-6" />
