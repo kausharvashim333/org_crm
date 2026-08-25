@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { SuperAdminRoute, PartnerRoute } from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import ErrorBoundary from './components/ErrorBoundary';
+import ChatbotWidget from './components/ChatbotWidget';
 
 // Public Pages (Lazy)
 const PublicHomepage = lazy(() => import('./pages/public/Homepage'));
@@ -226,6 +227,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Suspense>
+    <ChatbotWidget />
     </ErrorBoundary>
   );
 }

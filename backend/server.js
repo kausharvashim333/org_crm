@@ -147,6 +147,7 @@ app.use('/api/materials', require('./routes/materials'));
 app.use('/api/certificates', require('./routes/certificates'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/push', require('./routes/pushNotifications'));
+app.use('/api/chatbot', require('./routes/chatbot'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/org-homepage', require('./routes/orgHomepage'));
 app.use('/api/student-lms', require('./routes/studentLms'));
