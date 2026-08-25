@@ -74,7 +74,7 @@ router.post('/message', async (req, res) => {
     const fullPrompt = `${SYSTEM_PROMPT}\n\n--- Institute Context ---\n${context || 'No specific institute data available.'}\n--- End Context ---\n\nUser: ${message}`;
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
     const chat = model.startChat({
       history: [
