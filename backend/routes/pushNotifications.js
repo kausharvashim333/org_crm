@@ -5,11 +5,17 @@ const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:admin@liliorg.in',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+let vapidConfigured = false;
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT || 'mailto:admin@liliorg.in',
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+  vapidConfigured = true;
+} else {
+  console.warn('[Push Notifications] VAPID keys not set in .env — push notifications disabled');
+}
 
 // Get VAPID public key (public endpoint)
 router.get('/vapid-public-key', (req, res) => {
@@ -19,6 +25,9 @@ router.get('/vapid-public-key', (req, res) => {
 // Subscribe to push notifications
 router.post('/subscribe', protect, async (req, res) => {
   try {
+    if (!vapidConfigured) {
+      return res.status(503).json({ success: false, message: 'Push notifications not configured' });
+    }
     const { subscription } = req.body;
     if (!subscription || !subscription.endpoint || !subscription.keys) {
       return res.status(400).json({ success: false, message: 'Invalid subscription object' });
@@ -107,6 +116,7 @@ router.post('/send', protect, async (req, res) => {
 // Helper function to send push notification to a user (for internal use)
 async function sendPushNotification(userId, { title, body, url }) {
   try {
+    if (!vapidConfigured) return { sent: 0 };
     const subscriptions = await PushSubscription.find({ userId });
     if (subscriptions.length === 0) return { sent: 0 };
 
