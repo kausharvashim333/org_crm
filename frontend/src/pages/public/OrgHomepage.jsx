@@ -70,7 +70,7 @@ function SectionHeading({ badge = 'Explore', title, subtitle, themeColor }) {
           {badge}
         </span>
       )}
-      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-3 leading-tight">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-3 leading-tight text-shimmer">
         {title}
       </h2>
       <div className="flex items-center justify-center gap-1.5 mb-4">
@@ -83,6 +83,174 @@ function SectionHeading({ badge = 'Explore', title, subtitle, themeColor }) {
           {subtitle}
         </p>
       )}
+    </div>
+  );
+}
+
+function WaveDivider({ color = '#ffffff', flip = false }) {
+  return (
+    <div className="wave-divider" style={{ transform: flip ? 'rotate(180deg)' : 'none' }}>
+      <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+        <path d="M0,30 C200,60 400,0 600,20 C800,40 1000,10 1200,30 L1200,60 L0,60 Z" fill={color} />
+      </svg>
+    </div>
+  );
+}
+
+function TrustMarquee({ themeColor }) {
+  const partners = ['NSDC', 'Skill India', 'ISO 9001', 'Govt of India', 'Make in India', 'Digital India', 'PMKVY', 'NIELIT'];
+  return (
+    <section className="py-8 bg-white border-b border-slate-200/60 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 mb-4">
+        <p className="text-center text-[11px] font-bold uppercase tracking-widest text-slate-400">Trusted &amp; Accredited By</p>
+      </div>
+      <div className="relative">
+        <div className="flex marquee-track gap-12 items-center whitespace-nowrap">
+          {[...partners, ...partners].map((p, i) => (
+            <span key={i} className="text-lg sm:text-xl font-black text-slate-300 hover:text-slate-500 transition-colors cursor-default tracking-tight shrink-0">
+              {p}
+            </span>
+          ))}
+        </div>
+        {/* Edge fades */}
+        <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-white to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-white to-transparent pointer-events-none" />
+      </div>
+    </section>
+  );
+}
+
+function WhyChooseUs({ themeColor }) {
+  const features = [
+    { icon: ShieldCheck, title: 'Govt Certified Courses', desc: 'Industry-recognized certifications aligned with national skill standards.' },
+    { icon: Briefcase, title: '100% Placement Support', desc: 'Dedicated placement cell with tie-ups across 200+ companies.' },
+    { icon: Users, title: 'Expert Faculty', desc: 'Learn from certified trainers with 10+ years of industry experience.' },
+    { icon: Monitor, title: 'Modern Lab Facilities', desc: 'State-of-the-art computer labs and paramedical training equipment.' },
+  ];
+  return (
+    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50/50 border-b border-slate-200/60 relative overflow-hidden">
+      <div className="absolute top-10 right-10 w-40 h-40 rounded-full opacity-5 float-shape" style={{ backgroundColor: themeColor }} />
+      <div className="max-w-7xl mx-auto relative z-10">
+        <Reveal>
+          <SectionHeading
+            badge="Why Choose Us"
+            title="Excellence in Vocational Education"
+            subtitle="We deliver quality education that transforms careers and builds skilled professionals."
+            themeColor={themeColor}
+          />
+        </Reveal>
+        <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Connecting line for desktop */}
+          <div className="hidden lg:block why-line" />
+          {features.map((f, i) => {
+            const Icon = f.icon;
+            return (
+              <Reveal key={i} delay={i * 100} className="relative z-10">
+                <div className="group flex flex-col items-center text-center p-6 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl transition-all card-lift shine-card relative overflow-hidden">
+                  {/* Number badge */}
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm mb-4 number-pulse shrink-0" style={{ backgroundColor: themeColor }}>
+                    {i + 1}
+                  </div>
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 group-hover:rotate-3" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base mb-2">{f.title}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">{f.desc}</p>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQAccordion({ themeColor }) {
+  const [openIdx, setOpenIdx] = useState(null);
+  const faqs = [
+    { q: 'What courses do you offer?', a: 'We offer diploma and certificate courses in Computer Applications, Paramedical Sciences, Accounting & Tally, Graphic Design, and Stock Market training.' },
+    { q: 'Are the courses government certified?', a: 'Yes, all our courses are aligned with NSDC and Skill India standards. Certificates are verifiable online through our portal.' },
+    { q: 'Do you provide placement assistance?', a: 'Absolutely! We have a dedicated placement cell with tie-ups across 200+ companies for internships and full-time placements.' },
+    { q: 'How can I apply for admission?', a: 'You can apply online through our admission portal or visit any of our affiliated training centers for offline registration.' },
+    { q: 'Can I verify my certificate online?', a: 'Yes, use our online certificate verification tool on the homepage. Enter your certificate code to instantly verify authenticity.' },
+    { q: 'Do you offer franchise opportunities?', a: 'Yes, we partner with training institutes across India. Visit our franchise page or contact our coordinator for details.' },
+  ];
+  return (
+    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+      <div className="max-w-3xl mx-auto relative z-10">
+        <Reveal>
+          <SectionHeading
+            badge="FAQ"
+            title="Frequently Asked Questions"
+            subtitle="Everything you need to know about our courses, certifications, and admissions."
+            themeColor={themeColor}
+          />
+        </Reveal>
+        <div className="space-y-3">
+          {faqs.map((faq, i) => (
+            <Reveal key={i} delay={i * 50}>
+              <div className={`rounded-2xl border transition-all overflow-hidden ${openIdx === i ? 'border-indigo-200 shadow-md' : 'border-slate-200 shadow-xs hover:border-slate-300'}`}>
+                <button
+                  onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 p-4 sm:p-5 text-left group"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0 transition-colors" style={{ backgroundColor: openIdx === i ? themeColor : `${themeColor}12`, color: openIdx === i ? '#fff' : themeColor }}>
+                      {i + 1}
+                    </span>
+                    <span className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-indigo-600 transition-colors">{faq.q}</span>
+                  </span>
+                  <ChevronDown className={`w-5 h-5 shrink-0 transition-all duration-300 ${openIdx === i ? 'rotate-180' : ''}`} style={{ color: themeColor }} />
+                </button>
+                <div className={`faq-answer ${openIdx === i ? 'open' : ''}`}>
+                  <p className="px-5 pb-4 text-xs sm:text-sm text-slate-600 leading-relaxed pl-12">{faq.a}</p>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SideDotNav({ sections, themeColor }) {
+  const [activeSection, setActiveSection] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setVisible(window.scrollY > 400);
+      const scrollPos = window.scrollY + window.innerHeight / 2;
+      const sectionEls = sections.map(s => document.getElementById(s.id)).filter(Boolean);
+      for (let i = sectionEls.length - 1; i >= 0; i--) {
+        if (sectionEls[i].offsetTop <= scrollPos) {
+          setActiveSection(i);
+          break;
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [sections]);
+
+  if (!visible) return null;
+
+  return (
+    <div className="fixed right-4 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-3 items-end">
+      {sections.map((s, i) => (
+        <div key={i} className="flex items-center gap-2 group cursor-pointer" onClick={() => {
+          const el = document.getElementById(s.id);
+          if (el) window.scrollTo({ top: el.offsetTop - 70, behavior: 'smooth' });
+        }}>
+          <span className={`text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity ${activeSection === i ? 'text-slate-900' : 'text-slate-400'}`}>
+            {s.label}
+          </span>
+          <div className={`side-dot ${activeSection === i ? 'active' : ''}`} style={activeSection === i ? { background: themeColor } : {}} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -305,8 +473,23 @@ export default function OrgHomepage() {
   const orgName = hp?.settings?.orgName || 'Skill India Training Network';
   const hiddenSections = ['courses', 'franchise', 'notices', 'stats'];
   const layoutOrder = (hp?.layoutOrder || [
-    'hero', 'categories', 'verticals', 'services', 'verifyWidget', 'about', 'certifications', 'gallery', 'testimonials', 'cta', 'contact'
+    'hero', 'trustMarquee', 'categories', 'verticals', 'whyChooseUs', 'services', 'verifyWidget', 'about', 'certifications', 'gallery', 'testimonials', 'faq', 'cta', 'contact'
   ]).filter(s => !hiddenSections.includes(s));
+
+  const sideNavSections = [
+    { id: 'hero', label: 'Home' },
+    { id: 'verticals', label: 'Streams' },
+    { id: 'whyChooseUs', label: 'Why Us' },
+    { id: 'services', label: 'Services' },
+    { id: 'verifyWidget', label: 'Verify' },
+    { id: 'about', label: 'About' },
+    { id: 'certifications', label: 'Awards' },
+    { id: 'gallery', label: 'Gallery' },
+    { id: 'testimonials', label: 'Reviews' },
+    { id: 'faq', label: 'FAQ' },
+    { id: 'cta', label: 'Apply' },
+    { id: 'contact', label: 'Contact' },
+  ].filter(s => !hiddenSections.includes(s.id) || s.id === 'hero');
 
   // Notice categories extraction
   const rawNotices = hp?.notices?.items || [];
@@ -321,6 +504,12 @@ export default function OrgHomepage() {
 
   const renderSection = (section) => {
     switch (section) {
+      case 'trustMarquee':
+        return <TrustMarquee key="trustMarquee" themeColor={themeColor} />;
+      case 'whyChooseUs':
+        return <WhyChooseUs key="whyChooseUs" themeColor={themeColor} />;
+      case 'faq':
+        return <FAQAccordion key="faq" themeColor={themeColor} />;
       case 'hero':
         if (!hp.isPublished) return null;
         const heroSlides = hp.hero?.slides?.length > 0 ? hp.hero.slides : [
@@ -1534,6 +1723,7 @@ export default function OrgHomepage() {
         keywords="paramedical training, computer training, skill development, stock market training, franchise, certification, vocational courses, India"
       />
       <Navbar />
+      <SideDotNav sections={sideNavSections} themeColor={themeColor} />
       <main>
         {layoutOrder.map(section => renderSection(section))}
       </main>

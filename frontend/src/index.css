@@ -650,6 +650,134 @@ body {
   animation: shine-sweep 0.8s ease-out;
 }
 
+/* ===== HOMEPAGE V2 ENHANCEMENTS ===== */
+
+/* Marquee auto-scroll */
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee-scroll 25s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* FAQ accordion smooth expand */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+}
+.faq-answer.open {
+  max-height: 300px;
+}
+
+/* Progress ring */
+@keyframes ring-fill {
+  from { stroke-dashoffset: 283; }
+}
+.ring-progress {
+  animation: ring-fill 1.5s ease-out forwards;
+}
+
+/* Magnetic button */
+.magnetic-btn {
+  transition: transform 0.2s ease;
+}
+
+/* Side dot navigation */
+.side-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.side-dot.active {
+  width: 24px;
+  border-radius: 4px;
+  background: #2563eb;
+}
+.side-dot:hover {
+  background: #2563eb;
+}
+
+/* Wave divider */
+.wave-divider {
+  width: 100%;
+  height: 60px;
+  display: block;
+}
+.wave-divider svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Why Choose Us connecting line */
+.why-line {
+  position: absolute;
+  top: 40px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #2563eb20, #7c3aed20, transparent);
+  z-index: 0;
+}
+
+/* Number badge pulse */
+@keyframes number-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+}
+.number-pulse {
+  animation: number-pulse 2.5s ease-in-out infinite;
+}
+
+/* Card 3D tilt on hover */
+.tilt-3d {
+  transition: transform 0.3s ease;
+  transform-style: preserve-3d;
+}
+.tilt-3d:hover {
+  transform: perspective(800px) rotateX(2deg) rotateY(-2deg) translateY(-4px);
+}
+
+/* Gradient text shimmer */
+@keyframes text-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.text-shimmer {
+  background: linear-gradient(90deg, #0f172a 0%, #2563eb 30%, #7c3aed 50%, #2563eb 70%, #0f172a 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: text-shimmer 4s linear infinite;
+}
+
+/* Floating animation for badges */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.float-y {
+  animation: float-y 3s ease-in-out infinite;
+}
+
+/* Reveal stagger for list items */
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in-left {
+  animation: slide-in-left 0.5s ease-out forwards;
+}
+
 /* Lightbox */
 @keyframes lightbox-fade {
   from { opacity: 0; }
