@@ -303,17 +303,42 @@ export default function OrgCoursesPage() {
 
                       {/* Pricing */}
                       <div className="flex items-end justify-between mb-4 pt-3 border-t border-slate-100">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-xl font-black text-slate-900">
-                            ₹{sale.toLocaleString('en-IN')}
-                          </span>
-                          {original > sale && (
-                            <span className="text-xs text-slate-400 line-through">
-                              ₹{original.toLocaleString('en-IN')}
-                            </span>
+                        <div className="flex flex-col gap-0.5">
+                          {c.feeDisplayType === 'monthly' && c.monthlyFee ? (
+                            <>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-xl font-black text-slate-900">₹{c.monthlyFee.toLocaleString('en-IN')}</span>
+                                <span className="text-[10px] font-bold text-slate-500">/month</span>
+                              </div>
+                              {original > 0 && (
+                                <span className="text-[10px] text-slate-400">Full: ₹{sale.toLocaleString('en-IN')}</span>
+                              )}
+                            </>
+                          ) : c.feeDisplayType === 'both' && c.monthlyFee ? (
+                            <>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-lg font-black text-slate-900">₹{c.monthlyFee.toLocaleString('en-IN')}</span>
+                                <span className="text-[10px] font-bold text-slate-500">/month</span>
+                              </div>
+                              <span className="text-[11px] font-semibold text-slate-700">or ₹{sale.toLocaleString('en-IN')} full</span>
+                              {original > sale && (
+                                <span className="text-[10px] text-slate-400 line-through">₹{original.toLocaleString('en-IN')}</span>
+                              )}
+                            </>
+                          ) : (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-xl font-black text-slate-900">
+                                ₹{sale.toLocaleString('en-IN')}
+                              </span>
+                              {original > sale && (
+                                <span className="text-xs text-slate-400 line-through">
+                                  ₹{original.toLocaleString('en-IN')}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
-                        {discountPercent > 0 && (
+                        {discountPercent > 0 && c.feeDisplayType !== 'monthly' && (
                           <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-md flex items-center gap-0.5">
                             <Tag className="w-2.5 h-2.5" /> {discountPercent}% OFF
                           </span>

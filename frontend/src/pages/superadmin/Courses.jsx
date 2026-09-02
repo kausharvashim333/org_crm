@@ -25,6 +25,8 @@ const initialCourseState = {
   duration: '',
   durationMonths: 0,
   fee: 0,
+  monthlyFee: 0,
+  feeDisplayType: 'full',
   organizationFee: 0,
   studentFee: 0,
   certificateFee: 0,
@@ -96,6 +98,8 @@ export default function AdminCourses() {
       duration: c.duration || '',
       durationMonths: c.durationMonths || 0,
       fee: c.studentFee || c.fee || 0,
+      monthlyFee: c.monthlyFee || 0,
+      feeDisplayType: c.feeDisplayType || 'full',
       organizationFee: c.organizationFee || 0,
       studentFee: c.studentFee || c.fee || 0,
       certificateFee: c.certificateFee || 0,
@@ -436,6 +440,35 @@ export default function AdminCourses() {
               </select>
             </div>
             
+            {/* Fee Display Type + Monthly Fee */}
+            <div className="col-span-2 grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+              <div>
+                <label className="block text-[11px] font-black text-slate-700 mb-1">Fee Display Type</label>
+                <select
+                  value={formData.feeDisplayType}
+                  onChange={(e) => setFormData({ ...formData, feeDisplayType: e.target.value })}
+                  className="input-field bg-white font-bold text-slate-800 border-slate-300 text-xs"
+                >
+                  <option value="full">Full Fee Only</option>
+                  <option value="monthly">Monthly Fee Only</option>
+                  <option value="both">Both (Monthly + Full)</option>
+                </select>
+                <span className="text-[9px] text-slate-500 block mt-0.5">How fee appears on public course page</span>
+              </div>
+              <div>
+                <label className="block text-[11px] font-black text-slate-700 mb-1">Monthly Fee (₹)</label>
+                <input
+                  type="number"
+                  value={formData.monthlyFee}
+                  onChange={(e) => setFormData({ ...formData, monthlyFee: +e.target.value })}
+                  className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs"
+                  placeholder="e.g. 1500"
+                  disabled={formData.feeDisplayType === 'full'}
+                />
+                <span className="text-[9px] text-slate-500 block mt-0.5">Per month EMI / installment</span>
+              </div>
+            </div>
+
             {/* 3-Tier Fee Section */}
             <div className="grid grid-cols-3 gap-3 bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-100 col-span-2">
               <div>
