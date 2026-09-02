@@ -56,13 +56,13 @@ function Reveal({ children, delay = 0, className = '' }) {
 
 function SectionHeading({ badge = 'Explore', title, subtitle, themeColor }) {
   return (
-    <div className="text-center mb-12 sm:mb-16 relative max-w-3xl mx-auto px-4">
+    <div className="text-center mb-12 sm:mb-14 relative max-w-3xl mx-auto px-4">
       {badge && (
         <span
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full mb-3 shadow-xs border"
+          className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-4 shadow-sm border transition-all hover:scale-105"
           style={{
             backgroundColor: `${themeColor}0f`,
-            borderColor: `${themeColor}25`,
+            borderColor: `${themeColor}30`,
             color: themeColor
           }}
         >
@@ -70,10 +70,14 @@ function SectionHeading({ badge = 'Explore', title, subtitle, themeColor }) {
           {badge}
         </span>
       )}
-      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-3.5 leading-tight">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 mb-3 leading-tight">
         {title}
       </h2>
-      <div className="w-14 h-1 rounded-full mx-auto mb-4" style={{ backgroundColor: themeColor }} />
+      <div className="flex items-center justify-center gap-1.5 mb-4">
+        <div className="h-1 w-1.5 rounded-full" style={{ backgroundColor: `${themeColor}40` }} />
+        <div className="h-1 w-8 rounded-full line-draw" style={{ backgroundColor: themeColor }} />
+        <div className="h-1 w-1.5 rounded-full" style={{ backgroundColor: `${themeColor}40` }} />
+      </div>
       {subtitle && (
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
           {subtitle}
@@ -656,7 +660,7 @@ export default function OrgHomepage() {
         const catItems = (cmsCats && cmsCats.length > 0) ? cmsCats : defaultCats;
         if (!catItems.length) return null;
         return (
-          <section key="categories" className="py-5 bg-white border-b border-slate-200/80 shadow-xs relative z-20">
+          <section key="categories" className="py-4 bg-white border-b border-slate-200/80 shadow-xs relative z-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
                 {catItems.map((cat, i) => {
@@ -665,12 +669,14 @@ export default function OrgHomepage() {
                     <Link
                       key={i}
                       to={cat.link || '/courses'}
-                      className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 transition-all hover:border-slate-300 shrink-0 text-xs sm:text-sm font-bold shadow-xs group"
+                      className="group flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 hover:from-white hover:to-white border border-slate-200/80 text-slate-800 transition-all hover:border-slate-300 shrink-0 text-xs sm:text-sm font-bold shadow-xs hover:shadow-md shrink-0"
+                      style={{ '--cat-color': cat.color || themeColor }}
                     >
-                      <div className="w-6 h-6 rounded-lg flex items-center justify-center text-white shrink-0 shadow-xs" style={{ backgroundColor: cat.color || themeColor }}>
+                      <div className="w-7 h-7 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3" style={{ backgroundColor: cat.color || themeColor }}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
-                      <span>{cat.label}</span>
+                      <span className="group-hover:text-slate-900 transition-colors">{cat.label}</span>
+                      <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
                     </Link>
                   );
                 })}
@@ -682,7 +688,10 @@ export default function OrgHomepage() {
       case 'verticals':
         if (hp.verticals?.show === false) return null;
         return (
-          <section key="verticals" id="verticals" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-b border-slate-200/60 relative overflow-hidden">
+          <section key="verticals" id="verticals" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50 to-white border-b border-slate-200/60 relative overflow-hidden">
+            {/* Decorative floating shapes */}
+            <div className="absolute top-10 right-10 w-32 h-32 rounded-full opacity-5 float-shape" style={{ backgroundColor: themeColor }} />
+            <div className="absolute bottom-10 left-10 w-24 h-24 rounded-2xl opacity-5 float-shape" style={{ backgroundColor: '#7c3aed', animationDelay: '5s' }} />
             <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
@@ -698,11 +707,13 @@ export default function OrgHomepage() {
                   const Icon = iconMap[v.icon] || BookOpen;
                   return (
                     <Reveal key={i} delay={i * 80} className="w-full max-w-[300px]">
-                      <div className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-lg hover:border-indigo-300 transition-all duration-200 h-full flex flex-col justify-between">
+                      <div className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-xl hover:border-indigo-300 transition-all duration-300 h-full flex flex-col justify-between shine-card card-lift relative overflow-hidden">
+                        {/* Top gradient bar */}
+                        <div className="absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed)` }} />
                         
                         <div>
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 border group-hover:scale-105 transition-transform" style={{ color: themeColor, backgroundColor: `${themeColor}12`, borderColor: `${themeColor}20` }}>
-                            <Icon className="w-6 h-6" />
+                          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 border group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 icon-spin-hover" style={{ color: themeColor, backgroundColor: `${themeColor}12`, borderColor: `${themeColor}20` }}>
+                            <Icon className="w-7 h-7" />
                           </div>
 
                           <div className="flex items-center gap-2 mb-2">
@@ -734,7 +745,7 @@ export default function OrgHomepage() {
                           >
                             Explore Courses <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                           </Link>
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" title="Active Stream" />
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Active Stream" />
                         </div>
 
                       </div>
@@ -750,8 +761,10 @@ export default function OrgHomepage() {
         if (hp.courses?.show === false) return null;
         const tabs = hp.courses?.fieldTabs || [];
         return (
-          <section key="courses" id="courses" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
-            <div className="max-w-7xl mx-auto">
+          <section key="courses" id="courses" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
+            {/* Subtle background pattern */}
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+            <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
                   badge="Curriculum"
@@ -770,12 +783,12 @@ export default function OrgHomepage() {
                         <button
                           key={i}
                           onClick={() => setActiveCourseTab(i)}
-                          className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                          className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 ${
                             activeCourseTab === i
-                              ? 'bg-indigo-600 text-white shadow-sm'
+                              ? 'text-white shadow-lg'
                               : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/70'
                           }`}
-                          style={activeCourseTab === i ? { backgroundColor: themeColor } : {}}
+                          style={activeCourseTab === i ? { backgroundColor: themeColor, boxShadow: `0 4px 14px ${themeColor}40` } : {}}
                         >
                           {tab.fieldName}
                         </button>
@@ -787,16 +800,18 @@ export default function OrgHomepage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {(tabs[activeCourseTab]?.courses || []).map((c, i) => (
                       <Reveal key={i} delay={i * 60}>
-                        <TiltCard className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 h-full flex flex-col justify-between gradient-border-glow">
+                        <TiltCard className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-xl hover:border-indigo-300 transition-all duration-300 h-full flex flex-col justify-between shine-card relative overflow-hidden">
+                          {/* Top gradient accent */}
+                          <div className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed)` }} />
                           
                           {/* Course Card Header */}
                           <div>
                             <div className="flex items-start justify-between gap-3 mb-3">
-                              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-xs">
-                                <BookOpen className="w-5 h-5" />
+                              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 border border-indigo-100 shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3">
+                                <BookOpen className="w-6 h-6" />
                               </div>
-                              <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                Certified
+                              <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3" /> Certified
                               </span>
                             </div>
 
@@ -813,7 +828,7 @@ export default function OrgHomepage() {
                           <div className="space-y-3 pt-4 border-t border-slate-100">
                             <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
                               <span className="flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                                <Clock className="w-3.5 h-3.5" style={{ color: themeColor }} />
                                 {c.duration || '6 Months'}
                               </span>
                               <span className="text-sm sm:text-base font-extrabold text-slate-900">
@@ -832,7 +847,7 @@ export default function OrgHomepage() {
                               </button>
                               <Link
                                 to="/admission"
-                                className="py-2 px-3 rounded-lg text-white text-xs font-bold text-center transition-all shadow-xs hover:bg-indigo-700"
+                                className="py-2 px-3 rounded-lg text-white text-xs font-bold text-center transition-all shadow-xs hover:shadow-md"
                                 style={{ backgroundColor: themeColor }}
                               >
                                 Enroll Now
@@ -851,10 +866,10 @@ export default function OrgHomepage() {
                 <div className="mt-10 text-center">
                   <Link
                     to="/courses"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-xs sm:text-sm bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all"
+                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-slate-900 hover:bg-slate-800 text-white shadow-lg transition-all hover:scale-105 group"
                   >
                     <span>Browse All Courses</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </Reveal>
@@ -865,25 +880,28 @@ export default function OrgHomepage() {
       case 'stats':
         if (hp.stats?.show === false) return null;
         return (
-          <section key="stats" id="stats" className="py-12 bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 border-b border-slate-200/70">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <section key="stats" id="stats" className="py-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 relative overflow-hidden">
+            {/* Decorative floating orbs */}
+            <div className="absolute top-0 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-10 float-shape" style={{ backgroundColor: themeColor }} />
+            <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full blur-3xl opacity-10 float-shape" style={{ backgroundColor: '#7c3aed', animationDelay: '7s' }} />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
                 {(hp.stats?.items || []).map((s, i) => {
                   const Icon = iconMap[s.icon] || Building;
                   return (
                     <Reveal key={i} delay={i * 60}>
-                      <div className="p-4 rounded-xl bg-white border border-slate-200/80 text-center shadow-xs">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-2.5">
-                          <Icon className="w-4 h-4" />
+                      <div className="p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 text-center stat-glow transition-all hover:bg-white/10 hover:border-white/20" style={{ animationDelay: `${i * 0.4}s` }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ color: themeColor, backgroundColor: `${themeColor}20` }}>
+                          <Icon className="w-5 h-5" />
                         </div>
-                        <p className="text-xl sm:text-2xl font-black text-slate-900 mb-0.5">
+                        <p className="text-2xl sm:text-3xl font-black text-white mb-1">
                           {(() => {
                             const num = parseInt(String(s.value).replace(/[^0-9]/g, ''));
                             const suffix = String(s.value).replace(/[0-9,]/g, '');
                             return isNaN(num) ? s.value : <Counter end={num} suffix={suffix} />;
                           })()}
                         </p>
-                        <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">
                           {s.label}
                         </p>
                       </div>
@@ -898,39 +916,50 @@ export default function OrgHomepage() {
       case 'verifyWidget':
         if (hp.verifyWidget?.show === false) return null;
         return (
-          <section key="verifyWidget" className="py-14 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
-            <div className="max-w-4xl mx-auto bg-slate-50 rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                <div className="md:col-span-5 text-left">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md inline-block mb-2" style={{ color: themeColor, backgroundColor: `${themeColor}15`, borderColor: `${themeColor}30` }}>
-                    {hp.verifyWidget?.badge || 'Online Verification'}
-                  </span>
-                  <h3 className="text-xl font-bold text-slate-900 leading-snug mb-1.5">
-                    {hp.verifyWidget?.title || 'Verify Student Certificate'}
-                  </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    {hp.verifyWidget?.subtitle || 'Check authenticity, institute name, grade, and passing year online directly from our database.'}
-                  </p>
-                </div>
+          <section key="verifyWidget" className="py-14 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
+            {/* Decorative gradient bg */}
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-5" style={{ backgroundColor: themeColor }} />
+            <div className="max-w-4xl mx-auto relative z-10">
+              <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg shine-card relative overflow-hidden">
+                {/* Top accent bar */}
+                <div className="absolute top-0 left-0 right-0 h-1" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed, ${themeColor})`, backgroundSize: '200% 100%', animation: 'border-flow 3s linear infinite' }} />
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                  <div className="md:col-span-5 text-left">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ color: themeColor, backgroundColor: `${themeColor}15` }}>
+                        <ShieldCheck className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md" style={{ color: themeColor, backgroundColor: `${themeColor}15`, border: `1px solid ${themeColor}30` }}>
+                        {hp.verifyWidget?.badge || 'Online Verification'}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 leading-snug mb-1.5">
+                      {hp.verifyWidget?.title || 'Verify Student Certificate'}
+                    </h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      {hp.verifyWidget?.subtitle || 'Check authenticity, institute name, grade, and passing year online directly from our database.'}
+                    </p>
+                  </div>
 
-                <div className="md:col-span-7">
-                  <form onSubmit={handleVerifySubmit} className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="text"
-                      value={verifyCode}
-                      onChange={(e) => setVerifyCode(e.target.value)}
-                      placeholder={hp.verifyWidget?.placeholder || 'Enter Certificate Code (e.g. CERT-00123)'}
-                      className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-600"
-                    />
-                    <button
-                      type="submit"
-                      className="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-xs transition-all hover:bg-indigo-700 shrink-0 flex items-center justify-center gap-2"
-                      style={{ backgroundColor: themeColor }}
-                    >
-                      <Award className="w-4 h-4" />
-                      {hp.verifyWidget?.buttonText || 'Verify Now'}
-                    </button>
-                  </form>
+                  <div className="md:col-span-7">
+                    <form onSubmit={handleVerifySubmit} className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        value={verifyCode}
+                        onChange={(e) => setVerifyCode(e.target.value)}
+                        placeholder={hp.verifyWidget?.placeholder || 'Enter Certificate Code (e.g. CERT-00123)'}
+                        className="flex-1 px-4 py-3 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-600 transition-colors"
+                      />
+                      <button
+                        type="submit"
+                        className="px-5 py-3 rounded-xl font-bold text-xs sm:text-sm text-white shadow-md transition-all hover:scale-105 shrink-0 flex items-center justify-center gap-2"
+                        style={{ backgroundColor: themeColor }}
+                      >
+                        <Award className="w-4 h-4" />
+                        {hp.verifyWidget?.buttonText || 'Verify Now'}
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
@@ -940,8 +969,10 @@ export default function OrgHomepage() {
       case 'about':
         if (hp.about?.show === false) return null;
         return (
-          <section key="about" id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-b border-slate-200/60">
-            <div className="max-w-7xl mx-auto">
+          <section key="about" id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50/70 border-b border-slate-200/60 relative overflow-hidden">
+            {/* Decorative bg */}
+            <div className="absolute top-20 right-10 w-40 h-40 rounded-full opacity-5 float-shape" style={{ backgroundColor: themeColor }} />
+            <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
                   badge="Institutional Profile"
@@ -956,8 +987,9 @@ export default function OrgHomepage() {
                 <Reveal delay={100}>
                   <div className="flex flex-col sm:flex-row gap-4 max-w-4xl mx-auto mb-12">
                     {hp.about?.mission && (
-                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50" style={{ color: themeColor }}>
+                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all shine-card relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: themeColor }} />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
                           <Target className="w-5 h-5" />
                         </div>
                         <div>
@@ -967,8 +999,9 @@ export default function OrgHomepage() {
                       </div>
                     )}
                     {hp.about?.vision && (
-                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-indigo-50" style={{ color: themeColor }}>
+                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all shine-card relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: '#7c3aed' }} />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ color: '#7c3aed', backgroundColor: '#7c3aed12' }}>
                           <Heart className="w-5 h-5" />
                         </div>
                         <div>
@@ -988,9 +1021,9 @@ export default function OrgHomepage() {
                     const Icon = iconMap[f.icon] || BookOpen;
                     return (
                       <Reveal key={i} delay={i * 60} className="h-full">
-                        <div className="h-full flex flex-col items-center justify-start text-center p-5 bg-white rounded-xl border border-slate-200 shadow-xs hover:shadow-sm transition-all">
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-slate-100" style={{ color: themeColor }}>
-                            <Icon className="w-5 h-5" />
+                        <div className="h-full flex flex-col items-center justify-start text-center p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-indigo-200 transition-all card-lift shine-card relative overflow-hidden">
+                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-transform hover:scale-110 hover:rotate-3" style={{ color: themeColor, backgroundColor: `${themeColor}10` }}>
+                            <Icon className="w-6 h-6" />
                           </div>
                           <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-1">{f.title}</h4>
                           <p className="text-xs text-slate-500 leading-relaxed">{f.description}</p>
@@ -1008,31 +1041,52 @@ export default function OrgHomepage() {
       case 'franchise':
         if (hp.franchise?.show === false) return null;
         return (
-          <section key="franchise" id="franchise" className="py-14 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-slate-900 to-slate-800 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ backgroundColor: themeColor }} />
+          <section key="franchise" id="franchise" className="py-16 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, #0f172a, #1e293b)` }}>
+            {/* Animated gradient orbs */}
+            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 float-shape" style={{ backgroundColor: themeColor }} />
+            <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl opacity-15 float-shape" style={{ backgroundColor: '#7c3aed', animationDelay: '5s' }} />
+            {/* Grid pattern */}
+            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
             <div className="max-w-5xl mx-auto relative z-10">
               <Reveal>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                   <div className="flex-1">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3" style={{ backgroundColor: `${themeColor}25`, color: themeColor }}>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full mb-4 border" style={{ backgroundColor: `${themeColor}25`, color: themeColor, borderColor: `${themeColor}40` }}>
                       <Sparkles className="w-3.5 h-3.5" />
                       Franchise Affiliation
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold mb-3 tracking-tight">
                       {hp.franchise?.title || 'Partner With Us'}
                     </h2>
-                    <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
+                    <p className="text-sm text-slate-300 max-w-xl leading-relaxed mb-4">
                       {hp.franchise?.subtitle || 'Join our growing network of training institutes across India'}
                     </p>
+                    {/* Quick stats */}
+                    <div className="flex gap-6 justify-center md:justify-start">
+                      <div>
+                        <p className="text-2xl font-black" style={{ color: themeColor }}>50+</p>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-wider">Partners</p>
+                      </div>
+                      <div className="w-px bg-white/10" />
+                      <div>
+                        <p className="text-2xl font-black" style={{ color: themeColor }}>15+</p>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-wider">States</p>
+                      </div>
+                      <div className="w-px bg-white/10" />
+                      <div>
+                        <p className="text-2xl font-black" style={{ color: themeColor }}>5000+</p>
+                        <p className="text-[10px] text-slate-400 uppercase tracking-wider">Students</p>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex flex-col sm:flex-row gap-3 shrink-0">
                     <Link
                       to="/franchise"
-                      className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-lg transition-all hover:scale-105"
+                      className="btn-shimmer inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-lg transition-all hover:scale-105"
                       style={{ backgroundColor: themeColor }}
                     >
                       <span>{hp.franchise?.buttonText || 'Apply for Franchise'}</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 arrow-bounce" />
                     </Link>
                     <button
                       onClick={() => window.dispatchEvent(new Event('open-partner-enquiry'))}
@@ -1051,8 +1105,10 @@ export default function OrgHomepage() {
       case 'certifications':
         if (hp.certifications?.show === false || !hp.certifications?.items?.length) return null;
         return (
-          <section key="certifications" id="certifications" className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-b border-slate-200/60">
-            <div className="max-w-7xl mx-auto">
+          <section key="certifications" id="certifications" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
+            {/* Subtle gradient bg */}
+            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-indigo-50/30 to-transparent pointer-events-none" />
+            <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
                   badge="Recognition"
@@ -1065,12 +1121,14 @@ export default function OrgHomepage() {
               <div className="flex flex-wrap justify-center gap-5">
                 {hp.certifications.items.map((c, i) => (
                   <Reveal key={i} delay={i * 60} className="w-full max-w-[260px]">
-                    <div className="bg-white rounded-2xl p-5 text-center border border-slate-200 shadow-xs hover:shadow-sm transition-all flex flex-col items-center justify-center min-h-[140px]">
+                    <div className="bg-white rounded-2xl p-5 text-center border border-slate-200 shadow-xs hover:shadow-lg transition-all card-lift shine-card relative overflow-hidden group">
+                      {/* Hover gradient ring */}
+                      <div className="absolute inset-0 rounded-2xl border-2 opacity-0 group-hover:opacity-100 transition-opacity" style={{ borderColor: `${themeColor}30` }} />
                       {c.logo ? (
-                        <img src={c.logo} alt={c.name} className="w-14 h-14 object-contain mb-2.5" onError={(e) => { const img = e.target; if (!img.dataset.retried && c.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = c.logo.substring(c.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
+                        <img src={c.logo} alt={c.name} className="w-14 h-14 object-contain mb-2.5 mx-auto transition-transform group-hover:scale-110" onError={(e) => { const img = e.target; if (!img.dataset.retried && c.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = c.logo.substring(c.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} />
                       ) : (
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2.5 bg-indigo-50 text-indigo-600">
-                          <Award className="w-5 h-5" />
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-2.5 mx-auto bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 transition-transform group-hover:scale-110 group-hover:rotate-3">
+                          <Award className="w-6 h-6" />
                         </div>
                       )}
                       <h4 className="font-bold text-slate-900 text-xs sm:text-sm mb-1">{c.name}</h4>
@@ -1086,8 +1144,11 @@ export default function OrgHomepage() {
       case 'testimonials':
         if (hp.testimonials?.show === false || !hp.testimonials?.items?.length) return null;
         return (
-          <section key="testimonials" id="testimonials" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
-            <div className="max-w-7xl mx-auto">
+          <section key="testimonials" id="testimonials" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50/70 border-b border-slate-200/60 relative overflow-hidden">
+            {/* Decorative quote marks */}
+            <div className="absolute top-10 left-10 text-9xl font-black text-slate-100 opacity-30 select-none pointer-events-none">"</div>
+            <div className="absolute bottom-10 right-10 text-9xl font-black text-slate-100 opacity-30 select-none pointer-events-none">"</div>
+            <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
                   badge="Feedback"
@@ -1114,26 +1175,34 @@ export default function OrgHomepage() {
       case 'cta':
         if (hp.cta?.show === false) return null;
         return (
-          <section key="cta" id="cta" className="py-14 sm:py-16 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(to right, ${themeColor}, ${themeColor}dd)` }}>
+          <section key="cta" id="cta" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc, #7c3aed)` }}>
+            {/* Floating shapes */}
+            <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/5 float-shape" />
+            <div className="absolute bottom-10 right-10 w-40 h-40 rounded-2xl bg-white/5 float-shape" style={{ animationDelay: '5s' }} />
+            <div className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full bg-white/5 float-shape" style={{ animationDelay: '10s' }} />
             <div className="max-w-4xl mx-auto text-center relative z-10">
               <Reveal>
-                <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 tracking-tight">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/20 mb-5">
+                  <Rocket className="w-4 h-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider">Admissions 2026-27</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 tracking-tight">
                   {hp.cta?.title || 'Ready to Start Your Career Journey?'}
                 </h2>
-                <p className="text-xs sm:text-sm opacity-90 mb-6 max-w-xl mx-auto leading-relaxed">
+                <p className="text-sm sm:text-base opacity-90 mb-8 max-w-xl mx-auto leading-relaxed">
                   {hp.cta?.description || 'Get in touch with our counselors for syllabus details, admission fee schedules, and partner opportunities.'}
                 </p>
                 <div className="flex flex-wrap justify-center gap-3">
                   <Link
                     to="/admission"
-                    className="px-6 py-3 bg-white hover:bg-slate-50 rounded-xl font-bold text-xs sm:text-sm shadow-md transition-all"
+                    className="btn-shimmer px-7 py-3.5 bg-white hover:bg-slate-50 rounded-xl font-bold text-xs sm:text-sm shadow-xl transition-all hover:scale-105"
                     style={{ color: themeColor }}
                   >
                     Apply for Admission 2026-27
                   </Link>
                   <button
                     onClick={() => window.dispatchEvent(new Event('open-enquiry'))}
-                    className="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-xl font-bold text-xs sm:text-sm text-white transition-all"
+                    className="px-7 py-3.5 bg-white/10 hover:bg-white/20 border border-white/30 rounded-xl font-bold text-xs sm:text-sm text-white transition-all hover:scale-105"
                   >
                     Instant Inquiry Form
                   </button>
@@ -1262,8 +1331,10 @@ export default function OrgHomepage() {
       case 'services':
         if (hp.services?.show === false || !hp.services?.items?.length) return null;
         return (
-          <section key="services" id="services" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
-            <div className="max-w-7xl mx-auto">
+          <section key="services" id="services" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
+            {/* Dot pattern bg */}
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+            <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
                   badge="Training Programs"
@@ -1278,10 +1349,12 @@ export default function OrgHomepage() {
                   const Icon = iconMap[s.icon] || Briefcase;
                   return (
                     <Reveal key={i} delay={i * 70} className="w-full max-w-[380px]">
-                      <div className="group bg-slate-50 hover:bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:shadow-md transition-all h-full flex flex-col">
+                      <div className="group bg-slate-50 hover:bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:shadow-xl transition-all h-full flex flex-col shine-card relative overflow-hidden">
+                        {/* Top gradient bar */}
+                        <div className="absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed)` }} />
                         <div className="flex items-center justify-between mb-4">
-                          <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
-                            <Icon className="w-5 h-5" />
+                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
+                            <Icon className="w-6 h-6" />
                           </div>
                           {s.duration && (
                             <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
@@ -1325,8 +1398,8 @@ export default function OrgHomepage() {
         const featuredPhotos = (hp.gallery?.photos || []).filter(p => p.featured);
         const galleryPhotos = featuredPhotos.length > 0 ? featuredPhotos : (hp.gallery?.photos || []).slice(0, 8);
         return (
-          <section key="gallery" id="gallery" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50/70 border-b border-slate-200/60">
-            <div className="max-w-7xl mx-auto">
+          <section key="gallery" id="gallery" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50/70 to-white border-b border-slate-200/60 relative overflow-hidden">
+            <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
                   badge="Campus Life"
@@ -1349,11 +1422,12 @@ export default function OrgHomepage() {
               <div className="text-center mt-8">
                 <Link
                   to="/gallery"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white shadow-md transition-all hover:scale-105"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg transition-all hover:scale-105 group"
                   style={{ backgroundColor: themeColor }}
                 >
                   <ImageIcon className="w-4 h-4" />
                   View More Photos
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </div>
@@ -1363,7 +1437,7 @@ export default function OrgHomepage() {
       case 'notices':
         if (hp.notices?.show === false || !hp.notices?.items?.length) return null;
         return (
-          <section key="notices" id="notices" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60">
+          <section key="notices" id="notices" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50/70 to-white border-b border-slate-200/60 relative overflow-hidden">
             <div className="max-w-5xl mx-auto">
               <Reveal>
                 <SectionHeading
@@ -1379,11 +1453,13 @@ export default function OrgHomepage() {
                     <Reveal key={i} delay={i * 50}>
                       <div
                         onClick={() => notice.pdfUrl && window.open(notice.pdfUrl, '_blank')}
-                        className={`p-4 rounded-2xl bg-slate-50 hover:bg-indigo-50/40 border border-slate-200/70 hover:border-indigo-200 transition-all text-left ${notice.pdfUrl ? 'cursor-pointer group' : ''}`}
+                        className={`p-4 rounded-2xl bg-white hover:bg-indigo-50/40 border border-slate-200/70 hover:border-indigo-200 transition-all text-left shine-card relative overflow-hidden ${notice.pdfUrl ? 'cursor-pointer group' : ''}`}
                       >
+                        {/* Left accent bar */}
+                        <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: themeColor }} />
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{notice.title}</h4>
-                          {isNew && <span className="shrink-0 px-2 py-0.5 rounded-md bg-red-600 text-white text-[9px] font-black uppercase tracking-wider">NEW</span>}
+                          {isNew && <span className="shrink-0 px-2 py-0.5 rounded-md bg-red-600 text-white text-[9px] font-black uppercase tracking-wider animate-pulse">NEW</span>}
                         </div>
                         <p className="text-xs text-slate-600 mb-2 leading-relaxed">{notice.description}</p>
                         <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-200/50">
