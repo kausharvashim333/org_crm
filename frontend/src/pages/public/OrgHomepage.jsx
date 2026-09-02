@@ -100,21 +100,21 @@ function WaveDivider({ color = '#ffffff', flip = false }) {
 function TrustMarquee({ themeColor }) {
   const partners = ['NSDC', 'Skill India', 'ISO 9001', 'Govt of India', 'Make in India', 'Digital India', 'PMKVY', 'NIELIT'];
   return (
-    <section className="py-8 bg-white border-b border-slate-200/60 overflow-hidden">
+    <section className="py-8 liquid-surface border-b border-white/40 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 mb-4">
         <p className="text-center text-[11px] font-bold uppercase tracking-widest text-slate-400">Trusted &amp; Accredited By</p>
       </div>
       <div className="relative">
         <div className="flex marquee-track gap-12 items-center whitespace-nowrap">
           {[...partners, ...partners].map((p, i) => (
-            <span key={i} className="text-lg sm:text-xl font-black text-slate-300 hover:text-slate-500 transition-colors cursor-default tracking-tight shrink-0">
+            <span key={i} className="text-lg sm:text-xl font-black text-slate-400 hover:text-slate-600 transition-colors cursor-default tracking-tight shrink-0">
               {p}
             </span>
           ))}
         </div>
         {/* Edge fades */}
-        <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-white to-transparent pointer-events-none" />
-        <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-white to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-white/60 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-white/60 to-transparent pointer-events-none" />
       </div>
     </section>
   );
@@ -128,8 +128,8 @@ function WhyChooseUs({ themeColor }) {
     { icon: Monitor, title: 'Modern Lab Facilities', desc: 'State-of-the-art computer labs and paramedical training equipment.' },
   ];
   return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50/50 border-b border-slate-200/60 relative overflow-hidden">
-      <div className="absolute top-10 right-10 w-40 h-40 rounded-full opacity-5 float-shape" style={{ backgroundColor: themeColor }} />
+    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-blue-50/20 to-indigo-50/30 border-b border-slate-200/60 relative overflow-hidden">
+      <div className="absolute top-10 right-10 w-40 h-40 bg-indigo-400/8 rounded-full liquid-orb" />
       <div className="max-w-7xl mx-auto relative z-10">
         <Reveal>
           <SectionHeading
@@ -146,7 +146,7 @@ function WhyChooseUs({ themeColor }) {
             const Icon = f.icon;
             return (
               <Reveal key={i} delay={i * 100} className="relative z-10">
-                <div className="group flex flex-col items-center text-center p-6 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl transition-all card-lift shine-card relative overflow-hidden">
+                <div className="group flex flex-col items-center text-center p-6 liquid-glass liquid-refraction rounded-2xl transition-all card-lift liquid-shimmer relative overflow-hidden">
                   {/* Number badge */}
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm mb-4 number-pulse shrink-0" style={{ backgroundColor: themeColor }}>
                     {i + 1}
@@ -177,7 +177,7 @@ function FAQAccordion({ themeColor }) {
     { q: 'Do you offer franchise opportunities?', a: 'Yes, we partner with training institutes across India. Visit our franchise page or contact our coordinator for details.' },
   ];
   return (
-    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
+    <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-indigo-50/30 via-blue-50/20 to-white border-b border-slate-200/60 relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }} />
       <div className="max-w-3xl mx-auto relative z-10">
         <Reveal>
@@ -191,7 +191,7 @@ function FAQAccordion({ themeColor }) {
         <div className="space-y-3">
           {faqs.map((faq, i) => (
             <Reveal key={i} delay={i * 50}>
-              <div className={`rounded-2xl border transition-all overflow-hidden ${openIdx === i ? 'border-indigo-200 shadow-md' : 'border-slate-200 shadow-xs hover:border-slate-300'}`}>
+              <div className={`rounded-2xl liquid-glass liquid-refraction transition-all overflow-hidden ${openIdx === i ? 'shadow-md' : 'hover:scale-[1.01]'}`}>
                 <button
                   onClick={() => setOpenIdx(openIdx === i ? null : i)}
                   className="w-full flex items-center justify-between gap-4 p-4 sm:p-5 text-left group"
@@ -516,11 +516,11 @@ export default function OrgHomepage() {
           { image: hp.hero?.bgImage, title: hp.hero?.heading || 'Building Skilled Careers', subtitle: hp.hero?.description || 'Government-aligned vocational curriculum' },
         ].filter(s => s.image);
         return (
-          <section key="hero" id="hero" className="relative overflow-hidden pt-0 pb-16 lg:pt-0 lg:pb-12 bg-gradient-to-b from-slate-50 via-indigo-50/20 to-white text-slate-900 border-b border-slate-200/60 min-h-[86vh] flex items-center">
-            {/* Animated gradient mesh orbs */}
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl pointer-events-none hero-orb" />
-            <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-200/25 rounded-full blur-3xl pointer-events-none hero-orb" style={{ animationDelay: '4s' }} />
-            <div className="absolute top-1/3 left-1/2 w-72 h-72 bg-purple-200/20 rounded-full blur-3xl pointer-events-none hero-orb" style={{ animationDelay: '8s' }} />
+          <section key="hero" id="hero" className="relative overflow-hidden pt-0 pb-16 lg:pt-0 lg:pb-12 bg-gradient-to-b from-indigo-50 via-blue-50/40 to-white text-slate-900 border-b border-slate-200/60 min-h-[86vh] flex items-center">
+            {/* Liquid glass animated orbs */}
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-300/20 rounded-full liquid-orb pointer-events-none" />
+            <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-300/20 rounded-full liquid-orb pointer-events-none" style={{ animationDelay: '7s' }} />
+            <div className="absolute top-1/3 left-1/2 w-72 h-72 bg-purple-300/15 rounded-full liquid-orb pointer-events-none" style={{ animationDelay: '14s' }} />
             {/* Subtle grid pattern overlay */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
@@ -532,7 +532,7 @@ export default function OrgHomepage() {
                   
                   {/* Top Notification Badge with typing effect */}
                   <Reveal>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 text-indigo-700 font-bold shadow-xs badge-float" style={{ fontSize: typeof hp.hero?.subheadingFontSize === 'number' ? `${hp.hero.subheadingFontSize}px` : undefined }}>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full liquid-glass text-indigo-700 font-bold liquid-float" style={{ fontSize: typeof hp.hero?.subheadingFontSize === 'number' ? `${hp.hero.subheadingFontSize}px` : undefined }}>
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -636,7 +636,7 @@ export default function OrgHomepage() {
 
                       <Link
                         to="/admission"
-                        className="btn-shimmer inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 group"
+                        className="btn-shimmer inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/20 transition-all hover:scale-105 group"
                       >
                         <GraduationCap className="w-4 h-4" />
                         <span>Apply for Admission</span>
@@ -652,7 +652,7 @@ export default function OrgHomepage() {
                         {(hp.stats?.items || []).slice(0, 4).map((s, i) => {
                           const Icon = iconMap[s.icon] || Building;
                           return (
-                            <div key={i} className="flex flex-col items-center text-center p-2.5 rounded-xl bg-white border border-slate-200/70 shadow-xs hover:border-indigo-200 hover:shadow-md transition-all animate-pulse-glow" style={{ animationDelay: `${i * 0.5}s` }}>
+                            <div className="flex flex-col items-center text-center p-2.5 rounded-xl liquid-glass liquid-glow transition-all" style={{ animationDelay: `${i * 0.5}s` }}>
                               <Icon className="w-4 h-4 mb-1" style={{ color: themeColor }} />
                               <p className="text-base font-black text-slate-900 leading-tight">
                                 {(() => {
@@ -676,9 +676,9 @@ export default function OrgHomepage() {
                   <Reveal delay={200}>
                     <div className="relative">
                       {/* Main visual card */}
-                      <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-slate-300/40 relative overflow-hidden gradient-border-glow">
+                      <div className="bg-white/60 border border-white/60 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-indigo-300/30 relative overflow-hidden liquid-glass liquid-refraction">
                         {/* Shimmer top bar */}
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" style={{ backgroundSize: '200% 100%', animation: 'border-glow 3s linear infinite' }} />
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500" style={{ backgroundSize: '200% 100%', animation: 'border-glow 3s linear infinite' }} />
                         
                         {/* Widget Header */}
                         <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
@@ -825,7 +825,7 @@ export default function OrgHomepage() {
         const catItems = (cmsCats && cmsCats.length > 0) ? cmsCats : defaultCats;
         if (!catItems.length) return null;
         return (
-          <section key="categories" className="py-4 bg-white border-b border-slate-200/80 shadow-xs relative z-20">
+          <section key="categories" className="py-4 liquid-surface border-b border-white/40 shadow-xs relative z-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
                 {catItems.map((cat, i) => {
@@ -834,7 +834,7 @@ export default function OrgHomepage() {
                     <Link
                       key={i}
                       to={cat.link || '/courses'}
-                      className="group flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 hover:from-white hover:to-white border border-slate-200/80 text-slate-800 transition-all hover:border-slate-300 shrink-0 text-xs sm:text-sm font-bold shadow-xs hover:shadow-md shrink-0"
+                      className="group flex items-center gap-2.5 px-4 py-2.5 rounded-2xl liquid-glass liquid-refraction text-slate-800 transition-all hover:scale-105 shrink-0 text-xs sm:text-sm font-bold"
                       style={{ '--cat-color': cat.color || themeColor }}
                     >
                       <div className="w-7 h-7 rounded-xl flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3" style={{ backgroundColor: cat.color || themeColor }}>
@@ -853,10 +853,10 @@ export default function OrgHomepage() {
       case 'verticals':
         if (hp.verticals?.show === false) return null;
         return (
-          <section key="verticals" id="verticals" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50 to-white border-b border-slate-200/60 relative overflow-hidden">
-            {/* Decorative floating shapes */}
-            <div className="absolute top-10 right-10 w-32 h-32 rounded-full opacity-5 float-shape" style={{ backgroundColor: themeColor }} />
-            <div className="absolute bottom-10 left-10 w-24 h-24 rounded-2xl opacity-5 float-shape" style={{ backgroundColor: '#7c3aed', animationDelay: '5s' }} />
+          <section key="verticals" id="verticals" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50/30 via-indigo-50/20 to-white border-b border-slate-200/60 relative overflow-hidden">
+            {/* Liquid glass decorative orbs */}
+            <div className="absolute top-10 right-10 w-40 h-40 bg-indigo-400/10 rounded-full liquid-orb" />
+            <div className="absolute bottom-10 left-10 w-32 h-32 bg-purple-400/10 rounded-full liquid-orb" style={{ animationDelay: '10s' }} />
             <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
@@ -872,9 +872,9 @@ export default function OrgHomepage() {
                   const Icon = iconMap[v.icon] || BookOpen;
                   return (
                     <Reveal key={i} delay={i * 80} className="w-full max-w-[300px]">
-                      <div className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-xl hover:border-indigo-300 transition-all duration-300 h-full flex flex-col justify-between shine-card card-lift relative overflow-hidden">
+                      <div className="group liquid-glass liquid-refraction rounded-2xl p-6 transition-all duration-300 h-full flex flex-col justify-between liquid-shimmer relative overflow-hidden">
                         {/* Top gradient bar */}
-                        <div className="absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed)` }} />
+                        <div className="absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(90deg, #2563eb, #7c3aed)' }} />
                         
                         <div>
                           <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 border group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 icon-spin-hover" style={{ color: themeColor, backgroundColor: `${themeColor}12`, borderColor: `${themeColor}20` }}>
@@ -926,9 +926,10 @@ export default function OrgHomepage() {
         if (hp.courses?.show === false) return null;
         const tabs = hp.courses?.fieldTabs || [];
         return (
-          <section key="courses" id="courses" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
-            {/* Subtle background pattern */}
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+          <section key="courses" id="courses" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-blue-50/20 to-indigo-50/30 border-b border-slate-200/60 relative overflow-hidden">
+            {/* Liquid orbs */}
+            <div className="absolute top-20 right-20 w-48 h-48 bg-blue-400/8 rounded-full liquid-orb" />
+            <div className="absolute bottom-20 left-20 w-40 h-40 bg-purple-400/8 rounded-full liquid-orb" style={{ animationDelay: '8s' }} />
             <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
@@ -965,14 +966,14 @@ export default function OrgHomepage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {(tabs[activeCourseTab]?.courses || []).map((c, i) => (
                       <Reveal key={i} delay={i * 60}>
-                        <TiltCard className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-xl hover:border-indigo-300 transition-all duration-300 h-full flex flex-col justify-between shine-card relative overflow-hidden">
+                        <TiltCard className="group liquid-glass liquid-refraction rounded-2xl p-6 transition-all duration-300 h-full flex flex-col justify-between liquid-shimmer relative overflow-hidden">
                           {/* Top gradient accent */}
-                          <div className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed)` }} />
+                          <div className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(90deg, #2563eb, #7c3aed)' }} />
                           
                           {/* Course Card Header */}
                           <div>
                             <div className="flex items-start justify-between gap-3 mb-3">
-                              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600 border border-indigo-100 shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3">
+                              <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-600 border border-blue-100/50 shadow-sm transition-transform group-hover:scale-110 group-hover:rotate-3">
                                 <BookOpen className="w-6 h-6" />
                               </div>
                               <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
@@ -1045,17 +1046,17 @@ export default function OrgHomepage() {
       case 'stats':
         if (hp.stats?.show === false) return null;
         return (
-          <section key="stats" id="stats" className="py-14 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700/50 relative overflow-hidden">
-            {/* Decorative floating orbs */}
-            <div className="absolute top-0 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-10 float-shape" style={{ backgroundColor: themeColor }} />
-            <div className="absolute bottom-0 left-1/4 w-48 h-48 rounded-full blur-3xl opacity-10 float-shape" style={{ backgroundColor: '#7c3aed', animationDelay: '7s' }} />
+          <section key="stats" id="stats" className="py-14 bg-gradient-to-r from-indigo-950 via-blue-950 to-indigo-950 border-b border-indigo-900/50 relative overflow-hidden">
+            {/* Liquid glass orbs */}
+            <div className="absolute top-0 right-1/4 w-64 h-64 bg-blue-500/15 rounded-full liquid-orb" />
+            <div className="absolute bottom-0 left-1/4 w-48 h-48 bg-purple-500/15 rounded-full liquid-orb" style={{ animationDelay: '7s' }} />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
                 {(hp.stats?.items || []).map((s, i) => {
                   const Icon = iconMap[s.icon] || Building;
                   return (
                     <Reveal key={i} delay={i * 60}>
-                      <div className="p-5 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 text-center stat-glow transition-all hover:bg-white/10 hover:border-white/20" style={{ animationDelay: `${i * 0.4}s` }}>
+                      <div className="p-5 rounded-2xl liquid-glass-dark text-center stat-glow transition-all hover:scale-105" style={{ animationDelay: `${i * 0.4}s` }}>
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ color: themeColor, backgroundColor: `${themeColor}20` }}>
                           <Icon className="w-5 h-5" />
                         </div>
@@ -1081,11 +1082,11 @@ export default function OrgHomepage() {
       case 'verifyWidget':
         if (hp.verifyWidget?.show === false) return null;
         return (
-          <section key="verifyWidget" className="py-14 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
-            {/* Decorative gradient bg */}
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-5" style={{ backgroundColor: themeColor }} />
+          <section key="verifyWidget" className="py-14 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-indigo-50/30 to-white border-b border-slate-200/60 relative overflow-hidden">
+            {/* Liquid glass bg orb */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/8 rounded-full liquid-orb" />
             <div className="max-w-4xl mx-auto relative z-10">
-              <div className="glass-card rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg shine-card relative overflow-hidden">
+              <div className="liquid-glass liquid-border rounded-3xl p-6 sm:p-8 shadow-lg liquid-refraction relative overflow-hidden">
                 {/* Top accent bar */}
                 <div className="absolute top-0 left-0 right-0 h-1" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed, ${themeColor})`, backgroundSize: '200% 100%', animation: 'border-flow 3s linear infinite' }} />
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -1134,9 +1135,9 @@ export default function OrgHomepage() {
       case 'about':
         if (hp.about?.show === false) return null;
         return (
-          <section key="about" id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50/70 border-b border-slate-200/60 relative overflow-hidden">
-            {/* Decorative bg */}
-            <div className="absolute top-20 right-10 w-40 h-40 rounded-full opacity-5 float-shape" style={{ backgroundColor: themeColor }} />
+          <section key="about" id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-blue-50/20 to-indigo-50/30 border-b border-slate-200/60 relative overflow-hidden">
+            {/* Liquid glass decorative orb */}
+            <div className="absolute top-20 right-10 w-40 h-40 bg-indigo-400/8 rounded-full liquid-orb" />
             <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
@@ -1152,7 +1153,7 @@ export default function OrgHomepage() {
                 <Reveal delay={100}>
                   <div className="flex flex-col sm:flex-row gap-4 max-w-4xl mx-auto mb-12">
                     {hp.about?.mission && (
-                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all shine-card relative overflow-hidden">
+                      <div className="flex-1 flex items-start gap-3 p-5 liquid-glass liquid-refraction rounded-2xl transition-all liquid-shimmer relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: themeColor }} />
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
                           <Target className="w-5 h-5" />
@@ -1164,7 +1165,7 @@ export default function OrgHomepage() {
                       </div>
                     )}
                     {hp.about?.vision && (
-                      <div className="flex-1 flex items-start gap-3 p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all shine-card relative overflow-hidden">
+                      <div className="flex-1 flex items-start gap-3 p-5 liquid-glass liquid-refraction rounded-2xl transition-all liquid-shimmer relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: '#7c3aed' }} />
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ color: '#7c3aed', backgroundColor: '#7c3aed12' }}>
                           <Heart className="w-5 h-5" />
@@ -1186,7 +1187,7 @@ export default function OrgHomepage() {
                     const Icon = iconMap[f.icon] || BookOpen;
                     return (
                       <Reveal key={i} delay={i * 60} className="h-full">
-                        <div className="h-full flex flex-col items-center justify-start text-center p-5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-indigo-200 transition-all card-lift shine-card relative overflow-hidden">
+                        <div className="h-full flex flex-col items-center justify-start text-center p-5 liquid-glass liquid-refraction rounded-2xl transition-all card-lift liquid-shimmer relative overflow-hidden">
                           <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-transform hover:scale-110 hover:rotate-3" style={{ color: themeColor, backgroundColor: `${themeColor}10` }}>
                             <Icon className="w-6 h-6" />
                           </div>
@@ -1206,10 +1207,10 @@ export default function OrgHomepage() {
       case 'franchise':
         if (hp.franchise?.show === false) return null;
         return (
-          <section key="franchise" id="franchise" className="py-16 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, #0f172a, #1e293b)` }}>
-            {/* Animated gradient orbs */}
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 float-shape" style={{ backgroundColor: themeColor }} />
-            <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl opacity-15 float-shape" style={{ backgroundColor: '#7c3aed', animationDelay: '5s' }} />
+          <section key="franchise" id="franchise" className="py-16 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1e1b4b, #312e81)' }}>
+            {/* Liquid glass animated orbs */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/15 rounded-full liquid-orb" />
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-purple-500/15 rounded-full liquid-orb" style={{ animationDelay: '5s' }} />
             {/* Grid pattern */}
             <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
             <div className="max-w-5xl mx-auto relative z-10">
@@ -1270,9 +1271,10 @@ export default function OrgHomepage() {
       case 'certifications':
         if (hp.certifications?.show === false || !hp.certifications?.items?.length) return null;
         return (
-          <section key="certifications" id="certifications" className="py-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
+          <section key="certifications" id="certifications" className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-blue-50/30 border-b border-slate-200/60 relative overflow-hidden">
             {/* Subtle gradient bg */}
             <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-indigo-50/30 to-transparent pointer-events-none" />
+            <div className="absolute bottom-10 right-10 w-40 h-40 bg-purple-400/8 rounded-full liquid-orb" />
             <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
@@ -1286,7 +1288,7 @@ export default function OrgHomepage() {
               <div className="flex flex-wrap justify-center gap-5">
                 {hp.certifications.items.map((c, i) => (
                   <Reveal key={i} delay={i * 60} className="w-full max-w-[260px]">
-                    <div className="bg-white rounded-2xl p-5 text-center border border-slate-200 shadow-xs hover:shadow-lg transition-all card-lift shine-card relative overflow-hidden group">
+                    <div className="liquid-glass liquid-refraction rounded-2xl p-5 text-center transition-all card-lift liquid-shimmer relative overflow-hidden group">
                       {/* Hover gradient ring */}
                       <div className="absolute inset-0 rounded-2xl border-2 opacity-0 group-hover:opacity-100 transition-opacity" style={{ borderColor: `${themeColor}30` }} />
                       {c.logo ? (
@@ -1309,10 +1311,10 @@ export default function OrgHomepage() {
       case 'testimonials':
         if (hp.testimonials?.show === false || !hp.testimonials?.items?.length) return null;
         return (
-          <section key="testimonials" id="testimonials" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50/70 border-b border-slate-200/60 relative overflow-hidden">
+          <section key="testimonials" id="testimonials" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50/30 via-indigo-50/20 to-white border-b border-slate-200/60 relative overflow-hidden">
             {/* Decorative quote marks */}
-            <div className="absolute top-10 left-10 text-9xl font-black text-slate-100 opacity-30 select-none pointer-events-none">"</div>
-            <div className="absolute bottom-10 right-10 text-9xl font-black text-slate-100 opacity-30 select-none pointer-events-none">"</div>
+            <div className="absolute top-10 left-10 text-9xl font-black text-indigo-100/40 opacity-30 select-none pointer-events-none">"</div>
+            <div className="absolute bottom-10 right-10 text-9xl font-black text-purple-100/40 opacity-30 select-none pointer-events-none">"</div>
             <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
@@ -1340,11 +1342,11 @@ export default function OrgHomepage() {
       case 'cta':
         if (hp.cta?.show === false) return null;
         return (
-          <section key="cta" id="cta" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColor}cc, #7c3aed)` }}>
-            {/* Floating shapes */}
-            <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-white/5 float-shape" />
-            <div className="absolute bottom-10 right-10 w-40 h-40 rounded-2xl bg-white/5 float-shape" style={{ animationDelay: '5s' }} />
-            <div className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full bg-white/5 float-shape" style={{ animationDelay: '10s' }} />
+          <section key="cta" id="cta" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-white relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #2563eb, #4f46e5, #7c3aed)' }}>
+            {/* Liquid glass floating shapes */}
+            <div className="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-full liquid-orb" />
+            <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/5 rounded-full liquid-orb" style={{ animationDelay: '5s' }} />
+            <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-white/5 rounded-full liquid-orb" style={{ animationDelay: '10s' }} />
             <div className="max-w-4xl mx-auto text-center relative z-10">
               <Reveal>
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/20 mb-5">
@@ -1380,8 +1382,9 @@ export default function OrgHomepage() {
       case 'contact':
         if (hp.contact?.show === false) return null;
         return (
-          <section key="contact" id="contact" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
-            <div className="max-w-7xl mx-auto">
+          <section key="contact" id="contact" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-indigo-50/30 to-white border-t border-slate-200/60 relative overflow-hidden">
+            <div className="absolute bottom-10 right-10 w-48 h-48 bg-blue-400/8 rounded-full liquid-orb" />
+            <div className="max-w-7xl mx-auto relative z-10">
               <Reveal>
                 <SectionHeading
                   badge="Connect"
@@ -1394,9 +1397,9 @@ export default function OrgHomepage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
                 {/* Contact Information Cards */}
                 <Reveal className="lg:col-span-6 space-y-4">
-                  <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-3">
+                  <div className="liquid-glass rounded-2xl p-6 space-y-3 liquid-refraction">
                     {/* Phone numbers - all in one box */}
-                    <div className="flex items-start gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <div className="flex items-start gap-3.5 p-3 rounded-xl bg-white/40 border border-white/50">
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-600 bg-indigo-50 shrink-0">
                         <Phone className="w-5 h-5" />
                       </div>
@@ -1413,7 +1416,7 @@ export default function OrgHomepage() {
                       { icon: Mail, val: hp.contact?.email || 'contact@example.com', label: 'Email Department' },
                       { icon: MapPin, val: hp.contact?.address || 'Central Headquarters, India', label: 'Head Office Address' },
                     ].map((c, i) => (
-                      <div key={i} className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div key={i} className="flex items-center gap-3.5 p-3 rounded-xl bg-white/40 border border-white/50">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center text-indigo-600 bg-indigo-50 shrink-0">
                           <c.icon className="w-5 h-5" />
                         </div>
@@ -1493,116 +1496,10 @@ export default function OrgHomepage() {
           </section>
         );
 
-      case 'services':
-        if (hp.services?.show === false || !hp.services?.items?.length) return null;
-        return (
-          <section key="services" id="services" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200/60 relative overflow-hidden">
-            {/* Dot pattern bg */}
-            <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #000 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-            <div className="max-w-7xl mx-auto relative z-10">
-              <Reveal>
-                <SectionHeading
-                  badge="Training Programs"
-                  title={hp.services?.title || 'Our Training Services'}
-                  subtitle={hp.services?.subtitle || 'Explore our specialized vocational certification and coaching pathways'}
-                  themeColor={themeColor}
-                />
-              </Reveal>
-
-              <div className="flex flex-wrap justify-center gap-6">
-                {(hp.services?.items || []).map((s, i) => {
-                  const Icon = iconMap[s.icon] || Briefcase;
-                  return (
-                    <Reveal key={i} delay={i * 70} className="w-full max-w-[380px]">
-                      <div className="group bg-slate-50 hover:bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:shadow-xl transition-all h-full flex flex-col shine-card relative overflow-hidden">
-                        {/* Top gradient bar */}
-                        <div className="absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, ${themeColor}, #7c3aed)` }} />
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3" style={{ color: themeColor, backgroundColor: `${themeColor}12` }}>
-                            <Icon className="w-6 h-6" />
-                          </div>
-                          {s.duration && (
-                            <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> {s.duration}
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="text-base font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors" style={{ '--hover-color': themeColor }}>{s.title}</h3>
-                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">{s.desc}</p>
-                        {s.topics?.length > 0 && (
-                          <div className="mb-3">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Key Topics</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {s.topics.slice(0, 4).map((t, j) => (
-                                <span key={j} className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[11px] font-semibold text-slate-700">{t}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {s.careers?.length > 0 && (
-                          <div className="mt-auto pt-3 border-t border-slate-200/70">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Career Opportunities</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {s.careers.slice(0, 3).map((c, j) => (
-                                <span key={j} className="px-2 py-0.5 rounded-md text-[11px] font-semibold" style={{ backgroundColor: `${themeColor}10`, color: themeColor }}>{c}</span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </Reveal>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        );
-
-      case 'gallery':
-        if (hp.gallery?.show === false || !hp.gallery?.photos?.length) return null;
-        const featuredPhotos = (hp.gallery?.photos || []).filter(p => p.featured);
-        const galleryPhotos = featuredPhotos.length > 0 ? featuredPhotos : (hp.gallery?.photos || []).slice(0, 8);
-        return (
-          <section key="gallery" id="gallery" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50/70 to-white border-b border-slate-200/60 relative overflow-hidden">
-            <div className="max-w-7xl mx-auto relative z-10">
-              <Reveal>
-                <SectionHeading
-                  badge="Campus Life"
-                  title={hp.gallery?.title || 'Gallery'}
-                  subtitle="Glimpses from our training centers, events, and student activities"
-                  themeColor={themeColor}
-                />
-              </Reveal>
-
-              <Reveal delay={100}>
-                <div className="relative overflow-hidden rounded-2xl shadow-lg cursor-pointer" onClick={() => {
-                  setLightboxImages(galleryPhotos.map(p => ({ url: p.url || p, caption: p.caption || '' })));
-                  setLightboxStart(0);
-                  setLightboxOpen(true);
-                }}>
-                  <GallerySlider photos={galleryPhotos} />
-                </div>
-              </Reveal>
-
-              <div className="text-center mt-8">
-                <Link
-                  to="/gallery"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg transition-all hover:scale-105 group"
-                  style={{ backgroundColor: themeColor }}
-                >
-                  <ImageIcon className="w-4 h-4" />
-                  View More Photos
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
-          </section>
-        );
-
       case 'notices':
         if (hp.notices?.show === false || !hp.notices?.items?.length) return null;
         return (
-          <section key="notices" id="notices" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-50/70 to-white border-b border-slate-200/60 relative overflow-hidden">
+          <section key="notices" id="notices" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-blue-50/20 to-indigo-50/30 border-b border-slate-200/60 relative overflow-hidden">
             <div className="max-w-5xl mx-auto">
               <Reveal>
                 <SectionHeading
@@ -1618,7 +1515,7 @@ export default function OrgHomepage() {
                     <Reveal key={i} delay={i * 50}>
                       <div
                         onClick={() => notice.pdfUrl && window.open(notice.pdfUrl, '_blank')}
-                        className={`p-4 rounded-2xl bg-white hover:bg-indigo-50/40 border border-slate-200/70 hover:border-indigo-200 transition-all text-left shine-card relative overflow-hidden ${notice.pdfUrl ? 'cursor-pointer group' : ''}`}
+                        className={`p-4 rounded-2xl liquid-glass liquid-refraction transition-all text-left liquid-shimmer relative overflow-hidden ${notice.pdfUrl ? 'cursor-pointer group' : ''}`}
                       >
                         {/* Left accent bar */}
                         <div className="absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: themeColor }} />
@@ -1691,7 +1588,7 @@ export default function OrgHomepage() {
   };
 
   return (
-    <div className="bg-slate-50 text-slate-900 min-h-screen selection:bg-indigo-600 selection:text-white relative">
+    <div className="bg-gradient-to-b from-blue-50/20 via-white to-indigo-50/20 text-slate-900 min-h-screen selection:bg-indigo-600 selection:text-white relative">
       <SEO
         title={hp?.settings?.browserTitle || `${orgName} - Training Institute Management`}
         description={hp?.about?.description || 'Empowering India through quality education and practical training across multiple fields'}
