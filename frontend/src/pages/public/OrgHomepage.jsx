@@ -12,6 +12,12 @@ import {
   Clock, ShieldCheck, CheckCircle2, Layers, Compass, HelpCircle, UserCheck,
   CheckCircle, ArrowUpRight, ChevronDown, Image as ImageIcon
 } from 'lucide-react';
+import Counter from '../../components/ui/Counter';
+import TiltCard from '../../components/ui/TiltCard';
+import TypingText from '../../components/ui/TypingText';
+import TestimonialSlider from '../../components/ui/TestimonialSlider';
+import Lightbox from '../../components/ui/Lightbox';
+import { SkeletonCard } from '../../components/ui/Skeleton';
 
 const iconMap = {
   book: BookOpen, briefcase: Briefcase, users: Users, award: Award,
@@ -142,6 +148,9 @@ export default function OrgHomepage() {
   const [noticeSearch, setNoticeSearch] = useState('');
   const [heroSearch, setHeroSearch] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxStart, setLightboxStart] = useState(0);
+  const [lightboxImages, setLightboxImages] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
   const noticeScrollRef = useRef(null);
@@ -247,13 +256,28 @@ export default function OrgHomepage() {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <div className="text-center">
-        <div className="relative w-14 h-14 mx-auto mb-4">
-          <div className="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-t-indigo-600 animate-spin"></div>
+    <div className="min-h-screen bg-slate-50">
+      <div className="h-1" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-12">
+          <div className="lg:col-span-7 space-y-4">
+            <div className="skeleton h-8 w-32 rounded-full" />
+            <div className="skeleton h-12 w-full rounded-xl" />
+            <div className="skeleton h-12 w-3/4 rounded-xl" />
+            <div className="skeleton h-4 w-full rounded-lg" />
+            <div className="skeleton h-4 w-5/6 rounded-lg" />
+            <div className="flex gap-3 pt-2">
+              <div className="skeleton h-12 w-40 rounded-xl" />
+              <div className="skeleton h-12 w-40 rounded-xl" />
+            </div>
+          </div>
+          <div className="lg:col-span-5">
+            <div className="skeleton h-[400px] w-full rounded-3xl" />
+          </div>
         </div>
-        <p className="text-slate-600 font-semibold text-sm">Loading Learning Portal...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        </div>
       </div>
     </div>
   );
@@ -313,7 +337,14 @@ export default function OrgHomepage() {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                       </span>
-                      <span>{hp.hero?.subheading || 'Admissions Open 2026-27 • Certified Vocational Training'}</span>
+                      <span>{hp.hero?.subheading ? (
+                        <TypingText texts={[
+                          hp.hero?.subheading || 'Admissions Open 2026-27',
+                          'Government-aligned Vocational Training',
+                          'Certified Diploma Courses Available',
+                          'Join 500+ Skilled Graduates'
+                        ]} speed={50} />
+                      ) : 'Admissions Open 2026-27 • Certified Vocational Training'}</span>
                     </div>
                   </Reveal>
 
@@ -704,7 +735,7 @@ export default function OrgHomepage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {(tabs[activeCourseTab]?.courses || []).map((c, i) => (
                       <Reveal key={i} delay={i * 60}>
-                        <div className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 h-full flex flex-col justify-between">
+                        <TiltCard className="group bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 h-full flex flex-col justify-between gradient-border-glow">
                           
                           {/* Course Card Header */}
                           <div>
@@ -757,7 +788,7 @@ export default function OrgHomepage() {
                             </div>
                           </div>
 
-                        </div>
+                        </TiltCard>
                       </Reveal>
                     ))}
                   </div>
@@ -794,7 +825,11 @@ export default function OrgHomepage() {
                           <Icon className="w-4 h-4" />
                         </div>
                         <p className="text-xl sm:text-2xl font-black text-slate-900 mb-0.5">
-                          {s.value}
+                          {(() => {
+                            const num = parseInt(String(s.value).replace(/[^0-9]/g, ''));
+                            const suffix = String(s.value).replace(/[0-9,]/g, '');
+                            return isNaN(num) ? s.value : <Counter end={num} suffix={suffix} />;
+                          })()}
                         </p>
                         <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
                           {s.label}
@@ -1010,34 +1045,16 @@ export default function OrgHomepage() {
                 />
               </Reveal>
 
-              <div className="flex flex-wrap justify-center gap-6">
-                {hp.testimonials.items.map((t, i) => (
-                  <Reveal key={i} delay={i * 70} className="w-full max-w-[380px]">
-                    <div className="bg-slate-50 rounded-2xl border border-slate-200 p-6 shadow-xs h-full flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center gap-1 mb-3">
-                          {Array.from({ length: t.rating || 5 }).map((_, j) => (
-                            <Star key={j} className="w-4 h-4 text-amber-400 fill-current" />
-                          ))}
-                        </div>
-                        <p className="text-slate-700 text-xs sm:text-sm leading-relaxed mb-5 italic">
-                          "{t.review}"
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-3 pt-3.5 border-t border-slate-200/70">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-xs" style={{ backgroundColor: themeColor }}>
-                          {t.name?.charAt(0) || 'S'}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-900 text-xs sm:text-sm">{t.name}</p>
-                          <p className="text-[11px] text-slate-500">{t.role}{t.field ? ` • ${t.field}` : ''}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Reveal>
-                ))}
-              </div>
+              <Reveal delay={100}>
+                <TestimonialSlider
+                  testimonials={hp.testimonials.items.map(t => ({
+                    name: t.name,
+                    role: t.role ? (t.field ? `${t.role} • ${t.field}` : t.role) : '',
+                    message: t.review,
+                    rating: t.rating || 5,
+                  }))}
+                />
+              </Reveal>
             </div>
           </section>
         );
@@ -1268,7 +1285,11 @@ export default function OrgHomepage() {
               </Reveal>
 
               <Reveal delay={100}>
-                <div className="relative overflow-hidden rounded-2xl shadow-lg">
+                <div className="relative overflow-hidden rounded-2xl shadow-lg cursor-pointer" onClick={() => {
+                  setLightboxImages(galleryPhotos.map(p => ({ url: p.url || p, caption: p.caption || '' })));
+                  setLightboxStart(0);
+                  setLightboxOpen(true);
+                }}>
                   <GallerySlider photos={galleryPhotos} />
                 </div>
               </Reveal>
@@ -1389,6 +1410,13 @@ export default function OrgHomepage() {
         {layoutOrder.map(section => renderSection(section))}
       </main>
       <Footer homepageData={hp} />
+      {lightboxOpen && (
+        <Lightbox
+          images={lightboxImages}
+          startIndex={lightboxStart}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 }

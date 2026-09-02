@@ -4,6 +4,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { SuperAdminRoute, PartnerRoute } from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import ErrorBoundary from './components/ErrorBoundary';
+import ScrollProgress from './components/ui/ScrollProgress';
+import ScrollToTop from './components/ui/ScrollToTop';
+import Spotlight from './components/ui/Spotlight';
+import LiveNotification from './components/ui/LiveNotification';
 
 // Public Pages (Lazy)
 const PublicHomepage = lazy(() => import('./pages/public/Homepage'));
@@ -120,6 +124,8 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+    <ScrollProgress />
+    <Spotlight />
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Public Routes */}
@@ -226,6 +232,8 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Suspense>
+    <ScrollToTop />
+    <LiveNotification />
     </ErrorBoundary>
   );
 }
