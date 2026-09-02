@@ -877,7 +877,7 @@ export default function OrgHomepage() {
                         <div className="absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(90deg, #2563eb, #7c3aed)' }} />
                         
                         <div>
-                          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 border group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 icon-spin-hover" style={{ color: themeColor, backgroundColor: `${themeColor}12`, borderColor: `${themeColor}20` }}>
+                          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 border group-hover:scale-110 transition-all duration-300" style={{ color: themeColor, backgroundColor: `${themeColor}12`, borderColor: `${themeColor}20` }}>
                             <Icon className="w-7 h-7" />
                           </div>
 
