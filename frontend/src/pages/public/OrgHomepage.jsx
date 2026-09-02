@@ -1596,7 +1596,6 @@ export default function OrgHomepage() {
         keywords="paramedical training, computer training, skill development, stock market training, franchise, certification, vocational courses, India"
       />
       <Navbar />
-      <SideDotNav sections={sideNavSections} themeColor={themeColor} />
       <main>
         {layoutOrder.map(section => renderSection(section))}
       </main>
