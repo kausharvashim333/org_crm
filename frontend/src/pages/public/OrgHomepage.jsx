@@ -323,7 +323,7 @@ export default function OrgHomepage() {
           { image: hp.hero?.bgImage, title: hp.hero?.heading || 'Building Skilled Careers', subtitle: hp.hero?.description || 'Government-aligned vocational curriculum' },
         ].filter(s => s.image);
         return (
-          <section key="hero" id="hero" className="relative overflow-hidden pt-0 pb-16 lg:pt-2 lg:pb-12 bg-gradient-to-b from-slate-50 via-indigo-50/20 to-white text-slate-900 border-b border-slate-200/60 min-h-[88vh] flex items-center">
+          <section key="hero" id="hero" className="relative overflow-hidden pt-0 pb-16 lg:pt-0 lg:pb-12 bg-gradient-to-b from-slate-50 via-indigo-50/20 to-white text-slate-900 border-b border-slate-200/60 min-h-[86vh] flex items-center">
             {/* Animated gradient mesh orbs */}
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl pointer-events-none hero-orb" />
             <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-200/25 rounded-full blur-3xl pointer-events-none hero-orb" style={{ animationDelay: '4s' }} />
@@ -370,7 +370,7 @@ export default function OrgHomepage() {
                                   <span key={i} className="word-reveal" style={{ animationDelay: `${0.1 + i * 0.08}s` }}>{w} </span>
                                 ))}
                                 <span className="word-reveal" style={{ animationDelay: `${0.1 + words.length * 0.08}s`, color: themeColor }}>
-                                  {lastWords}
+                                  {' '}{lastWords}
                                 </span>
                               </>
                             );

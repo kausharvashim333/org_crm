@@ -458,6 +458,7 @@ body {
   display: inline-block;
   opacity: 0;
   animation: word-reveal 0.6s ease-out forwards;
+  margin-right: 0.25em;
 }
 
 /* Scroll-down indicator */
