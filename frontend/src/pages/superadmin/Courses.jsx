@@ -27,6 +27,7 @@ const initialCourseState = {
   fee: 0,
   monthlyFee: 0,
   feeDisplayType: 'full',
+  availableToPartners: true,
   organizationFee: 0,
   studentFee: 0,
   certificateFee: 0,
@@ -100,6 +101,7 @@ export default function AdminCourses() {
       fee: c.studentFee || c.fee || 0,
       monthlyFee: c.monthlyFee || 0,
       feeDisplayType: c.feeDisplayType || 'full',
+      availableToPartners: c.availableToPartners !== false,
       organizationFee: c.organizationFee || 0,
       studentFee: c.studentFee || c.fee || 0,
       certificateFee: c.certificateFee || 0,
@@ -196,6 +198,14 @@ export default function AdminCourses() {
     if (!confirm('Deactivate this course?')) return;
     try { await deleteCourse(id); showSuccess('Course deactivated'); load(); }
     catch { showError('Failed'); }
+  };
+
+  const togglePartnerAccess = async (c) => {
+    try {
+      await updateCourse(c._id, { availableToPartners: !c.availableToPartners });
+      showSuccess(c.availableToPartners ? 'Course hidden from partners' : 'Course made available to partners');
+      load();
+    } catch { showError('Failed'); }
   };
 
   const handleCatSubmit = async (e) => {
@@ -362,6 +372,19 @@ export default function AdminCourses() {
                       <span className={`badge ${c.approvalStatus === 'approved' ? 'badge-success' : c.approvalStatus === 'pending' ? 'badge-warning' : 'badge-danger'}`}>
                         {c.approvalStatus}
                       </span>
+                      {c.isStandard && (
+                        <button
+                          onClick={() => togglePartnerAccess(c)}
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all ${
+                            c.availableToPartners !== false
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                              : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                          }`}
+                          title={c.availableToPartners !== false ? 'Click to hide from partners' : 'Click to make available to partners'}
+                        >
+                          {c.availableToPartners !== false ? '✓ Partners' : '✗ Partners'}
+                        </button>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -466,6 +489,18 @@ export default function AdminCourses() {
                   disabled={formData.feeDisplayType === 'full'}
                 />
                 <span className="text-[9px] text-slate-500 block mt-0.5">Per month EMI / installment</span>
+              </div>
+              <div className="col-span-2 flex items-center gap-2 pt-2 border-t border-slate-200">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.availableToPartners}
+                    onChange={(e) => setFormData({ ...formData, availableToPartners: e.target.checked })}
+                    className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                  />
+                  Available to Partners
+                </label>
+                <span className="text-[10px] text-slate-500">({formData.availableToPartners ? 'Partners can see & enroll students' : 'Hidden from all partners'})</span>
               </div>
             </div>
 

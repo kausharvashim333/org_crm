@@ -77,7 +77,7 @@ router.get('/public', async (req, res) => {
 
       filter.$or = [
         { partnerId: req.query.partnerId, approvalStatus: 'approved' },
-        { isStandard: true, approvalStatus: 'approved', centerType: { $in: [pCenterType, 'All', null, ''] } },
+        { isStandard: true, approvalStatus: 'approved', availableToPartners: true, centerType: { $in: [pCenterType, 'All', null, ''] } },
       ];
     } else if (req.query.standard === 'true') {
       filter.isStandard = true;
@@ -104,12 +104,12 @@ router.get('/', protect, async (req, res) => {
 
       filter.$or = [
         { partnerId: req.user.partnerId },
-        { isStandard: true, approvalStatus: 'approved', centerType: { $in: [pCenterType, 'All', null, ''] } },
+        { isStandard: true, approvalStatus: 'approved', availableToPartners: true, centerType: { $in: [pCenterType, 'All', null, ''] } },
       ];
     } else if (req.query.partnerId) {
       filter.$or = [
         { partnerId: req.query.partnerId },
-        { isStandard: true },
+        { isStandard: true, availableToPartners: true },
       ];
     } else if (req.query.standard === 'true') {
       filter.isStandard = true;

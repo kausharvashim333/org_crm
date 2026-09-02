@@ -25,6 +25,7 @@ const courseSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
   }],
   isStandard: { type: Boolean, default: false },
+  availableToPartners: { type: Boolean, default: true },
   approvalStatus: {
     type: String,
     enum: ['approved', 'pending', 'rejected'],
