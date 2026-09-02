@@ -56,6 +56,13 @@ export const uploadCourseVideo = (formData) => API.post('/courses/upload-video',
 export const updateCourseChapters = (id, chapters) => API.put(`/courses/${id}/chapters`, { chapters });
 export const updateCourseAssessment = (id, assessment) => API.put(`/courses/${id}/assessment`, { assessment });
 
+// Course Categories APIs
+export const getCourseCategories = () => API.get('/course-categories');
+export const getAllCourseCategories = () => API.get('/course-categories/all');
+export const createCourseCategory = (data) => API.post('/course-categories', data);
+export const updateCourseCategory = (id, data) => API.put(`/course-categories/${id}`, data);
+export const deleteCourseCategory = (id) => API.delete(`/course-categories/${id}`);
+
 // Store Orders & Coupons APIs
 export const validateCoupon = (data) => API.post('/coupons/validate', data);
 export const getAdminCoupons = () => API.get('/coupons');

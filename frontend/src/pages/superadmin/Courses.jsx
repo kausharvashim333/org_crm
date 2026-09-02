@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse } from '../../api';
+import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse, getAllCourseCategories, createCourseCategory, updateCourseCategory, deleteCourseCategory } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
 import ChapterManagerModal from '../../components/ChapterManagerModal';
 import AIDescriptionModal from '../../components/AIDescriptionModal';
-import { Plus, Check, X, Trash2, BookOpen, Video, Edit, FileText, Sparkles, ChevronUp, ChevronDown, Clock } from 'lucide-react';
+import { Plus, Check, X, Trash2, BookOpen, Video, Edit, FileText, Sparkles, ChevronUp, ChevronDown, Clock, Tag, Settings2 } from 'lucide-react';
 
 const CENTER_TYPES = [
   'All',
@@ -47,6 +47,10 @@ export default function AdminCourses() {
   const [showChapterModal, setShowChapterModal] = useState(false);
   const [showAIModal, setShowAIModal] = useState(false);
   const [selectedCenterFilter, setSelectedCenterFilter] = useState('All');
+  const [categories, setCategories] = useState([]);
+  const [showCatModal, setShowCatModal] = useState(false);
+  const [catForm, setCatForm] = useState({ name: '', description: '', icon: 'BookOpen', color: '#2563eb', order: 0 });
+  const [editCat, setEditCat] = useState(null);
   const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState(initialCourseState);
   const [newDocName, setNewDocName] = useState('');
@@ -57,7 +61,11 @@ export default function AdminCourses() {
     getCourses().then(res => { setCourses(res.data.courses); setLoading(false); }).catch(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  const loadCategories = () => {
+    getAllCourseCategories().then(res => { setCategories(res.data.categories || []); }).catch(() => {});
+  };
+
+  useEffect(() => { load(); loadCategories(); }, []);
 
   const handleOpenAdd = () => {
     setEditCourse(null);
@@ -186,6 +194,37 @@ export default function AdminCourses() {
     catch { showError('Failed'); }
   };
 
+  const handleCatSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editCat) {
+        await updateCourseCategory(editCat._id, catForm);
+        showSuccess('Category updated');
+      } else {
+        await createCourseCategory(catForm);
+        showSuccess('Category created');
+      }
+      setShowCatModal(false);
+      setEditCat(null);
+      setCatForm({ name: '', description: '', icon: 'BookOpen', color: '#2563eb', order: 0 });
+      loadCategories();
+    } catch (error) {
+      showError(error.response?.data?.message || 'Failed to save category');
+    }
+  };
+
+  const handleCatDelete = async (id) => {
+    if (!confirm('Delete this category? Courses using it will keep their text value.')) return;
+    try { await deleteCourseCategory(id); showSuccess('Category deleted'); loadCategories(); }
+    catch { showError('Failed'); }
+  };
+
+  const handleCatEdit = (cat) => {
+    setEditCat(cat);
+    setCatForm({ name: cat.name, description: cat.description || '', icon: cat.icon || 'BookOpen', color: cat.color || '#2563eb', order: cat.order || 0 });
+    setShowCatModal(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -204,6 +243,9 @@ export default function AdminCourses() {
               <option key={ct} value={ct}>{ct}</option>
             ))}
           </select>
+          <button onClick={() => { setEditCat(null); setCatForm({ name: '', description: '', icon: 'BookOpen', color: '#2563eb', order: 0 }); setShowCatModal(true); }} className="btn-secondary flex items-center gap-2 text-xs py-2 whitespace-nowrap">
+            <Tag className="w-4 h-4" /> Manage Categories
+          </button>
           <button onClick={handleOpenAdd} className="btn-primary flex items-center gap-2 text-xs py-2 whitespace-nowrap">
             <Plus className="w-4 h-4" /> Add Standard Course
           </button>
@@ -381,7 +423,18 @@ export default function AdminCourses() {
             <div><label className="block text-sm font-medium mb-1">Duration *</label><input type="text" required value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: e.target.value })} className="input-field" placeholder="e.g. 6 Months" /></div>
             <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="number" value={formData.durationMonths} onChange={(e) => setFormData({ ...formData, durationMonths: +e.target.value })} className="input-field" /></div>
             <div><label className="block text-sm font-medium mb-1">Registration Fee (₹)</label><input type="number" value={formData.registrationFee} onChange={(e) => setFormData({ ...formData, registrationFee: +e.target.value })} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Category</label><input type="text" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="input-field" placeholder="e.g. Diploma / Programming" /></div>
+            <div><label className="block text-sm font-medium mb-1">Category</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="input-field bg-white font-semibold text-indigo-900 border-indigo-200"
+              >
+                <option value="">— Select Category —</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat.name}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
             
             {/* 3-Tier Fee Section */}
             <div className="grid grid-cols-3 gap-3 bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-100 col-span-2">
@@ -573,6 +626,68 @@ export default function AdminCourses() {
         category={formData.category}
         onGenerated={(aiText) => setFormData({ ...formData, description: aiText })}
       />
+
+      {/* Category Management Modal */}
+      <Modal isOpen={showCatModal} onClose={() => { setShowCatModal(false); setEditCat(null); }} title={editCat ? 'Edit Course Category' : 'Manage Course Categories'} size="md">
+        <form onSubmit={handleCatSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Category Name *</label>
+              <input type="text" required value={catForm.name} onChange={(e) => setCatForm({ ...catForm, name: e.target.value })} className="input-field" placeholder="e.g. Paramedical, Diploma, Stock Market" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <input type="text" value={catForm.description} onChange={(e) => setCatForm({ ...catForm, description: e.target.value })} className="input-field" placeholder="Short description (optional)" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Icon Name</label>
+              <input type="text" value={catForm.icon} onChange={(e) => setCatForm({ ...catForm, icon: e.target.value })} className="input-field" placeholder="BookOpen, Heart, TrendingUp..." />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Color</label>
+              <input type="color" value={catForm.color} onChange={(e) => setCatForm({ ...catForm, color: e.target.value })} className="w-full h-10 rounded-lg border border-slate-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Display Order</label>
+              <input type="number" value={catForm.order} onChange={(e) => setCatForm({ ...catForm, order: +e.target.value })} className="input-field" />
+            </div>
+          </div>
+          <button type="submit" className="btn-primary w-full py-2.5 text-sm font-bold">
+            {editCat ? 'Update Category' : 'Add Category'}
+          </button>
+        </form>
+
+        {/* Existing Categories List */}
+        <div className="mt-5 pt-4 border-t">
+          <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Existing Categories ({categories.length})</p>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {categories.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">No categories yet. Create one above.</p>
+            ) : categories.map(cat => (
+              <div key={cat._id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: cat.color || '#2563eb' }}>
+                    {cat.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">{cat.name}</p>
+                    {cat.description && <p className="text-[10px] text-slate-500">{cat.description}</p>}
+                  </div>
+                  {!cat.isActive && <span className="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">INACTIVE</span>}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => handleCatEdit(cat)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg border border-indigo-100" title="Edit">
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => handleCatDelete(cat._id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg border border-red-100" title="Delete">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

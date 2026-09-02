@@ -133,6 +133,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/partners', require('./routes/partners'));
 app.use('/api/students', require('./routes/students'));
 app.use('/api/courses', require('./routes/courses'));
+app.use('/api/course-categories', require('./routes/courseCategories'));
 app.use('/api/batches', require('./routes/batches'));
 app.use('/api/fees', require('./routes/fees'));
 app.use('/api/staff', require('./routes/staff'));

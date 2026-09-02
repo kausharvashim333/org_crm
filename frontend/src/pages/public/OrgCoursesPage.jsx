@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getOrgHomepagePublic, getStoreCourses } from '../../api';
+import { getOrgHomepagePublic, getStoreCourses, getCourseCategories } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import SEO from '../../components/SEO';
@@ -43,6 +43,7 @@ export default function OrgCoursesPage() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [categories, setCategories] = useState(['All']);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
   const navigate = useNavigate();
@@ -50,17 +51,18 @@ export default function OrgCoursesPage() {
   useEffect(() => {
     Promise.all([
       getOrgHomepagePublic().catch(() => ({ data: { homepage: {} } })),
-      getStoreCourses().catch(() => ({ data: { courses: [] } }))
-    ]).then(([hpRes, coursesRes]) => {
+      getStoreCourses().catch(() => ({ data: { courses: [] } })),
+      getCourseCategories().catch(() => ({ data: { categories: [] } })),
+    ]).then(([hpRes, coursesRes, catRes]) => {
       setHp(hpRes.data?.homepage || {});
       setCourses(coursesRes.data?.courses || []);
+      const cats = (catRes.data?.categories || []).map(c => c.name);
+      setCategories(['All', ...cats]);
       setLoading(false);
     });
   }, []);
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
-
-  const categories = ['All', 'Programming', 'Accounting', 'Diploma', 'Design', 'Basic'];
 
   // Filter & sort logic
   const filteredCourses = courses.filter(c => {
