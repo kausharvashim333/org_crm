@@ -675,30 +675,6 @@ export default function OrgHomepage() {
                 <div className="lg:col-span-5 w-full">
                   <Reveal delay={200}>
                     <div className="relative">
-                      {/* Floating accent badges around the card */}
-                      <div className="absolute -top-3 -left-3 z-20 badge-float">
-                        <div className="bg-white rounded-xl shadow-lg border border-slate-200 px-3 py-2 flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                            <Award className="w-4 h-4 text-emerald-600" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-slate-900 leading-tight">Govt Certified</p>
-                            <p className="text-[9px] text-slate-400">ISO Accredited</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="absolute -bottom-3 -right-3 z-20 badge-float" style={{ animationDelay: '1.5s' }}>
-                        <div className="bg-white rounded-xl shadow-lg border border-slate-200 px-3 py-2 flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                            <Users className="w-4 h-4 text-indigo-600" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-slate-900 leading-tight">500+ Students</p>
-                            <p className="text-[9px] text-slate-400">Currently enrolled</p>
-                          </div>
-                        </div>
-                      </div>
-
                       {/* Main visual card */}
                       <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-slate-300/40 relative overflow-hidden gradient-border-glow">
                         {/* Shimmer top bar */}
