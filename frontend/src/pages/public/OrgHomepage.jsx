@@ -319,20 +319,27 @@ export default function OrgHomepage() {
     switch (section) {
       case 'hero':
         if (!hp.isPublished) return null;
+        const heroSlides = hp.hero?.slides?.length > 0 ? hp.hero.slides : [
+          { image: hp.hero?.bgImage, title: hp.hero?.heading || 'Building Skilled Careers', subtitle: hp.hero?.description || 'Government-aligned vocational curriculum' },
+        ].filter(s => s.image);
         return (
-          <section key="hero" id="hero" className="relative overflow-hidden pt-4 pb-16 lg:py-12 bg-gradient-to-b from-slate-50 via-indigo-50/20 to-white text-slate-900 border-b border-slate-200/60">
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-100/30 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-100/25 rounded-full blur-3xl pointer-events-none" />
+          <section key="hero" id="hero" className="relative overflow-hidden pt-4 pb-20 lg:py-12 bg-gradient-to-b from-slate-50 via-indigo-50/20 to-white text-slate-900 border-b border-slate-200/60 min-h-[90vh] flex items-center">
+            {/* Animated gradient mesh orbs */}
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl pointer-events-none hero-orb" />
+            <div className="absolute bottom-0 left-10 w-96 h-96 bg-blue-200/25 rounded-full blur-3xl pointer-events-none hero-orb" style={{ animationDelay: '4s' }} />
+            <div className="absolute top-1/3 left-1/2 w-72 h-72 bg-purple-200/20 rounded-full blur-3xl pointer-events-none hero-orb" style={{ animationDelay: '8s' }} />
+            {/* Subtle grid pattern overlay */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
                 
                 {/* Left Hero Column (7 Cols on desktop) */}
-                <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4">
+                <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-5">
                   
-                  {/* Top Notification Badge */}
+                  {/* Top Notification Badge with typing effect */}
                   <Reveal>
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-indigo-100 text-indigo-700 font-bold shadow-xs" style={{ fontSize: typeof hp.hero?.subheadingFontSize === 'number' ? `${hp.hero.subheadingFontSize}px` : undefined }}>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-indigo-100 text-indigo-700 font-bold shadow-xs badge-float" style={{ fontSize: typeof hp.hero?.subheadingFontSize === 'number' ? `${hp.hero.subheadingFontSize}px` : undefined }}>
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -348,10 +355,10 @@ export default function OrgHomepage() {
                     </div>
                   </Reveal>
 
-                  {/* Main Hero Headline */}
+                  {/* Main Hero Headline with word-by-word reveal */}
                   <Reveal delay={100}>
                     <div className="space-y-1">
-                      <h1 className="font-black tracking-tight text-3xl sm:text-4xl lg:text-5xl xl:text-6xl" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: ['number'].includes(typeof hp.hero?.headingFontSize) ? `${hp.hero.headingFontSize}px` : undefined, lineHeight: hp.hero?.headingLineHeight || 1.65 }}>
+                      <h1 className="font-black tracking-tight text-3xl sm:text-4xl lg:text-5xl xl:text-6xl perspective-[800px]" style={{ color: hp.hero?.headingColor || '#0f172a', fontSize: ['number'].includes(typeof hp.hero?.headingFontSize) ? `${hp.hero.headingFontSize}px` : undefined, lineHeight: hp.hero?.headingLineHeight || 1.65 }}>
                         {(() => {
                           const title = hp.hero?.heading || 'Building Skilled Careers in IT, Paramedical & Finance';
                           const words = title.split(' ');
@@ -359,8 +366,10 @@ export default function OrgHomepage() {
                             const lastWords = words.splice(-2).join(' ');
                             return (
                               <>
-                                {words.join(' ')}{' '}
-                                <span style={{ color: '#2563eb' }}>
+                                {words.map((w, i) => (
+                                  <span key={i} className="word-reveal" style={{ animationDelay: `${0.1 + i * 0.08}s` }}>{w} </span>
+                                ))}
+                                <span className="word-reveal" style={{ animationDelay: `${0.1 + words.length * 0.08}s`, color: themeColor }}>
                                   {lastWords}
                                 </span>
                               </>
@@ -370,7 +379,7 @@ export default function OrgHomepage() {
                         })()}
                       </h1>
                       {hp?.settings?.shortName && (
-                        <p className="font-bold text-slate-400 tracking-wide text-lg sm:text-xl lg:text-2xl" style={{ fontSize: typeof hp.hero?.headingFontSize === 'number' ? `${Math.round(hp.hero.headingFontSize * 0.4)}px` : undefined }}>
+                        <p className="font-bold text-slate-400 tracking-wide text-lg sm:text-xl lg:text-2xl word-reveal" style={{ fontSize: typeof hp.hero?.headingFontSize === 'number' ? `${Math.round(hp.hero.headingFontSize * 0.4)}px` : undefined, animationDelay: '0.8s' }}>
                           {hp.settings.shortName}
                         </p>
                       )}
@@ -378,14 +387,14 @@ export default function OrgHomepage() {
                   </Reveal>
 
                   {/* Hero Description */}
-                  <Reveal delay={150}>
+                  <Reveal delay={300}>
                     <p className="text-slate-600 max-w-2xl leading-relaxed font-normal text-sm sm:text-base" style={{ fontSize: typeof hp.hero?.descriptionFontSize === 'number' ? `${hp.hero.descriptionFontSize}px` : undefined }}>
                       {hp.hero?.description || 'Government-aligned vocational curriculum, hands-on practical lab modules, standardized student certificates, and dedicated career guidance.'}
                     </p>
                   </Reveal>
 
-                  {/* Auto-sliding Trending Courses */}
-                  <Reveal delay={200} className="w-full max-w-md">
+                  {/* Auto-sliding Trending Courses with glow */}
+                  <Reveal delay={350} className="w-full max-w-md">
                     <div className="flex items-center gap-1.5 text-[11px] overflow-hidden whitespace-nowrap">
                       <span className="font-semibold text-slate-400 flex items-center gap-0.5 shrink-0">
                         <Sparkles className="w-2.5 h-2.5" style={{ color: themeColor }} />
@@ -401,7 +410,7 @@ export default function OrgHomepage() {
                                 setHeroSearch(term);
                                 navigate(`/courses?search=${encodeURIComponent(term)}`);
                               }}
-                              className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-slate-300 text-slate-500 hover:text-slate-800 font-medium transition-all shrink-0"
+                              className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-indigo-300 text-slate-500 hover:text-indigo-700 font-medium transition-all shrink-0 hover:shadow-sm"
                             >
                               {term}
                             </button>
@@ -411,22 +420,22 @@ export default function OrgHomepage() {
                     </div>
                   </Reveal>
 
-                  {/* Action CTA Buttons */}
-                  <Reveal delay={250}>
+                  {/* Action CTA Buttons with shimmer + arrow bounce */}
+                  <Reveal delay={400}>
                     <div className="flex flex-wrap gap-3 justify-center lg:justify-start w-full pt-1">
                       <Link
                         to="/courses"
-                        className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-md shadow-indigo-600/20 transition-all hover:scale-105"
+                        className="btn-shimmer inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 group"
                         style={{ backgroundColor: themeColor }}
                       >
                         <BookOpen className="w-4 h-4" />
                         <span>Explore Courses</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4 arrow-bounce" />
                       </Link>
 
                       <Link
                         to="/franchise"
-                        className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 shadow-xs transition-all hover:scale-105"
+                        className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 shadow-xs transition-all hover:scale-105 hover:border-indigo-300"
                       >
                         <Building className="w-4 h-4 text-indigo-600" />
                         <span>Become a Partner</span>
@@ -434,25 +443,31 @@ export default function OrgHomepage() {
 
                       <Link
                         to="/admission"
-                        className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-600/20 transition-all hover:scale-105"
+                        className="btn-shimmer inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 group"
                       >
                         <GraduationCap className="w-4 h-4" />
                         <span>Apply for Admission</span>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4 arrow-bounce" />
                       </Link>
                     </div>
                   </Reveal>
 
-                  {/* Real Stats Strip from DB */}
+                  {/* Real Stats Strip from DB with animated counters + floating badges */}
                   {(hp.stats?.items || []).length > 0 && (
-                    <Reveal delay={280}>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-200/80 w-full">
+                    <Reveal delay={450}>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-200/80 w-full">
                         {(hp.stats?.items || []).slice(0, 4).map((s, i) => {
                           const Icon = iconMap[s.icon] || Building;
                           return (
-                            <div key={i} className="flex flex-col items-center text-center p-2.5 rounded-xl bg-white border border-slate-200/70 shadow-xs hover:border-indigo-200 transition-colors">
+                            <div key={i} className="flex flex-col items-center text-center p-2.5 rounded-xl bg-white border border-slate-200/70 shadow-xs hover:border-indigo-200 hover:shadow-md transition-all animate-pulse-glow" style={{ animationDelay: `${i * 0.5}s` }}>
                               <Icon className="w-4 h-4 mb-1" style={{ color: themeColor }} />
-                              <p className="text-base font-black text-slate-900 leading-tight">{s.value}</p>
+                              <p className="text-base font-black text-slate-900 leading-tight">
+                                {(() => {
+                                  const num = parseInt(String(s.value).replace(/[^0-9]/g, ''));
+                                  const suffix = String(s.value).replace(/[0-9,]/g, '');
+                                  return isNaN(num) ? s.value : <Counter end={num} suffix={suffix} />;
+                                })()}
+                              </p>
                               <p className="text-[10px] text-slate-500 font-semibold">{s.label}</p>
                             </div>
                           );
@@ -463,26 +478,54 @@ export default function OrgHomepage() {
 
                 </div>
 
-                {/* Right Hero Column: Notice Hub (5 Cols on desktop) */}
+                {/* Right Hero Column: Visual Showcase (5 Cols on desktop) */}
                 <div className="lg:col-span-5 w-full">
                   <Reveal delay={200}>
-                    <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-200/50 relative overflow-hidden">
-                      
-                      {/* Widget Header */}
-                      <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-xs">
-                            <Bell className="w-4 h-4" />
+                    <div className="relative">
+                      {/* Floating accent badges around the card */}
+                      <div className="absolute -top-3 -left-3 z-20 badge-float">
+                        <div className="bg-white rounded-xl shadow-lg border border-slate-200 px-3 py-2 flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                            <Award className="w-4 h-4 text-emerald-600" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-slate-900 text-base">Live notifications & circulars</h3>
+                            <p className="text-[10px] font-bold text-slate-900 leading-tight">Govt Certified</p>
+                            <p className="text-[9px] text-slate-400">ISO Accredited</p>
                           </div>
                         </div>
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase tracking-wider">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                          Live Updates
-                        </span>
                       </div>
+                      <div className="absolute -bottom-3 -right-3 z-20 badge-float" style={{ animationDelay: '1.5s' }}>
+                        <div className="bg-white rounded-xl shadow-lg border border-slate-200 px-3 py-2 flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                            <Users className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-slate-900 leading-tight">500+ Students</p>
+                            <p className="text-[9px] text-slate-400">Currently enrolled</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Main visual card */}
+                      <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-slate-300/40 relative overflow-hidden gradient-border-glow">
+                        {/* Shimmer top bar */}
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" style={{ backgroundSize: '200% 100%', animation: 'border-glow 3s linear infinite' }} />
+                        
+                        {/* Widget Header */}
+                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-xs">
+                              <Bell className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-slate-900 text-base">Live notifications & circulars</h3>
+                            </div>
+                          </div>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase tracking-wider">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                            Live Updates
+                          </span>
+                        </div>
 
                       {/* Category Filter Pills & Search */}
                       <div className="space-y-2 mb-3">
@@ -582,9 +625,18 @@ export default function OrgHomepage() {
                       </div>
 
                     </div>
+                    </div>
                   </Reveal>
                 </div>
 
+              </div>
+            </div>
+
+            {/* Scroll-down indicator */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 hidden lg:flex flex-col items-center gap-1 scroll-indicator">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Scroll</span>
+              <div className="w-5 h-8 rounded-full border-2 border-slate-300 flex items-start justify-center p-1">
+                <div className="w-1 h-2 rounded-full bg-slate-400" />
               </div>
             </div>
           </section>

@@ -439,6 +439,74 @@ body {
   opacity: 1;
 }
 
+/* Hero gradient mesh shift */
+@keyframes mesh-shift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+.hero-orb {
+  animation: mesh-shift 12s ease-in-out infinite;
+}
+
+/* Word-by-word reveal */
+@keyframes word-reveal {
+  from { opacity: 0; transform: translateY(20px) rotateX(-40deg); }
+  to { opacity: 1; transform: translateY(0) rotateX(0); }
+}
+.word-reveal {
+  display: inline-block;
+  opacity: 0;
+  animation: word-reveal 0.6s ease-out forwards;
+}
+
+/* Scroll-down indicator */
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(8px); opacity: 0.5; }
+}
+.scroll-indicator {
+  animation: scroll-bounce 1.8s ease-in-out infinite;
+}
+
+/* Button shimmer sweep */
+@keyframes btn-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: btn-shimmer 3s ease-in-out infinite;
+}
+
+/* Arrow bounce */
+@keyframes arrow-bounce {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+.arrow-bounce {
+  animation: arrow-bounce 1.5s ease-in-out infinite;
+}
+
+/* Floating badge */
+@keyframes badge-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+}
+.badge-float {
+  animation: badge-float 3s ease-in-out infinite;
+}
+
 /* Lightbox */
 @keyframes lightbox-fade {
   from { opacity: 0; }
