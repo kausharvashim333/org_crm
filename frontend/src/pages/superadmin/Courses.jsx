@@ -479,8 +479,8 @@ export default function AdminCourses() {
               </select>
             </div>
             <div><label className="block text-sm font-medium mb-1">Duration *</label><input type="text" required value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: e.target.value })} className="input-field" placeholder="e.g. 6 Months" /></div>
-            <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="number" value={formData.durationMonths} onChange={(e) => setFormData({ ...formData, durationMonths: +e.target.value })} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Registration Fee (₹)</label><input type="number" value={formData.registrationFee} onChange={(e) => setFormData({ ...formData, registrationFee: +e.target.value })} className="input-field" /></div>
+            <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="number" value={formData.durationMonths || ''} onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value === '' ? 0 : +e.target.value })} className="input-field" /></div>
+            <div><label className="block text-sm font-medium mb-1">Registration Fee (₹)</label><input type="number" value={formData.registrationFee || ''} onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value === '' ? 0 : +e.target.value })} className="input-field" /></div>
             <div><label className="block text-sm font-medium mb-1">Category</label>
               <select
                 value={formData.category}
@@ -513,8 +513,8 @@ export default function AdminCourses() {
                 <label className="block text-[11px] font-black text-slate-700 mb-1">Monthly Fee (₹)</label>
                 <input
                   type="number"
-                  value={formData.monthlyFee}
-                  onChange={(e) => setFormData({ ...formData, monthlyFee: +e.target.value })}
+                  value={formData.monthlyFee || ''}
+                  onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value === '' ? 0 : +e.target.value })}
                   className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs"
                   placeholder="e.g. 1500"
                   disabled={formData.feeDisplayType === 'full'}
@@ -543,8 +543,8 @@ export default function AdminCourses() {
                 </label>
                 <input
                   type="number"
-                  value={formData.organizationFee}
-                  onChange={(e) => setFormData({ ...formData, organizationFee: +e.target.value })}
+                  value={formData.organizationFee || ''}
+                  onChange={(e) => setFormData({ ...formData, organizationFee: e.target.value === '' ? 0 : +e.target.value })}
                   className="input-field bg-white font-extrabold text-indigo-900 border-indigo-200 text-xs"
                   placeholder="e.g. 500"
                 />
@@ -556,8 +556,8 @@ export default function AdminCourses() {
                 </label>
                 <input
                   type="number"
-                  value={formData.certificateFee}
-                  onChange={(e) => setFormData({ ...formData, certificateFee: +e.target.value })}
+                  value={formData.certificateFee || ''}
+                  onChange={(e) => setFormData({ ...formData, certificateFee: e.target.value === '' ? 0 : +e.target.value })}
                   className="input-field bg-white font-extrabold text-blue-900 border-blue-200 text-xs"
                   placeholder="e.g. 250"
                 />
@@ -569,8 +569,8 @@ export default function AdminCourses() {
                 </label>
                 <input
                   type="number"
-                  value={formData.studentFee}
-                  onChange={(e) => setFormData({ ...formData, studentFee: +e.target.value, fee: +e.target.value })}
+                  value={formData.studentFee || ''}
+                  onChange={(e) => setFormData({ ...formData, studentFee: e.target.value === '' ? 0 : +e.target.value, fee: e.target.value === '' ? 0 : +e.target.value })}
                   className="input-field bg-white font-extrabold text-slate-900 border-slate-300 text-xs"
                   placeholder="e.g. 3500"
                 />
