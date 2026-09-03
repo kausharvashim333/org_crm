@@ -18,6 +18,7 @@ const initialCourseState = {
   fee: '',
   monthlyFee: '',
   feeDisplayType: 'full',
+  feeNote: '',
   availableToPartners: true,
   organizationFee: '',
   studentFee: '',
@@ -112,6 +113,7 @@ export default function AdminCourses() {
       fee: c.studentFee || c.fee ? String(c.studentFee || c.fee) : '',
       monthlyFee: c.monthlyFee ? String(c.monthlyFee) : '',
       feeDisplayType: c.feeDisplayType || 'full',
+      feeNote: c.feeNote || '',
       availableToPartners: c.availableToPartners !== false,
       organizationFee: c.organizationFee ? String(c.organizationFee) : '',
       studentFee: c.studentFee || c.fee ? String(c.studentFee || c.fee) : '',
@@ -615,6 +617,11 @@ export default function AdminCourses() {
                   <span className="text-[9px] text-slate-500 block mt-0.5">Full fee set below in Student Fee</span>
                 </>
               )}
+            </div>
+            <div className="col-span-2">
+              <label className="block text-[11px] font-black text-slate-700 mb-1">Fee Note (Optional)</label>
+              <input type="text" value={formData.feeNote} onChange={(e) => setFormData({ ...formData, feeNote: e.target.value })} className="input-field bg-white text-slate-800 border-slate-300 text-xs" placeholder="e.g. EMI available, 3 months course, etc." />
+              <span className="text-[9px] text-slate-500 block mt-0.5">Shown below fee on course cards (optional)</span>
             </div>
             <div className="col-span-2 flex items-center gap-2 pt-2 border-t border-slate-200">
               <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">

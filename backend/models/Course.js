@@ -15,6 +15,7 @@ const courseSchema = new mongoose.Schema({
   fee: { type: Number, default: 0 },
   monthlyFee: { type: Number, default: 0 },
   feeDisplayType: { type: String, enum: ['full', 'monthly', 'both'], default: 'full' },
+  feeNote: { type: String, default: '' },
   organizationFee: { type: Number, default: 0 },
   studentFee: { type: Number, default: 0 },
   certificateFee: { type: Number, default: 0 },

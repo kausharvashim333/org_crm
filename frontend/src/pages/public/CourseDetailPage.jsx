@@ -244,9 +244,6 @@ export default function CourseDetailPage() {
                       ₹{monthlyFee.toLocaleString('en-IN')}
                     </span>
                     <span className="text-sm font-bold text-slate-500">/month</span>
-                    {sale > 0 && (
-                      <span className="text-sm text-slate-400">Full: ₹{sale.toLocaleString('en-IN')}</span>
-                    )}
                   </div>
                 ) : feeDisplayType === 'both' && monthlyFee ? (
                   <div className="space-y-1">
@@ -284,6 +281,9 @@ export default function CourseDetailPage() {
                 <div className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5" /> Special promotional fee valid today!
                 </div>
+                {course.feeNote && (
+                  <p className="text-xs text-slate-500 font-medium mt-2 italic leading-tight">{course.feeNote}</p>
+                )}
               </div>
 
               {/* CTAs */}

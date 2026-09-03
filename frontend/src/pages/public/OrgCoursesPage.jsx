@@ -310,9 +310,6 @@ export default function OrgCoursesPage() {
                                 <span className="text-xl font-black text-slate-900">₹{c.monthlyFee.toLocaleString('en-IN')}</span>
                                 <span className="text-[10px] font-bold text-slate-500">/month</span>
                               </div>
-                              {original > 0 && (
-                                <span className="text-[10px] text-slate-400">Full: ₹{sale.toLocaleString('en-IN')}</span>
-                              )}
                             </>
                           ) : c.feeDisplayType === 'both' && c.monthlyFee ? (
                             <>
@@ -344,6 +341,11 @@ export default function OrgCoursesPage() {
                           </span>
                         )}
                       </div>
+
+                      {/* Fee Note */}
+                      {c.feeNote && (
+                        <p className="text-[10px] text-slate-500 font-medium mb-3 italic leading-tight">{c.feeNote}</p>
+                      )}
 
                       {/* CTA Buttons */}
                       <div className="grid grid-cols-2 gap-2">
