@@ -59,6 +59,7 @@ const SubAdminStaff = lazy(() => import('./pages/superadmin/SubAdminStaff'));
 const AuditLogs = lazy(() => import('./pages/superadmin/AuditLogs'));
 const SecurityAndBackup = lazy(() => import('./pages/superadmin/SecurityAndBackup'));
 const AdminAddons = lazy(() => import('./pages/superadmin/AdminAddons'));
+const AdminCenterTypes = lazy(() => import('./pages/superadmin/CenterTypes'));
 
 // Partner Pages (Lazy)
 const PartnerLogin = lazy(() => import('./pages/partner/Login'));
@@ -186,6 +187,7 @@ export default function App() {
                 <Route path="audit-logs" element={<AuditLogs />} />
                 <Route path="security" element={<SecurityAndBackup />} />
                 <Route path="addons" element={<AdminAddons />} />
+                <Route path="center-types" element={<AdminCenterTypes />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Routes>
             </AdminLayout>
