@@ -194,6 +194,23 @@ router.post('/', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
+// Reorder courses (bulk update displayOrder) — must be before /:id route
+router.put('/reorder', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    if (!Array.isArray(orderedIds)) {
+      return res.status(400).json({ success: false, message: 'orderedIds array required' });
+    }
+    const updates = orderedIds.map((id, index) =>
+      Course.findByIdAndUpdate(id, { displayOrder: index }, { new: true })
+    );
+    await Promise.all(updates);
+    res.json({ success: true, message: 'Course order updated' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.put('/:id', protect, async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
@@ -314,23 +331,6 @@ router.put('/:id/assessment', protect, partnerOrAdmin, async (req, res) => {
     course.assessment = assessment;
     await course.save();
     res.json({ success: true, course });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// Reorder courses (bulk update displayOrder)
-router.put('/reorder', protect, superAdminOnly, async (req, res) => {
-  try {
-    const { orderedIds } = req.body;
-    if (!Array.isArray(orderedIds)) {
-      return res.status(400).json({ success: false, message: 'orderedIds array required' });
-    }
-    const updates = orderedIds.map((id, index) =>
-      Course.findByIdAndUpdate(id, { displayOrder: index }, { new: true })
-    );
-    await Promise.all(updates);
-    res.json({ success: true, message: 'Course order updated' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
