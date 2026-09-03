@@ -7,7 +7,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ScrollProgress from './components/ui/ScrollProgress';
 import ScrollToTop from './components/ui/ScrollToTop';
 import Spotlight from './components/ui/Spotlight';
-import LiveNotification from './components/ui/LiveNotification';
 
 // Public Pages (Lazy)
 const PublicHomepage = lazy(() => import('./pages/public/Homepage'));
@@ -233,7 +232,6 @@ export default function App() {
       </Routes>
     </Suspense>
     <ScrollToTop />
-    <LiveNotification />
     </ErrorBoundary>
   );
 }

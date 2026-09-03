@@ -184,6 +184,63 @@ router.post('/staff-users', protect, superAdminOnly, async (req, res) => {
   }
 });
 
+// Update admin staff user
+router.put('/staff-users/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { name, phone, roleId, roleName, isActive, password } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Staff user not found' });
+    if (user.role !== 'super_admin') return res.status(400).json({ success: false, message: 'Can only edit admin staff users' });
+
+    if (name !== undefined) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (roleId !== undefined) { user.roleId = roleId || undefined; user.assignedRoleName = roleName || 'Super Admin'; }
+    if (isActive !== undefined) user.isActive = isActive;
+    if (password && password.length >= 6) user.password = password;
+
+    await user.save();
+
+    await AuditLog.create({
+      user: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      role: req.user.role,
+      module: 'SubAdmin',
+      action: 'Update Staff',
+      details: `Updated admin staff user: ${user.email}`,
+    });
+
+    res.json({ success: true, staffUser: user });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// Delete admin staff user
+router.delete('/staff-users/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'Staff user not found' });
+    if (user.email === req.user.email) return res.status(400).json({ success: false, message: 'Cannot delete your own account' });
+    if (user.role !== 'super_admin') return res.status(400).json({ success: false, message: 'Can only delete admin staff users' });
+
+    await AuditLog.create({
+      user: req.user._id,
+      userName: req.user.name,
+      userEmail: req.user.email,
+      role: req.user.role,
+      module: 'SubAdmin',
+      action: 'Delete Staff',
+      details: `Deleted admin staff user: ${user.email}`,
+    });
+
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Staff user deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // --- AUDIT LOGS ---
 
 // Get audit logs

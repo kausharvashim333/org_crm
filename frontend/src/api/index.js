@@ -254,6 +254,8 @@ export const deleteRole = (id) => API.delete(`/rbac/roles/${id}`);
 
 export const getStaffUsers = () => API.get('/rbac/staff-users');
 export const createStaffUser = (data) => API.post('/rbac/staff-users', data);
+export const updateStaffUser = (id, data) => API.put(`/rbac/staff-users/${id}`, data);
+export const deleteStaffUser = (id) => API.delete(`/rbac/staff-users/${id}`);
 
 export const getAuditLogs = () => API.get('/rbac/audit-logs');
 export const getSecurityExport = () => API.get('/rbac/security/export');
