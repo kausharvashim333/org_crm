@@ -431,6 +431,12 @@ export default function AdminCourses() {
                 {/* Column 3: 3-Tier Pricing Breakdown */}
                 <TableCell>
                   <div className="p-2 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1 min-w-[170px]">
+                    {(c.feeDisplayType === 'monthly' || c.feeDisplayType === 'both') && (
+                      <div className="flex items-center justify-between text-[11px] pb-1 border-b border-slate-200">
+                        <span className="text-slate-500 font-semibold flex items-center gap-1">📅 Monthly:</span>
+                        <span className="font-black text-emerald-700">₹{c.monthlyFee || 0}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-slate-500 font-semibold flex items-center gap-1">🏛️ Org Royalty:</span>
                       <span className="font-black text-indigo-700">₹{c.organizationFee || 0}</span>
@@ -443,6 +449,11 @@ export default function AdminCourses() {
                       <span className="text-slate-900 font-extrabold flex items-center gap-1">🎓 Student Price:</span>
                       <span className="font-black text-slate-900">₹{c.studentFee || c.fee || 0}</span>
                     </div>
+                    {c.feeDisplayType && c.feeDisplayType !== 'full' && (
+                      <div className="text-[9px] text-slate-400 font-bold pt-0.5">
+                        Display: {c.feeDisplayType === 'monthly' ? 'Monthly Only' : 'Monthly + Full'}
+                      </div>
+                    )}
                   </div>
                 </TableCell>
 
