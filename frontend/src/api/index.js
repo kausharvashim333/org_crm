@@ -68,7 +68,7 @@ export const deleteCourseCategory = (id) => API.delete(`/course-categories/${id}
 export const getCenterTypes = () => API.get('/center-types');
 export const getAllCenterTypes = () => API.get('/center-types/all');
 export const createCenterType = (data) => API.post('/center-types', data);
-export const updateCenterType = (id, data) => API.put(`/center-types/${id}`, data);
+export const renameCenterType = (id, name) => API.put(`/center-types/${id}/rename`, { name });
 export const deleteCenterType = (id) => API.delete(`/center-types/${id}`);
 
 // Store Orders & Coupons APIs

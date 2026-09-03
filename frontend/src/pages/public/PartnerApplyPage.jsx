@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getOrgHomepagePublic, applyPartner, createFranchiseOrder, checkPartnerEmail, getCenterTypes } from '../../api';
+import { getOrgHomepagePublic, applyPartner, createFranchiseOrder, checkPartnerEmail } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import {
@@ -12,7 +12,6 @@ export default function PartnerApplyPage() {
   const [searchParams] = useSearchParams();
   const [hp, setHp] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [centerTypes, setCenterTypes] = useState([]);
   const navigate = useNavigate();
 
   const queryPlan = searchParams.get('plan') || '';
@@ -119,7 +118,6 @@ export default function PartnerApplyPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-    getCenterTypes().then(res => setCenterTypes(res.data.centerTypes || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -710,19 +708,13 @@ export default function PartnerApplyPage() {
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-slate-850 font-bold"
                         >
-                          {centerTypes.length > 0 ? centerTypes.map(ct => (
-                            <option key={ct._id} value={ct.name}>{ct.name}</option>
-                          )) : (
-                            <>
-                              <option value="Academy">Academy</option>
-                              <option value="Paramedical Training">Paramedical Training</option>
-                              <option value="Computer & IT Training">Computer & IT Training</option>
-                              <option value="Health & Yoga Training">Health & Yoga Training</option>
-                              <option value="Stock Market & Finance">Stock Market & Finance</option>
-                              <option value="CGPSC & CGVYAPAM Preparation">CGPSC & CGVYAPAM Preparation</option>
-                              <option value="Skill Development Projects">Skill Development Projects</option>
-                            </>
-                          )}
+                          <option value="Academy">Academy</option>
+                          <option value="Paramedical Training">Paramedical Training</option>
+                          <option value="Computer & IT Training">Computer & IT Training</option>
+                          <option value="Health & Yoga Training">Health & Yoga Training</option>
+                          <option value="Stock Market & Finance">Stock Market & Finance</option>
+                          <option value="CGPSC & CGVYAPAM Preparation">CGPSC & CGVYAPAM Preparation</option>
+                          <option value="Skill Development Projects">Skill Development Projects</option>
                         </select>
                       </div>
                       <div>
