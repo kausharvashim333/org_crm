@@ -64,6 +64,13 @@ export const createCourseCategory = (data) => API.post('/course-categories', dat
 export const updateCourseCategory = (id, data) => API.put(`/course-categories/${id}`, data);
 export const deleteCourseCategory = (id) => API.delete(`/course-categories/${id}`);
 
+// Center Types APIs
+export const getCenterTypes = () => API.get('/center-types');
+export const getAllCenterTypes = () => API.get('/center-types/all');
+export const createCenterType = (data) => API.post('/center-types', data);
+export const updateCenterType = (id, data) => API.put(`/center-types/${id}`, data);
+export const deleteCenterType = (id) => API.delete(`/center-types/${id}`);
+
 // Store Orders & Coupons APIs
 export const validateCoupon = (data) => API.post('/coupons/validate', data);
 export const getAdminCoupons = () => API.get('/coupons');

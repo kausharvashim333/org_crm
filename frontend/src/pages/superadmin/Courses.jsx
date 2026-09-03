@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse, reorderCourses, getAllCourseCategories, createCourseCategory, updateCourseCategory, deleteCourseCategory, uploadOrgImage } from '../../api';
+import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse, reorderCourses, getAllCourseCategories, createCourseCategory, updateCourseCategory, deleteCourseCategory, uploadOrgImage, getAllCenterTypes, createCenterType, updateCenterType, deleteCenterType } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
@@ -7,16 +7,7 @@ import ChapterManagerModal from '../../components/ChapterManagerModal';
 import AIDescriptionModal from '../../components/AIDescriptionModal';
 import { Plus, Check, X, Trash2, BookOpen, Video, Edit, FileText, Sparkles, ChevronUp, ChevronDown, Clock, Tag, Settings2, Image as ImageIcon, Upload, Star } from 'lucide-react';
 
-const CENTER_TYPES = [
-  'All',
-  'Computer & IT Training',
-  'Paramedical Training',
-  'Health & Yoga Training',
-  'Skill Development Projects',
-  'Stock Market & Finance',
-  'UG & PG Courses',
-  'Competitive Coaching',
-];
+const DEFAULT_CENTER_TYPES = ['All', 'Computer & IT Training', 'Paramedical Training', 'Health & Yoga Training', 'Skill Development Projects', 'Stock Market & Finance', 'UG & PG Courses', 'Competitive Coaching'];
 
 const initialCourseState = {
   name: '',
@@ -62,6 +53,10 @@ export default function AdminCourses() {
   const [showCatModal, setShowCatModal] = useState(false);
   const [catForm, setCatForm] = useState({ name: '', description: '', icon: 'BookOpen', color: '#2563eb', order: 0 });
   const [editCat, setEditCat] = useState(null);
+  const [centerTypes, setCenterTypes] = useState([]);
+  const [showCTModal, setShowCTModal] = useState(false);
+  const [ctForm, setCtForm] = useState({ name: '', description: '', icon: 'Building2', color: '#2563eb', order: 0 });
+  const [editCT, setEditCT] = useState(null);
   const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState(initialCourseState);
   const [newDocName, setNewDocName] = useState('');
@@ -79,7 +74,11 @@ export default function AdminCourses() {
     getAllCourseCategories().then(res => { setCategories(res.data.categories || []); }).catch(() => {});
   };
 
-  useEffect(() => { load(); loadCategories(); }, []);
+  const loadCenterTypes = () => {
+    getAllCenterTypes().then(res => { setCenterTypes(res.data.centerTypes || []); }).catch(() => {});
+  };
+
+  useEffect(() => { load(); loadCategories(); loadCenterTypes(); }, []);
 
   const handleOpenAdd = () => {
     setEditCourse(null);
@@ -306,6 +305,37 @@ export default function AdminCourses() {
     setShowCatModal(true);
   };
 
+  const handleCTSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editCT) {
+        await updateCenterType(editCT._id, ctForm);
+        showSuccess('Center type updated');
+      } else {
+        await createCenterType(ctForm);
+        showSuccess('Center type created');
+      }
+      setShowCTModal(false);
+      setEditCT(null);
+      setCtForm({ name: '', description: '', icon: 'Building2', color: '#2563eb', order: 0 });
+      loadCenterTypes();
+    } catch (error) {
+      showError(error.response?.data?.message || 'Failed to save center type');
+    }
+  };
+
+  const handleCTDelete = async (id) => {
+    if (!confirm('Delete this center type? Courses using it will keep their text value.')) return;
+    try { await deleteCenterType(id); showSuccess('Center type deleted'); loadCenterTypes(); }
+    catch { showError('Failed'); }
+  };
+
+  const handleCTEdit = (ct) => {
+    setEditCT(ct);
+    setCtForm({ name: ct.name, description: ct.description || '', icon: ct.icon || 'Building2', color: ct.color || '#2563eb', order: ct.order || 0 });
+    setShowCTModal(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -320,12 +350,15 @@ export default function AdminCourses() {
             className="input-field py-2 text-xs font-bold text-indigo-900 border-indigo-200 bg-indigo-50/50"
           >
             <option value="All">Filter: All Center Types</option>
-            {CENTER_TYPES.filter(ct => ct !== 'All').map(ct => (
-              <option key={ct} value={ct}>{ct}</option>
+            {(centerTypes.length > 0 ? centerTypes : DEFAULT_CENTER_TYPES.filter(ct => ct !== 'All')).map(ct => (
+              <option key={ct._id || ct} value={ct.name || ct}>{ct.name || ct}</option>
             ))}
           </select>
+          <button onClick={() => { setEditCT(null); setCtForm({ name: '', description: '', icon: 'Building2', color: '#2563eb', order: 0 }); setShowCTModal(true); }} className="btn-secondary flex items-center gap-2 text-xs py-2 whitespace-nowrap">
+            <Settings2 className="w-4 h-4" /> Center Types
+          </button>
           <button onClick={() => { setEditCat(null); setCatForm({ name: '', description: '', icon: 'BookOpen', color: '#2563eb', order: 0 }); setShowCatModal(true); }} className="btn-secondary flex items-center gap-2 text-xs py-2 whitespace-nowrap">
-            <Tag className="w-4 h-4" /> Manage Categories
+            <Tag className="w-4 h-4" /> Categories
           </button>
           <button onClick={handleOpenAdd} className="btn-primary flex items-center gap-2 text-xs py-2 whitespace-nowrap">
             <Plus className="w-4 h-4" /> Add Standard Course
@@ -521,7 +554,10 @@ export default function AdminCourses() {
             <div>
               <label className="block text-sm font-medium mb-1 text-slate-700">Center Type / Vertical *</label>
               <select value={formData.centerType || 'All'} onChange={(e) => setFormData({ ...formData, centerType: e.target.value })} className="input-field bg-white font-semibold text-indigo-900 border-indigo-200">
-                {CENTER_TYPES.map(ct => (<option key={ct} value={ct}>{ct === 'All' ? '🌐 All Center Types (Global)' : ct}</option>))}
+                <option value="All">🌐 All Center Types (Global)</option>
+                {(centerTypes.length > 0 ? centerTypes : DEFAULT_CENTER_TYPES.filter(ct => ct !== 'All')).map(ct => (
+                  <option key={ct._id || ct} value={ct.name || ct}>{ct.name || ct}</option>
+                ))}
               </select>
             </div>
             <div><label className="block text-sm font-medium mb-1">Category</label>
@@ -719,6 +755,68 @@ export default function AdminCourses() {
                     <Edit className="w-3.5 h-3.5" />
                   </button>
                   <button onClick={() => handleCatDelete(cat._id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg border border-red-100" title="Delete">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Center Type Management Modal */}
+      <Modal isOpen={showCTModal} onClose={() => { setShowCTModal(false); setEditCT(null); }} title={editCT ? 'Edit Center Type' : 'Manage Center Types'} size="md">
+        <form onSubmit={handleCTSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Center Type Name *</label>
+              <input type="text" required value={ctForm.name} onChange={(e) => setCtForm({ ...ctForm, name: e.target.value })} className="input-field" placeholder="e.g. Computer & IT Training, Paramedical Training" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <input type="text" value={ctForm.description} onChange={(e) => setCtForm({ ...ctForm, description: e.target.value })} className="input-field" placeholder="Short description (optional)" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Icon Name</label>
+              <input type="text" value={ctForm.icon} onChange={(e) => setCtForm({ ...ctForm, icon: e.target.value })} className="input-field" placeholder="Building2, Monitor, Heart..." />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Color</label>
+              <input type="color" value={ctForm.color} onChange={(e) => setCtForm({ ...ctForm, color: e.target.value })} className="w-full h-10 rounded-lg border border-slate-200 cursor-pointer" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Display Order</label>
+              <input type="number" value={ctForm.order} onChange={(e) => setCtForm({ ...ctForm, order: +e.target.value })} className="input-field" />
+            </div>
+          </div>
+          <button type="submit" className="btn-primary w-full py-2.5 text-sm font-bold">
+            {editCT ? 'Update Center Type' : 'Add Center Type'}
+          </button>
+        </form>
+
+        {/* Existing Center Types List */}
+        <div className="mt-5 pt-4 border-t">
+          <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Existing Center Types ({centerTypes.length})</p>
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {centerTypes.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">No center types yet. Create one above.</p>
+            ) : centerTypes.map(ct => (
+              <div key={ct._id} className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: ct.color || '#2563eb' }}>
+                    {ct.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">{ct.name}</p>
+                    {ct.description && <p className="text-[10px] text-slate-500">{ct.description}</p>}
+                  </div>
+                  {!ct.isActive && <span className="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">INACTIVE</span>}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button onClick={() => handleCTEdit(ct)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg border border-indigo-100" title="Edit">
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => handleCTDelete(ct._id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg border border-red-100" title="Delete">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
