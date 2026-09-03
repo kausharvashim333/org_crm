@@ -93,6 +93,8 @@ router.get('/stats', protect, superAdminOnly, async (req, res) => {
       student: { new: 0, contacted: 0, admitted: 0, rejected: 0, approved: 0, total: 0 },
       partner: { new: 0, contacted: 0, admitted: 0, rejected: 0, approved: 0, total: 0 },
       grandTotal: 0,
+      todayLeads: 0,
+      todayFollowUps: 0,
     };
     stats.forEach(s => {
       const t = s._id.type || 'student';
@@ -103,6 +105,20 @@ router.get('/stats', protect, superAdminOnly, async (req, res) => {
       }
       result.grandTotal += s.count;
     });
+
+    // Today's leads (created today)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    result.todayLeads = await Inquiry.countDocuments({ createdAt: { $gte: startOfDay } });
+
+    // Today's follow-ups (followUpNotes added today)
+    const todayFollowUps = await Inquiry.aggregate([
+      { $unwind: '$followUpNotes' },
+      { $match: { 'followUpNotes.date': { $gte: startOfDay } } },
+      { $count: 'count' },
+    ]);
+    result.todayFollowUps = todayFollowUps.length > 0 ? todayFollowUps[0].count : 0;
+
     res.json({ success: true, stats: result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

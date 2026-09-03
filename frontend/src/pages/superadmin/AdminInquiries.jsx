@@ -4,7 +4,7 @@ import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import Pagination from '../../components/Pagination';
 import { Table, TableRow, TableCell } from '../../components/Table';
-import { Bell, Phone, Mail, MessageSquare, Search, BookOpen, Building, MapPin, Calendar, Layers, Trash2, Download, TrendingUp, Users, UserCheck, XCircle, Clock } from 'lucide-react';
+import { Bell, Phone, Mail, MessageSquare, Search, BookOpen, Building, MapPin, Calendar, Layers, Trash2, Download, TrendingUp, Users, UserCheck, XCircle, Clock, CalendarCheck, MessageCircle } from 'lucide-react';
 
 export default function AdminInquiries() {
   const [inquiries, setInquiries] = useState([]);
@@ -171,10 +171,18 @@ export default function AdminInquiries() {
 
       {/* Stats Dashboard */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
           <div className="card p-3.5 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><Users className="w-5 h-5 text-blue-600" /></div>
             <div><p className="text-[10px] font-bold text-slate-500 uppercase">Total Leads</p><p className="text-xl font-black text-slate-800">{stats.grandTotal}</p></div>
+          </div>
+          <div className="card p-3.5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center"><CalendarCheck className="w-5 h-5 text-cyan-600" /></div>
+            <div><p className="text-[10px] font-bold text-slate-500 uppercase">Today's Leads</p><p className="text-xl font-black text-cyan-600">{stats.todayLeads || 0}</p></div>
+          </div>
+          <div className="card p-3.5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center"><MessageCircle className="w-5 h-5 text-purple-600" /></div>
+            <div><p className="text-[10px] font-bold text-slate-500 uppercase">Today's Follow-ups</p><p className="text-xl font-black text-purple-600">{stats.todayFollowUps || 0}</p></div>
           </div>
           <div className="card p-3.5 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><Bell className="w-5 h-5 text-amber-600" /></div>
@@ -246,7 +254,7 @@ export default function AdminInquiries() {
           </div>
         ) : activeTab === 'student' ? (
           /* Student Enquiries Table */
-          <Table headers={['Candidate Info', 'Program of Interest', 'Date Submitted', 'Status', 'Actions']}>
+          <Table headers={['Candidate Info', 'Program of Interest', 'Latest Remark', 'Date Submitted', 'Status', 'Actions']}>
             {paginated.map(i => (
               <TableRow key={i._id}>
                 <TableCell>
@@ -265,6 +273,16 @@ export default function AdminInquiries() {
                 </TableCell>
                 <TableCell>
                   <span className="font-semibold text-slate-700 text-xs px-2.5 py-1 bg-slate-50 border border-slate-200/50 rounded-lg">{i.courseInterest || 'N/A'}</span>
+                </TableCell>
+                <TableCell>
+                  {i.followUpNotes && i.followUpNotes.length > 0 ? (
+                    <div className="max-w-[200px]">
+                      <p className="text-xs text-slate-700 italic line-clamp-2 leading-tight">"{i.followUpNotes[i.followUpNotes.length - 1].note}"</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{new Date(i.followUpNotes[i.followUpNotes.length - 1].date).toLocaleDateString()}</p>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-300">No remarks</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <span className="text-xs text-gray-400 flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(i.createdAt).toLocaleDateString()}</span>
@@ -311,7 +329,7 @@ export default function AdminInquiries() {
           </Table>
         ) : (
           /* Partner Enquiries Table */
-          <Table headers={['Institute & Location', 'Contact Person', 'Details', 'Status', 'Actions']}>
+          <Table headers={['Institute & Location', 'Contact Person', 'Details', 'Latest Remark', 'Status', 'Actions']}>
             {paginated.map(i => (
               <TableRow key={i._id}>
                 <TableCell>
@@ -338,6 +356,16 @@ export default function AdminInquiries() {
                       </p>
                     )}
                   </div>
+                </TableCell>
+                <TableCell>
+                  {i.followUpNotes && i.followUpNotes.length > 0 ? (
+                    <div className="max-w-[200px]">
+                      <p className="text-xs text-slate-700 italic line-clamp-2 leading-tight">"{i.followUpNotes[i.followUpNotes.length - 1].note}"</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{new Date(i.followUpNotes[i.followUpNotes.length - 1].date).toLocaleDateString()}</p>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-300">No remarks</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <span className={`badge ${
