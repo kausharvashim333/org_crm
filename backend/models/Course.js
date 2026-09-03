@@ -26,6 +26,7 @@ const courseSchema = new mongoose.Schema({
   }],
   isStandard: { type: Boolean, default: false },
   availableToPartners: { type: Boolean, default: true },
+  displayOrder: { type: Number, default: 0 },
   approvalStatus: {
     type: String,
     enum: ['approved', 'pending', 'rejected'],

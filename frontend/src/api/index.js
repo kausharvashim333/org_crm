@@ -52,6 +52,7 @@ export const updateCourse = (id, data) => API.put(`/courses/${id}`, data);
 export const updatePartnerCourseFee = (id, customStudentFee) => API.put(`/courses/${id}/partner-fee`, { customStudentFee });
 export const approveCourse = (id, status) => API.put(`/courses/${id}/approve`, { approvalStatus: status });
 export const deleteCourse = (id) => API.delete(`/courses/${id}`);
+export const reorderCourses = (orderedIds) => API.put('/courses/reorder', { orderedIds });
 export const uploadCourseVideo = (formData) => API.post('/courses/upload-video', formData);
 export const updateCourseChapters = (id, chapters) => API.put(`/courses/${id}/chapters`, { chapters });
 export const updateCourseAssessment = (id, assessment) => API.put(`/courses/${id}/assessment`, { assessment });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse, getAllCourseCategories, createCourseCategory, updateCourseCategory, deleteCourseCategory } from '../../api';
+import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse, reorderCourses, getAllCourseCategories, createCourseCategory, updateCourseCategory, deleteCourseCategory } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
@@ -208,6 +208,19 @@ export default function AdminCourses() {
     } catch { showError('Failed'); }
   };
 
+  const handleReorder = async (index, direction) => {
+    const visibleCourses = courses.filter(c => selectedCenterFilter === 'All' || c.centerType === selectedCenterFilter || c.centerType === 'All' || !c.centerType);
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= visibleCourses.length) return;
+    const reordered = [...visibleCourses];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    const orderedIds = reordered.map(c => c._id);
+    try {
+      await reorderCourses(orderedIds);
+      load();
+    } catch { showError('Failed to reorder'); }
+  };
+
   const handleCatSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -271,11 +284,29 @@ export default function AdminCourses() {
           <Table headers={['Course Details', 'Duration & Vertical', 'Pricing Breakdown (3-Tier)', 'Required Documents', 'Actions & Status']}>
             {courses
               .filter(c => selectedCenterFilter === 'All' || c.centerType === selectedCenterFilter || c.centerType === 'All' || !c.centerType)
-              .map(c => (
+              .map((c, idx) => (
               <TableRow key={c._id}>
                 {/* Column 1: Course Details */}
                 <TableCell>
                   <div className="flex items-start gap-3 py-1">
+                    <div className="flex flex-col gap-0.5 flex-shrink-0">
+                      <button
+                        onClick={() => handleReorder(idx, 'up')}
+                        disabled={idx === 0}
+                        className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 disabled:hover:text-slate-400 p-0.5"
+                        title="Move Up"
+                      >
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleReorder(idx, 'down')}
+                        disabled={idx === courses.filter(c2 => selectedCenterFilter === 'All' || c2.centerType === selectedCenterFilter || c2.centerType === 'All' || !c2.centerType).length - 1}
+                        className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 disabled:hover:text-slate-400 p-0.5"
+                        title="Move Down"
+                      >
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                     <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold flex-shrink-0 mt-0.5">
                       <BookOpen className="w-4 h-4" />
                     </div>

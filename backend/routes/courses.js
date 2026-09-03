@@ -26,11 +26,11 @@ router.get('/store', async (req, res) => {
       ];
     }
 
-    let sortObj = { enrolledCount: -1, createdAt: -1 };
-    if (sort === 'price-low') sortObj = { salePrice: 1, fee: 1 };
-    else if (sort === 'price-high') sortObj = { salePrice: -1, fee: -1 };
-    else if (sort === 'rating') sortObj = { rating: -1 };
-    else if (sort === 'newest') sortObj = { createdAt: -1 };
+    let sortObj = { displayOrder: 1, enrolledCount: -1, createdAt: -1 };
+    if (sort === 'price-low') sortObj = { displayOrder: 1, salePrice: 1, fee: 1 };
+    else if (sort === 'price-high') sortObj = { displayOrder: 1, salePrice: -1, fee: -1 };
+    else if (sort === 'rating') sortObj = { displayOrder: 1, rating: -1 };
+    else if (sort === 'newest') sortObj = { displayOrder: 1, createdAt: -1 };
 
     const courses = await Course.find(filter).sort(sortObj);
     res.json({ success: true, count: courses.length, courses });
@@ -87,7 +87,7 @@ router.get('/public', async (req, res) => {
       filter.centerType = { $in: [req.query.centerType, 'All', null, ''] };
     }
 
-    const courses = await Course.find(filter).sort({ isStandard: -1, createdAt: -1 });
+    const courses = await Course.find(filter).sort({ displayOrder: 1, isStandard: -1, createdAt: -1 });
     res.json({ success: true, count: courses.length, courses });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -119,7 +119,7 @@ router.get('/', protect, async (req, res) => {
       filter.centerType = { $in: [req.query.centerType, 'All'] };
     }
 
-    const rawCourses = await Course.find(filter).sort({ isStandard: -1, createdAt: -1 });
+    const rawCourses = await Course.find(filter).sort({ displayOrder: 1, isStandard: -1, createdAt: -1 });
     const targetPartnerId = req.user.role === 'partner' ? req.user.partnerId : (req.query.partnerId || null);
     const courses = rawCourses.map(c => {
       const cObj = c.toObject();
@@ -314,6 +314,23 @@ router.put('/:id/assessment', protect, partnerOrAdmin, async (req, res) => {
     course.assessment = assessment;
     await course.save();
     res.json({ success: true, course });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Reorder courses (bulk update displayOrder)
+router.put('/reorder', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { orderedIds } = req.body;
+    if (!Array.isArray(orderedIds)) {
+      return res.status(400).json({ success: false, message: 'orderedIds array required' });
+    }
+    const updates = orderedIds.map((id, index) =>
+      Course.findByIdAndUpdate(id, { displayOrder: index }, { new: true })
+    );
+    await Promise.all(updates);
+    res.json({ success: true, message: 'Course order updated' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
