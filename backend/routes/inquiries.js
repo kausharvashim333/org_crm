@@ -78,6 +78,37 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
   }
 });
 
+// Stats endpoint — must be before /:id routes
+router.get('/stats', protect, superAdminOnly, async (req, res) => {
+  try {
+    const stats = await Inquiry.aggregate([
+      {
+        $group: {
+          _id: { type: '$type', status: '$status' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const result = {
+      student: { new: 0, contacted: 0, admitted: 0, rejected: 0, approved: 0, total: 0 },
+      partner: { new: 0, contacted: 0, admitted: 0, rejected: 0, approved: 0, total: 0 },
+      grandTotal: 0,
+    };
+    stats.forEach(s => {
+      const t = s._id.type || 'student';
+      const st = s._id.status || 'new';
+      if (result[t]) {
+        result[t][st] = (result[t][st] || 0) + s.count;
+        result[t].total += s.count;
+      }
+      result.grandTotal += s.count;
+    });
+    res.json({ success: true, stats: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.put('/:id/status', protect, partnerOrAdmin, async (req, res) => {
   try {
     const { status } = req.body;
@@ -103,6 +134,35 @@ router.post('/:id/followup', protect, partnerOrAdmin, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     inquiry.followUpNotes.push({ note, addedBy: req.user._id });
+    await inquiry.save();
+    res.json({ success: true, inquiry });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Admin: delete inquiry
+router.delete('/:id', protect, partnerOrAdmin, async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findById(req.params.id);
+    if (!inquiry) return res.status(404).json({ success: false, message: 'Inquiry not found' });
+    if (req.user.role === 'partner' && (!req.user.partnerId || inquiry.partnerId?.toString() !== req.user.partnerId.toString())) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+    await Inquiry.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Inquiry deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Admin: assign inquiry to a staff member
+router.put('/:id/assign', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { assignedTo } = req.body;
+    const inquiry = await Inquiry.findById(req.params.id);
+    if (!inquiry) return res.status(404).json({ success: false, message: 'Inquiry not found' });
+    inquiry.assignedTo = assignedTo || null;
     await inquiry.save();
     res.json({ success: true, inquiry });
   } catch (error) {

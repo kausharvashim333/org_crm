@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getInquiries, updateInquiryStatus, addFollowUp } from '../../api';
+import { getInquiries, updateInquiryStatus, addFollowUp, deleteInquiry, getInquiryStats } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import Pagination from '../../components/Pagination';
 import { Table, TableRow, TableCell } from '../../components/Table';
-import { Bell, Phone, Mail, MessageSquare, Search, BookOpen, Building, MapPin, Calendar, Layers } from 'lucide-react';
+import { Bell, Phone, Mail, MessageSquare, Search, BookOpen, Building, MapPin, Calendar, Layers, Trash2, Download, TrendingUp, Users, UserCheck, XCircle, Clock } from 'lucide-react';
 
 export default function AdminInquiries() {
   const [inquiries, setInquiries] = useState([]);
@@ -15,6 +15,7 @@ export default function AdminInquiries() {
   const [showFollowUp, setShowFollowUp] = useState(null);
   const [followUpNote, setFollowUpNote] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [stats, setStats] = useState(null);
   const itemsPerPage = 10;
   const { showSuccess, showError } = useToast();
 
@@ -31,8 +32,13 @@ export default function AdminInquiries() {
       });
   };
 
+  const loadStats = () => {
+    getInquiryStats().then(res => setStats(res.data.stats)).catch(() => {});
+  };
+
   useEffect(() => {
     load();
+    loadStats();
   }, []);
 
   const handleStatus = async (id, status) => {
@@ -68,6 +74,41 @@ export default function AdminInquiries() {
     } catch (error) {
       showError('Failed to add note');
     }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Delete this inquiry permanently?')) return;
+    try {
+      await deleteInquiry(id);
+      showSuccess('Inquiry deleted');
+      load();
+      loadStats();
+    } catch (error) {
+      showError(error.response?.data?.message || 'Failed to delete');
+    }
+  };
+
+  const handleExport = () => {
+    const headers = activeTab === 'student'
+      ? ['Name', 'Phone', 'Email', 'Course Interest', 'Message', 'Status', 'Date']
+      : ['Institute Name', 'Contact Name', 'Phone', 'Email', 'Location', 'Space Area', 'Message', 'Status', 'Date'];
+
+    const rows = filtered.map(item => {
+      const date = new Date(item.createdAt).toLocaleDateString();
+      if (activeTab === 'student') {
+        return [item.name, item.phone, item.email || '', item.courseInterest || '', (item.message || '').replace(/"/g, '""'), item.status, date];
+      }
+      return [item.instituteName || '', item.name, item.phone, item.email || '', item.location || '', item.spaceArea || '', (item.message || '').replace(/"/g, '""'), item.status, date];
+    });
+
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeTab}-leads-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const filtered = inquiries.filter(item => {
@@ -128,6 +169,32 @@ export default function AdminInquiries() {
         </div>
       </div>
 
+      {/* Stats Dashboard */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="card p-3.5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><Users className="w-5 h-5 text-blue-600" /></div>
+            <div><p className="text-[10px] font-bold text-slate-500 uppercase">Total Leads</p><p className="text-xl font-black text-slate-800">{stats.grandTotal}</p></div>
+          </div>
+          <div className="card p-3.5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><Bell className="w-5 h-5 text-amber-600" /></div>
+            <div><p className="text-[10px] font-bold text-slate-500 uppercase">New</p><p className="text-xl font-black text-amber-600">{(stats.student?.new || 0) + (stats.partner?.new || 0)}</p></div>
+          </div>
+          <div className="card p-3.5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center"><Clock className="w-5 h-5 text-indigo-600" /></div>
+            <div><p className="text-[10px] font-bold text-slate-500 uppercase">Contacted</p><p className="text-xl font-black text-indigo-600">{(stats.student?.contacted || 0) + (stats.partner?.contacted || 0)}</p></div>
+          </div>
+          <div className="card p-3.5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><UserCheck className="w-5 h-5 text-emerald-600" /></div>
+            <div><p className="text-[10px] font-bold text-slate-500 uppercase">Converted</p><p className="text-xl font-black text-emerald-600">{(stats.student?.admitted || 0) + (stats.partner?.approved || 0)}</p></div>
+          </div>
+          <div className="card p-3.5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center"><XCircle className="w-5 h-5 text-red-600" /></div>
+            <div><p className="text-[10px] font-bold text-slate-500 uppercase">Rejected</p><p className="text-xl font-black text-red-600">{(stats.student?.rejected || 0) + (stats.partner?.rejected || 0)}</p></div>
+          </div>
+        </div>
+      )}
+
       {/* Filter and Search Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="relative md:col-span-2">
@@ -164,6 +231,9 @@ export default function AdminInquiries() {
             </>
           )}
         </select>
+        <button onClick={handleExport} disabled={filtered.length === 0} className="btn-secondary flex items-center gap-2 text-xs py-2.5 disabled:opacity-50">
+          <Download className="w-4 h-4" /> Export CSV
+        </button>
       </div>
 
       <div className="card">
@@ -227,6 +297,13 @@ export default function AdminInquiries() {
                     >
                       <MessageSquare className="w-4 h-4" />
                     </button>
+                    <button
+                      onClick={() => handleDelete(i._id)}
+                      className="p-1 text-slate-400 hover:text-red-600 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -289,6 +366,13 @@ export default function AdminInquiries() {
                       title="Follow-up notes"
                     >
                       <MessageSquare className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(i._id)}
+                      className="p-1 text-slate-400 hover:text-red-600 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </TableCell>

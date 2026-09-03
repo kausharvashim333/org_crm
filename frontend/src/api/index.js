@@ -178,6 +178,9 @@ export const submitPartnerInquiry = (data) => API.post('/inquiries/public/partne
 export const getInquiries = (params) => API.get('/inquiries', { params });
 export const updateInquiryStatus = (id, status) => API.put(`/inquiries/${id}/status`, { status });
 export const addFollowUp = (id, note) => API.post(`/inquiries/${id}/followup`, { note });
+export const deleteInquiry = (id) => API.delete(`/inquiries/${id}`);
+export const assignInquiry = (id, userId) => API.put(`/inquiries/${id}/assign`, { assignedTo: userId });
+export const getInquiryStats = () => API.get('/inquiries/stats');
 
 export const getMaterials = (params) => API.get('/materials', { params });
 export const uploadMaterial = (formData) => API.post('/materials/upload', formData);

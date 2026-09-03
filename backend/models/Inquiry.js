@@ -16,6 +16,7 @@ const inquirySchema = new mongoose.Schema({
     enum: ['new', 'contacted', 'admitted', 'rejected', 'approved'],
     default: 'new',
   },
+  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   followUpNotes: [{
     note: { type: String },
     date: { type: Date, default: Date.now },
