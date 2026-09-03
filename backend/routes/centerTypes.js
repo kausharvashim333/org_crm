@@ -52,12 +52,14 @@ router.get('/all', protect, superAdminOnly, async (req, res) => {
 router.post('/', protect, superAdminOnly, async (req, res) => {
   try {
     const { name, description, order } = req.body;
-    const existing = await CenterType.findOne({ name: name.trim() });
+    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const existing = await CenterType.findOne({ $or: [{ name: name.trim() }, { slug }] });
     if (existing) {
       return res.status(400).json({ success: false, message: 'Center type with this name already exists' });
     }
     const type = await CenterType.create({
       name: name.trim(),
+      slug,
       description: description || '',
       order: order || 0,
     });

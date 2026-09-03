@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse, reorderCourses, getAllCourseCategories, createCourseCategory, updateCourseCategory, deleteCourseCategory, uploadOrgImage, getAllCenterTypes, createCenterType, renameCenterType, deleteCenterType } from '../../api';
+import { getCourses, createStandardCourse, updateCourse, approveCourse, deleteCourse, reorderCourses, getAllCourseCategories, createCourseCategory, updateCourseCategory, deleteCourseCategory, uploadOrgImage, getCenterTypes, createCenterType, renameCenterType, deleteCenterType } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
@@ -75,7 +75,7 @@ export default function AdminCourses() {
   };
 
   const loadCenterTypes = () => {
-    getAllCenterTypes().then(res => { setCenterTypes(res.data.centerTypes || []); }).catch(() => {});
+    getCenterTypes().then(res => { setCenterTypes(res.data.centerTypes || []); }).catch(() => {});
   };
 
   useEffect(() => { load(); loadCategories(); loadCenterTypes(); }, []);
