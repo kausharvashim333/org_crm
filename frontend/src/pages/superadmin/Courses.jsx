@@ -513,293 +513,148 @@ export default function AdminCourses() {
         onSaved={load}
       />
 
-      <Modal isOpen={showAdd} onClose={() => { setShowAdd(false); setEditCourse(null); setActiveTab('basic'); }} title={editCourse ? 'Edit Course' : 'Add Standard Course'} size="lg">
+      <Modal isOpen={showAdd} onClose={() => { setShowAdd(false); setEditCourse(null); }} title={editCourse ? 'Edit Course & Required Documents' : 'Add Standard Course'} size="lg">
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Tab Bar */}
-          <div className="flex gap-1 border-b border-slate-200 pb-px">
-            {[
-              { id: 'basic', label: 'Basic Info', icon: BookOpen },
-              { id: 'pricing', label: 'Pricing', icon: Tag },
-              { id: 'content', label: 'Content', icon: FileText },
-              { id: 'documents', label: 'Documents', icon: FileText },
-              { id: 'access', label: 'Access', icon: Settings2 },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-t-lg transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600'
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                <tab.icon className="w-3.5 h-3.5" /> {tab.label}
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className="block text-sm font-medium mb-1">Course Name *</label><input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="input-field" placeholder="e.g. DCA - Diploma in Computer Applications" /></div>
+            <div><label className="block text-sm font-medium mb-1">Course Code</label><input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} className="input-field" placeholder="e.g. DCA" /></div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-slate-700">Center Type / Vertical *</label>
+              <select value={formData.centerType || 'All'} onChange={(e) => setFormData({ ...formData, centerType: e.target.value })} className="input-field bg-white font-semibold text-indigo-900 border-indigo-200">
+                {CENTER_TYPES.map(ct => (<option key={ct} value={ct}>{ct === 'All' ? '🌐 All Center Types (Global)' : ct}</option>))}
+              </select>
+            </div>
+            <div><label className="block text-sm font-medium mb-1">Category</label>
+              <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="input-field bg-white font-semibold text-indigo-900 border-indigo-200">
+                <option value="">— Select Category —</option>
+                {categories.map(cat => (<option key={cat._id} value={cat.name}>{cat.name}</option>))}
+              </select>
+            </div>
+            <div><label className="block text-sm font-medium mb-1">Duration *</label><input type="text" required value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: e.target.value })} className="input-field" placeholder="e.g. 6 Months" /></div>
+            <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="text" inputMode="numeric" value={formData.durationMonths} onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value })} className="input-field" /></div>
           </div>
 
-          {/* Tab: Basic Info */}
-          {activeTab === 'basic' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1">Course Name *</label><input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="input-field" placeholder="e.g. DCA - Diploma in Computer Applications" /></div>
-                <div><label className="block text-sm font-medium mb-1">Course Code</label><input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} className="input-field" placeholder="e.g. DCA" /></div>
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-slate-700">Center Type / Vertical *</label>
-                  <select value={formData.centerType || 'All'} onChange={(e) => setFormData({ ...formData, centerType: e.target.value })} className="input-field bg-white font-semibold text-indigo-900 border-indigo-200">
-                    {CENTER_TYPES.map(ct => (<option key={ct} value={ct}>{ct === 'All' ? '🌐 All Center Types (Global)' : ct}</option>))}
-                  </select>
-                </div>
-                <div><label className="block text-sm font-medium mb-1">Category</label>
-                  <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="input-field bg-white font-semibold text-indigo-900 border-indigo-200">
-                    <option value="">— Select Category —</option>
-                    {categories.map(cat => (<option key={cat._id} value={cat.name}>{cat.name}</option>))}
-                  </select>
-                </div>
-                <div><label className="block text-sm font-medium mb-1">Duration *</label><input type="text" required value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: e.target.value })} className="input-field" placeholder="e.g. 6 Months" /></div>
-                <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="text" inputMode="numeric" value={formData.durationMonths} onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value })} className="input-field" placeholder="e.g. 6" /></div>
-                <div><label className="block text-sm font-medium mb-1">Total Hours</label><input type="text" inputMode="numeric" value={formData.totalHours} onChange={(e) => setFormData({ ...formData, totalHours: e.target.value })} className="input-field" placeholder="e.g. 120" /></div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Level</label>
-                  <select value={formData.level} onChange={(e) => setFormData({ ...formData, level: e.target.value })} className="input-field bg-white">
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
-                    <option value="Beginner to Advanced">Beginner to Advanced</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Language</label>
-                  <select value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} className="input-field bg-white">
-                    <option value="Hindi / Hinglish">Hindi / Hinglish</option>
-                    <option value="English">English</option>
-                    <option value="Bilingual (Hindi + English)">Bilingual (Hindi + English)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Badge</label>
-                  <select value={formData.badge} onChange={(e) => setFormData({ ...formData, badge: e.target.value })} className="input-field bg-white">
-                    <option value="Govt Certified">Govt Certified</option>
-                    <option value="Bestseller">Bestseller</option>
-                    <option value="Hot & New">Hot & New</option>
-                    <option value="Highest Rated">Highest Rated</option>
-                    <option value="">No Badge</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Course Image Upload */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <label className="block text-sm font-medium mb-2">Course Thumbnail Image</label>
-                <div className="flex items-center gap-4">
-                  {formData.image ? (
-                    <img src={formData.image} alt="Course" className="w-24 h-24 rounded-xl object-cover border-2 border-slate-200" onError={(e) => { e.target.style.display = 'none'; }} />
-                  ) : (
-                    <div className="w-24 h-24 rounded-xl bg-white border-2 border-dashed border-slate-300 flex items-center justify-center">
-                      <ImageIcon className="w-8 h-8 text-slate-300" />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <label className="btn-secondary flex items-center gap-2 cursor-pointer w-fit">
-                      <Upload className="w-4 h-4" /> {uploadingImage ? 'Uploading...' : 'Upload Image'}
-                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
-                    </label>
-                    {formData.image && (
-                      <button type="button" onClick={() => setFormData({ ...formData, image: '' })} className="text-red-600 text-xs ml-3">Remove</button>
-                    )}
-                    <p className="text-[10px] text-slate-500 mt-1.5">Recommended: 400x300px, shown on public course cards</p>
-                  </div>
-                </div>
-              </div>
+          {/* Fee Display Type + Fee Input */}
+          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+            <div>
+              <label className="block text-[11px] font-black text-slate-700 mb-1">Fee Display Type</label>
+              <select value={formData.feeDisplayType} onChange={(e) => setFormData({ ...formData, feeDisplayType: e.target.value })} className="input-field bg-white font-bold text-slate-800 border-slate-300 text-xs">
+                <option value="full">Full Fee Only</option>
+                <option value="monthly">Monthly Fee Only</option>
+                <option value="both">Both (Monthly + Full)</option>
+              </select>
+              <span className="text-[9px] text-slate-500 block mt-0.5">How fee appears on public course page</span>
             </div>
-          )}
-
-          {/* Tab: Pricing */}
-          {activeTab === 'pricing' && (
-            <div className="space-y-4">
-              {/* Fee Display Type + Monthly Fee */}
-              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                <div>
-                  <label className="block text-[11px] font-black text-slate-700 mb-1">Fee Display Type</label>
-                  <select value={formData.feeDisplayType} onChange={(e) => setFormData({ ...formData, feeDisplayType: e.target.value })} className="input-field bg-white font-bold text-slate-800 border-slate-300 text-xs">
-                    <option value="full">Full Fee Only</option>
-                    <option value="monthly">Monthly Fee Only</option>
-                    <option value="both">Both (Monthly + Full)</option>
-                  </select>
-                  <span className="text-[9px] text-slate-500 block mt-0.5">How fee appears on public course page</span>
-                </div>
-                <div>
+            <div>
+              {formData.feeDisplayType === 'full' ? (
+                <>
+                  <label className="block text-[11px] font-black text-slate-700 mb-1">Full Fee (₹)</label>
+                  <input type="text" inputMode="numeric" value={formData.studentFee} onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 3500" />
+                  <span className="text-[9px] text-slate-500 block mt-0.5">Total course fee shown to students</span>
+                </>
+              ) : formData.feeDisplayType === 'monthly' ? (
+                <>
                   <label className="block text-[11px] font-black text-slate-700 mb-1">Monthly Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.monthlyFee} onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 1500" disabled={formData.feeDisplayType === 'full'} />
+                  <input type="text" inputMode="numeric" value={formData.monthlyFee} onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 1500" />
                   <span className="text-[9px] text-slate-500 block mt-0.5">Per month EMI / installment</span>
-                </div>
-              </div>
-
-              {/* 3-Tier Fee Section */}
-              <div className="grid grid-cols-3 gap-3 bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-100">
-                <div>
-                  <label className="block text-[11px] font-black text-indigo-900 mb-1 flex items-center gap-1"><span>🏛️</span> Org Wholesale Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.organizationFee} onChange={(e) => setFormData({ ...formData, organizationFee: e.target.value })} className="input-field bg-white font-extrabold text-indigo-900 border-indigo-200 text-xs" placeholder="e.g. 500" />
-                  <span className="text-[9px] text-indigo-600 block mt-0.5">Franchise Royalty</span>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-black text-blue-900 mb-1 flex items-center gap-1"><span>📜</span> Cert-Only Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.certificateFee} onChange={(e) => setFormData({ ...formData, certificateFee: e.target.value })} className="input-field bg-white font-extrabold text-blue-900 border-blue-200 text-xs" placeholder="e.g. 250" />
-                  <span className="text-[9px] text-blue-600 block mt-0.5">Independent Cert Charge</span>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-black text-slate-900 mb-1 flex items-center gap-1"><span>🎓</span> Student Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.studentFee} onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })} className="input-field bg-white font-extrabold text-slate-900 border-slate-300 text-xs" placeholder="e.g. 3500" />
-                  <span className="text-[9px] text-slate-500 block mt-0.5">Student Tuition Charge</span>
-                </div>
-              </div>
-
-              {/* Registration + Sale Pricing */}
-              <div className="grid grid-cols-3 gap-3 bg-emerald-50/60 p-3.5 rounded-2xl border border-emerald-100">
-                <div>
-                  <label className="block text-[11px] font-black text-slate-700 mb-1">Registration Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.registrationFee} onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 100" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-black text-slate-700 mb-1">Original Price / MRP (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.originalPrice} onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 5000" />
-                  <span className="text-[9px] text-slate-500 block mt-0.5">Show as strikethrough</span>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-black text-emerald-700 mb-1">Sale Price (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.salePrice} onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })} className="input-field bg-white font-extrabold text-emerald-700 border-emerald-200 text-xs" placeholder="e.g. 3500" />
-                  <span className="text-[9px] text-emerald-600 block mt-0.5">Discounted price shown</span>
-                </div>
-              </div>
-              <p className="text-[10px] text-slate-500">If Sale Price is set, it overrides Student Fee on public pages. Original Price shows as strikethrough for discount %.</p>
-            </div>
-          )}
-
-          {/* Tab: Content */}
-          {activeTab === 'content' && (
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-sm font-medium">Course Description</label>
-                  <button type="button" onClick={() => setShowAIModal(true)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg transition-all">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Write with AI
-                  </button>
-                </div>
-                <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="input-field text-xs leading-relaxed" placeholder="Detailed course overview, learning outcomes, and career opportunities..." />
-              </div>
-
-              {/* Highlights */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <label className="block text-sm font-medium mb-2">Course Highlights</label>
-                <p className="text-[10px] text-slate-500 mb-3">Bullet points shown on course card & detail page (e.g. "QR-Verified Certificate", "Lifetime LMS Access")</p>
-                <div className="space-y-2 mb-3">
-                  {formData.highlights.map((h, idx) => (
-                    <div key={idx} className="flex items-center gap-2 bg-white border rounded-lg p-2">
-                      <Star className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                      <span className="text-xs flex-1">{h}</span>
-                      <button type="button" onClick={() => removeHighlight(idx)} className="text-slate-400 hover:text-red-600 p-0.5"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  ))}
-                  {formData.highlights.length === 0 && <p className="text-[10px] text-slate-400 text-center py-2">No highlights added yet</p>}
-                </div>
-                <div className="flex gap-2">
-                  <input type="text" value={newHighlight} onChange={(e) => setNewHighlight(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addHighlight(); } }} placeholder="e.g. QR-Verified Certificate" className="input-field flex-1 text-xs" />
-                  <button type="button" onClick={addHighlight} className="btn-secondary text-xs px-3 py-2 font-semibold text-indigo-600 border-indigo-200">+ Add</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tab: Documents */}
-          {activeTab === 'documents' && (
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-              <label className="block text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center justify-between">
-                <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-indigo-600" /> Required Student Documents</span>
-                <span className="text-[10px] text-indigo-600 font-normal">Toggle Compulsory Flag</span>
-              </label>
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {formData.requiredDocumentsList.map((doc, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 bg-white border rounded-xl text-xs gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-col gap-0.5">
-                        <button type="button" disabled={idx === 0} onClick={() => moveDocumentItem(idx, 'up')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
-                        <button type="button" disabled={idx === formData.requiredDocumentsList.length - 1} onClick={() => moveDocumentItem(idx, 'down')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
-                      </div>
-                      <span className="font-semibold text-slate-800">{doc.docName}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <select value={doc.docType || 'document'} onChange={(e) => updateDocumentType(idx, e.target.value)} className="input-field text-[11px] py-1 px-2 font-semibold border-indigo-200 bg-slate-50 hover:bg-white text-indigo-900">
-                        <option value="document">📄 PDF / Doc</option>
-                        <option value="image">📷 Image</option>
-                        <option value="id_proof">🪪 ID Proof</option>
-                        <option value="any">📎 Any Format</option>
-                      </select>
-                      <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 font-medium text-[11px]">
-                        <input type="checkbox" checked={doc.isCompulsory} onChange={() => toggleDocumentCompulsory(idx)} className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" />
-                        {doc.isCompulsory ? <span className="badge badge-danger text-[10px]">Compulsory</span> : <span className="badge badge-info text-[10px]">Optional</span>}
-                      </label>
-                      <button type="button" onClick={() => removeDocumentItem(idx)} className="text-slate-400 hover:text-red-600 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 pt-2 border-t">
-                <input type="text" value={newDocName} onChange={(e) => setNewDocName(e.target.value)} placeholder="e.g. 12th Marksheet, Income Certificate" className="input-field flex-1 text-xs py-1.5" />
-                <select value={newDocType} onChange={(e) => setNewDocType(e.target.value)} className="input-field text-xs py-1.5 w-36 font-semibold">
-                  <option value="document">📄 PDF / Doc</option>
-                  <option value="image">📷 Image</option>
-                  <option value="id_proof">🪪 ID Proof</option>
-                  <option value="any">📎 Any Format</option>
-                </select>
-                <label className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 cursor-pointer">
-                  <input type="checkbox" checked={newDocCompulsory} onChange={(e) => setNewDocCompulsory(e.target.checked)} className="rounded text-indigo-600 w-3.5 h-3.5" /> Compulsory
-                </label>
-                <button type="button" onClick={addDocumentItem} className="btn-secondary text-xs px-3 py-2 font-semibold text-indigo-600 border-indigo-200">+ Add</button>
-              </div>
-            </div>
-          )}
-
-          {/* Tab: Access Control */}
-          {activeTab === 'access' && (
-            <div className="space-y-4">
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={formData.availableToPartners} onChange={(e) => setFormData({ ...formData, availableToPartners: e.target.checked })} className="rounded text-indigo-600 focus:ring-indigo-500 w-5 h-5" />
-                  <div>
-                    <span className="text-sm font-bold text-slate-800">Available to Partners</span>
-                    <p className="text-xs text-slate-500 mt-0.5">{formData.availableToPartners ? 'Partners can see this course and enroll students in it.' : 'This course is hidden from all partners. Only superadmin can manage enrollments.'}</p>
-                  </div>
-                </label>
-              </div>
-              <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                <p className="text-xs text-indigo-700 font-semibold">Course Visibility Summary</p>
-                <ul className="text-[11px] text-slate-600 mt-2 space-y-1">
-                  <li>• Public courses page: {formData.centerType === 'All' ? 'All center types' : formData.centerType}</li>
-                  <li>• Partner access: {formData.availableToPartners ? '✓ Enabled' : '✗ Disabled'}</li>
-                  <li>• Fee display: {formData.feeDisplayType === 'full' ? 'Full fee only' : formData.feeDisplayType === 'monthly' ? 'Monthly fee only' : 'Both monthly + full'}</li>
-                  <li>• Badge: {formData.badge || 'None'}</li>
-                </ul>
-              </div>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <div className="flex items-center justify-between pt-2 border-t">
-            <button type="button" onClick={() => { setShowAdd(false); setEditCourse(null); }} className="btn-secondary text-xs py-2.5 px-4">Cancel</button>
-            <div className="flex gap-2">
-              {activeTab !== 'access' && (
-                <button type="button" onClick={() => {
-                  const tabs = ['basic', 'pricing', 'content', 'documents', 'access'];
-                  const next = tabs[tabs.indexOf(activeTab) + 1];
-                  if (next) setActiveTab(next);
-                }} className="btn-secondary text-xs py-2.5 px-4">Next →</button>
+                </>
+              ) : (
+                <>
+                  <label className="block text-[11px] font-black text-slate-700 mb-1">Monthly Fee (₹)</label>
+                  <input type="text" inputMode="numeric" value={formData.monthlyFee} onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 1500" />
+                  <span className="text-[9px] text-slate-500 block mt-0.5">Full fee set below in Student Fee</span>
+                </>
               )}
-              <button type="submit" className="btn-primary py-2.5 px-6 text-sm font-bold">
-                {editCourse ? 'Update Course' : 'Create Course'}
-              </button>
+            </div>
+            <div className="col-span-2 flex items-center gap-2 pt-2 border-t border-slate-200">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <input type="checkbox" checked={formData.availableToPartners} onChange={(e) => setFormData({ ...formData, availableToPartners: e.target.checked })} className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" />
+                Available to Partners
+              </label>
+              <span className="text-[10px] text-slate-500">({formData.availableToPartners ? 'Partners can see & enroll students' : 'Hidden from all partners'})</span>
             </div>
           </div>
+
+          {/* 3-Tier Fee Section */}
+          <div className="grid grid-cols-3 gap-3 bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-100">
+            <div>
+              <label className="block text-[11px] font-black text-indigo-900 mb-1 flex items-center gap-1"><span>🏛️</span> Org Wholesale Fee (₹)</label>
+              <input type="text" inputMode="numeric" value={formData.organizationFee} onChange={(e) => setFormData({ ...formData, organizationFee: e.target.value })} className="input-field bg-white font-extrabold text-indigo-900 border-indigo-200 text-xs" placeholder="e.g. 500" />
+              <span className="text-[9px] text-indigo-600 block mt-0.5">Franchise Royalty</span>
+            </div>
+            <div>
+              <label className="block text-[11px] font-black text-blue-900 mb-1 flex items-center gap-1"><span>📜</span> Cert-Only Fee (₹)</label>
+              <input type="text" inputMode="numeric" value={formData.certificateFee} onChange={(e) => setFormData({ ...formData, certificateFee: e.target.value })} className="input-field bg-white font-extrabold text-blue-900 border-blue-200 text-xs" placeholder="e.g. 250" />
+              <span className="text-[9px] text-blue-600 block mt-0.5">Independent Cert Charge</span>
+            </div>
+            <div>
+              <label className="block text-[11px] font-black text-slate-900 mb-1 flex items-center gap-1"><span>🎓</span> Student Fee (₹)</label>
+              <input type="text" inputMode="numeric" value={formData.studentFee} onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })} className="input-field bg-white font-extrabold text-slate-900 border-slate-300 text-xs" placeholder="e.g. 3500" />
+              <span className="text-[9px] text-slate-500 block mt-0.5">Student Tuition Charge</span>
+            </div>
+          </div>
+
+          {/* Required Documents */}
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+            <label className="block text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center justify-between">
+              <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-indigo-600" /> Required Student Documents Config</span>
+              <span className="text-[10px] text-indigo-600 font-normal">Toggle Compulsory Flag</span>
+            </label>
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              {formData.requiredDocumentsList.map((doc, idx) => (
+                <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 bg-white border rounded-xl text-xs gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-0.5">
+                      <button type="button" disabled={idx === 0} onClick={() => moveDocumentItem(idx, 'up')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
+                      <button type="button" disabled={idx === formData.requiredDocumentsList.length - 1} onClick={() => moveDocumentItem(idx, 'down')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
+                    </div>
+                    <span className="font-semibold text-slate-800">{doc.docName}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <select value={doc.docType || 'document'} onChange={(e) => updateDocumentType(idx, e.target.value)} className="input-field text-[11px] py-1 px-2 font-semibold border-indigo-200 bg-slate-50 hover:bg-white text-indigo-900">
+                      <option value="document">📄 PDF / Doc</option>
+                      <option value="image">📷 Image</option>
+                      <option value="id_proof">🪪 ID Proof</option>
+                      <option value="any">📎 Any Format</option>
+                    </select>
+                    <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 font-medium text-[11px]">
+                      <input type="checkbox" checked={doc.isCompulsory} onChange={() => toggleDocumentCompulsory(idx)} className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" />
+                      {doc.isCompulsory ? <span className="badge badge-danger text-[10px]">Compulsory</span> : <span className="badge badge-info text-[10px]">Optional</span>}
+                    </label>
+                    <button type="button" onClick={() => removeDocumentItem(idx)} className="text-slate-400 hover:text-red-600 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 pt-2 border-t">
+              <input type="text" value={newDocName} onChange={(e) => setNewDocName(e.target.value)} placeholder="e.g. 12th Marksheet, Income Certificate" className="input-field flex-1 text-xs py-1.5" />
+              <select value={newDocType} onChange={(e) => setNewDocType(e.target.value)} className="input-field text-xs py-1.5 w-36 font-semibold">
+                <option value="document">📄 PDF / Doc</option>
+                <option value="image">📷 Image</option>
+                <option value="id_proof">🪪 ID Proof</option>
+                <option value="any">📎 Any Format</option>
+              </select>
+              <label className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                <input type="checkbox" checked={newDocCompulsory} onChange={(e) => setNewDocCompulsory(e.target.checked)} className="rounded text-indigo-600 w-3.5 h-3.5" /> Compulsory
+              </label>
+              <button type="button" onClick={addDocumentItem} className="btn-secondary text-xs px-3 py-2 font-semibold text-indigo-600 border-indigo-200">+ Add</button>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium">Course Description</label>
+              <button type="button" onClick={() => setShowAIModal(true)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg transition-all">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Write with AI
+              </button>
+            </div>
+            <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="input-field text-xs leading-relaxed" placeholder="Detailed course overview, learning outcomes, and career opportunities..." />
+          </div>
+
+          <button type="submit" className="btn-primary w-full py-3 text-sm font-bold">
+            {editCourse ? 'Update Course Details' : 'Create Standard Course'}
+          </button>
         </form>
       </Modal>
 
