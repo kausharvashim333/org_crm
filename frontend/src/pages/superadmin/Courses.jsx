@@ -23,15 +23,15 @@ const initialCourseState = {
   code: '',
   description: '',
   duration: '',
-  durationMonths: 0,
-  fee: 0,
-  monthlyFee: 0,
+  durationMonths: '',
+  fee: '',
+  monthlyFee: '',
   feeDisplayType: 'full',
   availableToPartners: true,
-  organizationFee: 0,
-  studentFee: 0,
-  certificateFee: 0,
-  registrationFee: 0,
+  organizationFee: '',
+  studentFee: '',
+  certificateFee: '',
+  registrationFee: '',
   category: '',
   centerType: 'All',
   requiredDocumentsList: [
@@ -97,15 +97,15 @@ export default function AdminCourses() {
       code: c.code || '',
       description: c.description || '',
       duration: c.duration || '',
-      durationMonths: c.durationMonths || 0,
-      fee: c.studentFee || c.fee || 0,
-      monthlyFee: c.monthlyFee || 0,
+      durationMonths: c.durationMonths ? String(c.durationMonths) : '',
+      fee: c.studentFee || c.fee ? String(c.studentFee || c.fee) : '',
+      monthlyFee: c.monthlyFee ? String(c.monthlyFee) : '',
       feeDisplayType: c.feeDisplayType || 'full',
       availableToPartners: c.availableToPartners !== false,
-      organizationFee: c.organizationFee || 0,
-      studentFee: c.studentFee || c.fee || 0,
-      certificateFee: c.certificateFee || 0,
-      registrationFee: c.registrationFee || 0,
+      organizationFee: c.organizationFee ? String(c.organizationFee) : '',
+      studentFee: c.studentFee || c.fee ? String(c.studentFee || c.fee) : '',
+      certificateFee: c.certificateFee ? String(c.certificateFee) : '',
+      registrationFee: c.registrationFee ? String(c.registrationFee) : '',
       category: c.category || '',
       centerType: c.centerType || 'All',
       requiredDocumentsList: docs,
@@ -169,6 +169,13 @@ export default function AdminCourses() {
     try {
       const payload = {
         ...formData,
+        durationMonths: +formData.durationMonths || 0,
+        fee: +formData.fee || 0,
+        monthlyFee: +formData.monthlyFee || 0,
+        organizationFee: +formData.organizationFee || 0,
+        studentFee: +formData.studentFee || 0,
+        certificateFee: +formData.certificateFee || 0,
+        registrationFee: +formData.registrationFee || 0,
         requiredDocuments: formData.requiredDocumentsList,
       };
       delete payload.requiredDocumentsList;
@@ -479,8 +486,8 @@ export default function AdminCourses() {
               </select>
             </div>
             <div><label className="block text-sm font-medium mb-1">Duration *</label><input type="text" required value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: e.target.value })} className="input-field" placeholder="e.g. 6 Months" /></div>
-            <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="number" value={formData.durationMonths || ''} onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value === '' ? 0 : +e.target.value })} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Registration Fee (₹)</label><input type="number" value={formData.registrationFee || ''} onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value === '' ? 0 : +e.target.value })} className="input-field" /></div>
+            <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="text" inputMode="numeric" value={formData.durationMonths} onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value })} className="input-field" /></div>
+            <div><label className="block text-sm font-medium mb-1">Registration Fee (₹)</label><input type="text" inputMode="numeric" value={formData.registrationFee} onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value })} className="input-field" /></div>
             <div><label className="block text-sm font-medium mb-1">Category</label>
               <select
                 value={formData.category}
@@ -512,9 +519,10 @@ export default function AdminCourses() {
               <div>
                 <label className="block text-[11px] font-black text-slate-700 mb-1">Monthly Fee (₹)</label>
                 <input
-                  type="number"
-                  value={formData.monthlyFee || ''}
-                  onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value === '' ? 0 : +e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formData.monthlyFee}
+                  onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })}
                   className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs"
                   placeholder="e.g. 1500"
                   disabled={formData.feeDisplayType === 'full'}
@@ -542,9 +550,10 @@ export default function AdminCourses() {
                   <span>🏛️</span> Org Wholesale Fee (₹)
                 </label>
                 <input
-                  type="number"
-                  value={formData.organizationFee || ''}
-                  onChange={(e) => setFormData({ ...formData, organizationFee: e.target.value === '' ? 0 : +e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formData.organizationFee}
+                  onChange={(e) => setFormData({ ...formData, organizationFee: e.target.value })}
                   className="input-field bg-white font-extrabold text-indigo-900 border-indigo-200 text-xs"
                   placeholder="e.g. 500"
                 />
@@ -555,9 +564,10 @@ export default function AdminCourses() {
                   <span>📜</span> Cert-Only Fee (₹)
                 </label>
                 <input
-                  type="number"
-                  value={formData.certificateFee || ''}
-                  onChange={(e) => setFormData({ ...formData, certificateFee: e.target.value === '' ? 0 : +e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formData.certificateFee}
+                  onChange={(e) => setFormData({ ...formData, certificateFee: e.target.value })}
                   className="input-field bg-white font-extrabold text-blue-900 border-blue-200 text-xs"
                   placeholder="e.g. 250"
                 />
@@ -568,9 +578,10 @@ export default function AdminCourses() {
                   <span>🎓</span> Student Fee (₹)
                 </label>
                 <input
-                  type="number"
-                  value={formData.studentFee || ''}
-                  onChange={(e) => setFormData({ ...formData, studentFee: e.target.value === '' ? 0 : +e.target.value, fee: e.target.value === '' ? 0 : +e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formData.studentFee}
+                  onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })}
                   className="input-field bg-white font-extrabold text-slate-900 border-slate-300 text-xs"
                   placeholder="e.g. 3500"
                 />
