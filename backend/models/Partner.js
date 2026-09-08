@@ -63,6 +63,7 @@ const partnerSchema = new mongoose.Schema({
   showInAdmissionForm: { type: Boolean, default: true },
   upiId: { type: String, default: '' },
   paymentQrImage: { type: String, default: '' },
+  referredByPartnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Partner' },
   proposalDetails: { type: mongoose.Schema.Types.Mixed },
   paymentInfo: {
     paymentMode: { type: String, enum: ['online_razorpay', 'offline_pay_later', 'bank_transfer'], default: 'offline_pay_later' },

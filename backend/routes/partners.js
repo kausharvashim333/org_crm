@@ -610,7 +610,8 @@ router.post('/public/apply', async (req, res) => {
       tradingTerminalsCount, seatingCapacity, facultyExperience,
       govtRegNo, pastPlacementDetails, biometricSystem,
       partnershipType, partnershipPlan, interestedVerticals, currentBusinessType, experienceInEducation, hearAboutUs,
-      paymentMode, paidAmount, razorpayOrderId, razorpayPaymentId, razorpaySignature
+      paymentMode, paidAmount, razorpayOrderId, razorpayPaymentId, razorpaySignature,
+      referredByPartnerId
     } = req.body;
 
     if (!instituteName || !name || !email || !phone || !address || !city || !state) {
@@ -702,6 +703,7 @@ router.post('/public/apply', async (req, res) => {
       computers: computers ? Number(computers) : 0,
       agreementStartDate: Date.now(),
       status: 'pending',
+      referredByPartnerId: referredByPartnerId || undefined,
       proposalDetails,
       paymentInfo,
     });
@@ -717,6 +719,35 @@ router.post('/public/apply', async (req, res) => {
     });
 
     await createDefaultHomepage(partner._id, '#2563eb');
+
+    // Create referral commission for referring partner (20% of membership fee)
+    if (isPaymentVerified && referredByPartnerId) {
+      try {
+        const PartnerEarning = require('../models/PartnerEarning');
+        const referrer = await Partner.findById(referredByPartnerId);
+        if (referrer) {
+          const now = new Date();
+          const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+          const commissionBase = Number(paidAmount) || 0;
+          if (commissionBase > 0) {
+            const commissionAmount = Math.round(commissionBase * 0.20);
+            await PartnerEarning.create({
+              partnerId: referrer._id,
+              type: 'referral_commission',
+              referredPartnerId: partner._id,
+              baseAmount: commissionBase,
+              percentage: 20,
+              amount: commissionAmount,
+              month,
+              status: 'pending',
+              description: `20% referral commission for ${instituteName} membership`,
+            });
+          }
+        }
+      } catch (refErr) {
+        console.error('Referral commission creation error:', refErr.message);
+      }
+    }
 
     // Send Confirmation Email with Credentials to Partner
     try {

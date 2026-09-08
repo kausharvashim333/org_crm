@@ -58,6 +58,7 @@ const SubAdminStaff = lazy(() => import('./pages/superadmin/SubAdminStaff'));
 const AuditLogs = lazy(() => import('./pages/superadmin/AuditLogs'));
 const SecurityAndBackup = lazy(() => import('./pages/superadmin/SecurityAndBackup'));
 const AdminAddons = lazy(() => import('./pages/superadmin/AdminAddons'));
+const PartnerSettlements = lazy(() => import('./pages/superadmin/PartnerSettlements'));
 
 // Partner Pages (Lazy)
 const PartnerLogin = lazy(() => import('./pages/partner/Login'));
@@ -78,6 +79,7 @@ const PartnerSettings = lazy(() => import('./pages/partner/Settings'));
 const PartnerAdmissionPage = lazy(() => import('./pages/partner/PartnerAdmissionPage'));
 const PartnerPendingApprovals = lazy(() => import('./pages/partner/PendingApprovals'));
 const PartnerAddons = lazy(() => import('./pages/partner/Addons'));
+const MyEarnings = lazy(() => import('./pages/partner/MyEarnings'));
 
 // Student Pages (Lazy)
 const StudentLogin = lazy(() => import('./pages/student/Login'));
@@ -185,6 +187,7 @@ export default function App() {
                 <Route path="audit-logs" element={<AuditLogs />} />
                 <Route path="security" element={<SecurityAndBackup />} />
                 <Route path="addons" element={<AdminAddons />} />
+                <Route path="settlements" element={<PartnerSettlements />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Routes>
             </AdminLayout>
@@ -214,6 +217,7 @@ export default function App() {
                 <Route path="settings" element={<PartnerSettings />} />
                 <Route path="pending-approvals" element={<PartnerPendingApprovals />} />
                 <Route path="addons" element={<PartnerAddons />} />
+                <Route path="earnings" element={<MyEarnings />} />
               </Routes>
             </AdminLayout>
           </PartnerRoute>

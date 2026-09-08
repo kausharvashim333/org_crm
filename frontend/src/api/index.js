@@ -272,3 +272,10 @@ export const deleteAddon = (id) => API.delete(`/addons/admin/${id}`);
 export const getAddonPurchases = () => API.get('/addons/admin/purchases');
 export const adminActivateAddon = (data) => API.post('/addons/admin/activate', data);
 export const adminDeactivateAddon = (id) => API.put(`/addons/admin/deactivate/${id}`);
+
+// Partner Earnings
+export const getMyEarnings = (params) => API.get('/partner-earnings', { params });
+export const getEarningsSummary = (params) => API.get('/partner-earnings/summary', { params });
+export const getAllEarnings = (params) => API.get('/partner-earnings/all', { params });
+export const settleEarnings = (data) => API.post('/partner-earnings/settle', data);
+export const settleAllEarnings = (data) => API.post('/partner-earnings/settle-all', data);

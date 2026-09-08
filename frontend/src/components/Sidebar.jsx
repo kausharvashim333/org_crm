@@ -5,7 +5,7 @@ import {
   Calendar, FileText, Globe, Settings, LogOut, Building2, Briefcase,
   Bell, Award, FolderOpen, ChevronDown, MessageSquare, Megaphone, Image,
   Info, BarChart3, Camera, MessageCircle, ClipboardList, MousePointerClick,
-  Contact, Palette, ShieldCheck, UserCheck, History, Lock, X, ShoppingBag, Tag, Package
+  Contact, Palette, ShieldCheck, UserCheck, History, Lock, X, ShoppingBag, Tag, Package, Wallet
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getNotifications, markAllNotificationsRead, getOrgHomepagePublic, getMyAddons } from '../api';
@@ -64,6 +64,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
         { to: '/admin/franchises', icon: Building2, label: 'Partner Centers' },
         { to: '/admin/homepage?section=franchise', icon: Award, label: 'Partnership Plans' },
         { to: '/admin/royalty', icon: IndianRupee, label: 'Royalty Tracker' },
+        { to: '/admin/settlements', icon: Wallet, label: 'Partner Settlements' },
       ],
     },
     {
@@ -127,6 +128,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       icon: IndianRupee,
       links: [
         { to: '/partner/fees', icon: IndianRupee, label: 'Fees' },
+        { to: '/partner/earnings', icon: Wallet, label: 'My Earnings' },
       ],
     },
     {

@@ -1166,6 +1166,40 @@ router.post('/partner-center/submit', protect, upload.fields([
       });
     }
 
+    // Check for online course order with this partner's center selected (for 40% royalty)
+    try {
+      const Order = require('../models/Order');
+      const PartnerEarning = require('../models/PartnerEarning');
+      const matchingOrder = await Order.findOne({
+        preferredFranchiseCenter: partnerId,
+        paymentStatus: 'completed',
+        customerEmail: studentEmail,
+        customerPhone: String(phone).trim(),
+      });
+      if (matchingOrder) {
+        const now = new Date();
+        const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const existingEarning = await PartnerEarning.findOne({ orderId: matchingOrder._id, partnerId, type: 'center_royalty' });
+        if (!existingEarning) {
+          const royaltyAmount = Math.round(matchingOrder.finalAmount * 0.40);
+          await PartnerEarning.create({
+            partnerId,
+            type: 'center_royalty',
+            orderId: matchingOrder._id,
+            studentId: student._id,
+            baseAmount: matchingOrder.finalAmount,
+            percentage: 40,
+            amount: royaltyAmount,
+            month,
+            status: 'pending',
+            description: `40% royalty for course sale ${matchingOrder.orderNumber} - student registered at center`,
+          });
+        }
+      }
+    } catch (royaltyErr) {
+      console.error('Royalty earning creation error:', royaltyErr.message);
+    }
+
     // Send admission confirmation email to student
     if (req.body.email) {
       try {
