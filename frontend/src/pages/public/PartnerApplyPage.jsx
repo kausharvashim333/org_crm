@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getOrgHomepagePublic, applyPartner, createFranchiseOrder, checkPartnerEmail } from '../../api';
+import { getOrgHomepagePublic, applyPartner, createFranchiseOrder, checkPartnerEmail, getReferrerPartner } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import {
@@ -16,6 +16,7 @@ export default function PartnerApplyPage() {
 
   const queryPlan = searchParams.get('plan') || '';
   const refPartnerId = searchParams.get('ref') || '';
+  const [referrer, setReferrer] = useState(null);
 
   // Detailed application form states
   const [submitted, setSubmitted] = useState(false);
@@ -126,6 +127,12 @@ export default function PartnerApplyPage() {
       setFormData(prev => ({ ...prev, partnershipPlan: selectedPlanObj.name }));
     }
   }, [hp, queryPlan]);
+
+  useEffect(() => {
+    if (refPartnerId) {
+      getReferrerPartner(refPartnerId).then(res => setReferrer(res.data.partner)).catch(() => {});
+    }
+  }, [refPartnerId]);
 
   const handleEmailBlur = async () => {
     const email = (formData.email || '').trim().toLowerCase();
@@ -414,10 +421,18 @@ export default function PartnerApplyPage() {
                 </div>
               ) : (
                 <form onSubmit={handleFormSubmit} className="space-y-8">
-                  {refPartnerId && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-2xl flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      You are applying via a partner referral. The referring partner will receive a 20% commission on your membership fee.
+                  {refPartnerId && referrer && (
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3">
+                      {referrer.logo ? (
+                        <img src={referrer.logo} alt={referrer.instituteName} className="w-10 h-10 rounded-xl object-cover border border-emerald-200" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center"><Building2 className="w-5 h-5 text-emerald-600" /></div>
+                      )}
+                      <div className="flex-1">
+                        <p className="text-xs font-black text-emerald-800">Referred by: {referrer.instituteName}</p>
+                        <p className="text-[11px] text-emerald-600 font-medium">{referrer.franchiseId} • {referrer.city}, {referrer.state}</p>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-600 bg-white px-2 py-1 rounded-lg border border-emerald-200">20% Commission to Referrer</span>
                     </div>
                   )}
                   {submitError && (

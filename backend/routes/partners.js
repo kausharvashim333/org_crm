@@ -112,6 +112,22 @@ router.get('/public', async (req, res) => {
   }
 });
 
+// Fetch referrer partner info by ID (for referral link display)
+router.get('/public/referrer/:id', async (req, res) => {
+  try {
+    const partner = await Partner.findById(req.params.id).select('instituteName franchiseId city state logo');
+    if (!partner) return res.status(404).json({ success: false, message: 'Referrer not found' });
+    const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const partnerObj = partner.toObject();
+    if (partnerObj.logo && partnerObj.logo.startsWith('/uploads/')) {
+      partnerObj.logo = `${baseUrl}${partnerObj.logo}`;
+    }
+    res.json({ success: true, partner: partnerObj });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Check if an email or phone is already registered for partner/user
 router.get('/public/check-email', async (req, res) => {
   try {

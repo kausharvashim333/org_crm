@@ -10,6 +10,7 @@ export const resetPassword = (data) => API.post('/auth/reset-password', data);
 
 export const getPartners = () => API.get('/partners');
 export const getPublicPartners = () => API.get('/partners/public');
+export const getReferrerPartner = (id) => API.get(`/partners/public/referrer/${id}`);
 export const applyPartner = (data) => API.post('/partners/public/apply', data);
 export const checkPartnerEmail = (email) => API.get('/partners/public/check-email', { params: { email } });
 export const createFranchiseOrder = (data) => API.post('/partners/public/create-franchise-order', data);
