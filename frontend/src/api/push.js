@@ -23,7 +23,8 @@ export async function subscribeToPush() {
   let subscription = await reg.pushManager.getSubscription();
   if (!subscription) {
     const res = await API.get('/push/vapid-public-key');
-    const publicKey = res.data.publicKey;
+    const publicKey = res.data?.publicKey;
+    if (!publicKey) return { success: false, error: 'VAPID public key not configured' };
     const convertedKey = urlBase64ToUint8Array(publicKey);
 
     subscription = await reg.pushManager.subscribe({
