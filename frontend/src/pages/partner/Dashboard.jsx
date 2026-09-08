@@ -179,6 +179,39 @@ export default function PartnerDashboard() {
         </div>
       )}
 
+      {/* Referral Link */}
+      {user?.partner?._id && (
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2"><Briefcase className="w-4 h-4 text-purple-600" /> Referral Link</h3>
+            <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-lg">20% Commission</span>
+          </div>
+          <p className="text-xs text-slate-500 mb-3">Share this link with new institutes. When they register and pay via your link, you earn 20% commission.</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={`${window.location.origin}/franchise/apply?ref=${user.partner._id}`}
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 font-mono"
+              onClick={(e) => e.target.select()}
+            />
+            <button
+              onClick={() => {
+                const link = `${window.location.origin}/franchise/apply?ref=${user.partner._id}`;
+                navigator.clipboard.writeText(link).then(() => {
+                  const btn = document.getElementById('copy-ref-btn');
+                  if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+                });
+              }}
+              id="copy-ref-btn"
+              className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-all whitespace-nowrap"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
           <h3 className="font-semibold text-gray-800 mb-4">Monthly Revenue</h3>

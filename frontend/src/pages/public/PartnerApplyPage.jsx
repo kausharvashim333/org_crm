@@ -15,6 +15,7 @@ export default function PartnerApplyPage() {
   const navigate = useNavigate();
 
   const queryPlan = searchParams.get('plan') || '';
+  const refPartnerId = searchParams.get('ref') || '';
 
   // Detailed application form states
   const [submitted, setSubmitted] = useState(false);
@@ -224,6 +225,7 @@ export default function PartnerApplyPage() {
         razorpayOrderId: paymentData.razorpayOrderId,
         razorpayPaymentId: paymentData.razorpayPaymentId,
         razorpaySignature: paymentData.razorpaySignature,
+        referredByPartnerId: refPartnerId || undefined,
       };
 
       const res = await applyPartner(payload);
@@ -412,6 +414,12 @@ export default function PartnerApplyPage() {
                 </div>
               ) : (
                 <form onSubmit={handleFormSubmit} className="space-y-8">
+                  {refPartnerId && (
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-2xl flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      You are applying via a partner referral. The referring partner will receive a 20% commission on your membership fee.
+                    </div>
+                  )}
                   {submitError && (
                     <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold rounded-2xl">
                       {submitError}
