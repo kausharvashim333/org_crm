@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { getPartnerDashboard, getStudents, getFees, getInquiries } from '../../api';
+import { getPartnerDashboard, getStudents, getFees, getInquiries, getEarningsSummary } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
 import StatCard from '../../components/StatCard';
-import { Users, GraduationCap, IndianRupee, UserCog, Bell, Award, Briefcase, BookOpen, ExternalLink, FileText, Sparkles, Download, BellRing } from 'lucide-react';
+import { Users, GraduationCap, IndianRupee, UserCog, Bell, Award, Briefcase, BookOpen, ExternalLink, FileText, Sparkles, Download, BellRing, Wallet, TrendingUp, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -31,11 +31,13 @@ export default function PartnerDashboard() {
   const { user } = useAuth();
   const { supported, permission, subscribed, requestPermission } = usePushNotifications();
   const [data, setData] = useState(null);
+  const [earnings, setEarnings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     getPartnerDashboard().then(res => setData(res.data)).catch(() => {}).finally(() => setLoading(false));
+    getEarningsSummary().then(res => setEarnings(res.data.summary)).catch(() => {});
   }, []);
 
   const handleExport = async (type) => {
@@ -138,6 +140,44 @@ export default function PartnerDashboard() {
         <StatCard icon={Award} label="Pending Certificates" value={stats?.pendingCerts || 0} color="yellow" />
         <StatCard icon={Briefcase} label="Active Projects" value={stats?.activeProjects || 0} color="primary" />
       </div>
+
+      {/* Earnings Summary */}
+      {earnings && (
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2"><Wallet className="w-4 h-4 text-indigo-600" /> My Earnings</h3>
+            <Link to="/partner/earnings" className="text-xs text-primary-600 hover:underline font-bold">View Details</Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center"><Wallet className="w-5 h-5 text-indigo-600" /></div>
+              <div><p className="text-[10px] font-bold text-slate-500 uppercase">Total</p><p className="text-lg font-black text-slate-800">₹{(earnings.totalEarnings || 0).toLocaleString('en-IN')}</p></div>
+            </div>
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><Clock className="w-5 h-5 text-amber-600" /></div>
+              <div><p className="text-[10px] font-bold text-slate-500 uppercase">Pending</p><p className="text-lg font-black text-amber-600">₹{(earnings.pendingAmount || 0).toLocaleString('en-IN')}</p></div>
+            </div>
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center"><TrendingUp className="w-5 h-5 text-emerald-600" /></div>
+              <div><p className="text-[10px] font-bold text-slate-500 uppercase">Paid</p><p className="text-lg font-black text-emerald-600">₹{(earnings.paidAmount || 0).toLocaleString('en-IN')}</p></div>
+            </div>
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3">
+              <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center"><Wallet className="w-5 h-5 text-cyan-600" /></div>
+              <div><p className="text-[10px] font-bold text-slate-500 uppercase">This Month</p><p className="text-lg font-black text-cyan-600">₹{(earnings.thisMonthAmount || 0).toLocaleString('en-IN')}</p></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+            <div className="flex items-center gap-3 bg-blue-50 rounded-xl p-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center"><BookOpen className="w-4 h-4 text-blue-600" /></div>
+              <div className="flex-1"><p className="text-[10px] font-bold text-slate-500 uppercase">Center Royalty (40%)</p><p className="text-base font-black text-blue-600">₹{(earnings.centerRoyalty || 0).toLocaleString('en-IN')}</p></div>
+            </div>
+            <div className="flex items-center gap-3 bg-purple-50 rounded-xl p-3">
+              <div className="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center"><Briefcase className="w-4 h-4 text-purple-600" /></div>
+              <div className="flex-1"><p className="text-[10px] font-bold text-slate-500 uppercase">Referral Commission (20%)</p><p className="text-base font-black text-purple-600">₹{(earnings.referralCommission || 0).toLocaleString('en-IN')}</p></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">

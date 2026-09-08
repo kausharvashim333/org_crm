@@ -14,8 +14,10 @@ export async function getNotificationPermission() {
 export async function subscribeToPush() {
   if (!await isPushSupported()) return { success: false, error: 'Push not supported' };
 
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') return { success: false, error: 'Permission denied' };
+  if (Notification.permission !== 'granted') {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return { success: false, error: 'Permission denied' };
+  }
 
   const reg = await navigator.serviceWorker.register(SW_PATH, { scope: '/' });
   await navigator.serviceWorker.ready;
