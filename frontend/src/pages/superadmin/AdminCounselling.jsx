@@ -7,11 +7,10 @@ import {
   getCounsellors, createCounsellor, updateCounsellor, deleteCounsellor,
   copyCounsellingSession, getCounsellingWaitlist,
   createCounsellingSlot, getCounsellingSlots, deleteCounsellingSlot, sendCounsellingRecording, resendCounsellingJoin,
-  generateCounsellingTagline,
 } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
-import { Plus, Edit, Trash2, Save, Users, Video, Calendar, Upload, ClipboardList, Sparkles, Wand2, RefreshCw, Check } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, Users, Video, Calendar, Upload, ClipboardList, Sparkles } from 'lucide-react';
 
 const emptyService = {
   name: '', tagline: '', description: '', duration: '30 min', mode: 'video',
@@ -120,67 +119,6 @@ export default function AdminCounselling() {
   const getContextualTagline = (name = '', description = '') => getContextualMeta(name, description).tagline;
   const getContextualIncludes = (name = '', description = '') => getContextualMeta(name, description).includes;
 
-  const [taglineModal, setTaglineModal] = useState({
-    open: false,
-    loading: false,
-    taglines: [],
-    suggestedIncludes: '',
-  });
-
-  const handleOpenAITaglines = async (overrideName, overrideDesc) => {
-    const targetName = (overrideName !== undefined ? overrideName : serviceForm.name || '').trim();
-    const targetDesc = (overrideDesc !== undefined ? overrideDesc : serviceForm.description || '').trim();
-    if (!targetName && !targetDesc) {
-      showError('Please enter a service name or description first');
-      return;
-    }
-    setTaglineModal({ open: true, loading: true, taglines: [], suggestedIncludes: '' });
-    try {
-      const res = await generateCounsellingTagline({
-        name: targetName,
-        description: targetDesc,
-        mode: serviceForm.mode,
-        duration: serviceForm.duration,
-      });
-      if (res?.data?.success && Array.isArray(res.data.taglines) && res.data.taglines.length > 0) {
-        setTaglineModal({
-          open: true,
-          loading: false,
-          taglines: res.data.taglines,
-          suggestedIncludes: res.data.includes || getContextualIncludes(targetName, targetDesc),
-        });
-      } else {
-        const meta = getContextualMeta(targetName, targetDesc);
-        setTaglineModal({
-          open: true,
-          loading: false,
-          taglines: [
-            meta.tagline,
-            `1-on-1 personalized mentorship to ace your ${targetName || 'goals'}`,
-            `Structured roadmap & expert guidance tailored for ${targetName || 'career growth'}`,
-            `Practical step-by-step strategy with industry mentors for ${targetName || 'success'}`,
-            `Gain absolute clarity, avoid career mistakes & succeed in ${targetName || 'your path'}`,
-          ],
-          suggestedIncludes: meta.includes,
-        });
-      }
-    } catch (err) {
-      const meta = getContextualMeta(targetName, targetDesc);
-      setTaglineModal({
-        open: true,
-        loading: false,
-        taglines: [
-          meta.tagline,
-          `1-on-1 personalized mentorship to ace your ${targetName || 'goals'}`,
-          `Structured roadmap & expert guidance tailored for ${targetName || 'career growth'}`,
-          `Practical step-by-step strategy with industry mentors for ${targetName || 'success'}`,
-          `Gain absolute clarity, avoid career mistakes & succeed in ${targetName || 'your path'}`,
-        ],
-        suggestedIncludes: meta.includes,
-      });
-    }
-  };
-
   const load = async () => {
     try {
       const [sRes, svcRes, sesRes, bRes, cRes, wRes, slRes] = await Promise.all([
@@ -246,6 +184,7 @@ export default function AdminCounselling() {
     try {
       const payload = {
         ...serviceForm,
+        tagline: serviceForm.tagline || getContextualTagline(serviceForm.name, serviceForm.description),
         price: Number(serviceForm.price) || 0,
         originalPrice: Number(serviceForm.originalPrice) || 0,
         includes: String(serviceForm.includes).split(',').map((x) => x.trim()).filter(Boolean),
@@ -783,7 +722,7 @@ export default function AdminCounselling() {
       <Modal isOpen={showService} onClose={() => setShowService(false)} title={editService ? 'Edit 1-on-1 service' : 'Add 1-on-1 service'} size="lg">
         <form onSubmit={handleServiceSubmit} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-xs font-medium mb-1">Name *</label>
               <input
                 required
@@ -793,48 +732,10 @@ export default function AdminCounselling() {
                 onChange={(e) => {
                   const newName = e.target.value;
                   setServiceForm((prev) => {
-                    const autoTagline = !taglineUserEdited || !prev.tagline ? getContextualTagline(newName, prev.description) : prev.tagline;
+                    const autoTagline = getContextualTagline(newName, prev.description);
                     const autoIncludes = !includesUserEdited || !prev.includes ? getContextualIncludes(newName, prev.description) : prev.includes;
                     return { ...prev, name: newName, tagline: autoTagline, includes: autoIncludes };
                   });
-                }}
-              />
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1 gap-2">
-                <label className="block text-xs font-medium">Tagline</label>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenAITaglines()}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 hover:from-indigo-100 hover:to-purple-100 border border-indigo-200 transition-all cursor-pointer shadow-xs"
-                    title="Generate trending taglines & deliverables from AI"
-                  >
-                    <Wand2 className="w-3 h-3 text-indigo-600 animate-pulse" />
-                    <span>Popular AI Taglines</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const generated = getContextualTagline(serviceForm.name, serviceForm.description);
-                      setServiceForm((prev) => ({ ...prev, tagline: generated }));
-                      setTaglineUserEdited(true);
-                      showSuccess('Tagline auto-generated from description & topic!');
-                    }}
-                    className="text-[11px] text-slate-500 hover:text-indigo-600 font-medium flex items-center gap-0.5 cursor-pointer"
-                    title="Auto quick-fill from description"
-                  >
-                    <Sparkles className="w-3 h-3" /> From description
-                  </button>
-                </div>
-              </div>
-              <input
-                className="input-field"
-                placeholder="Auto-generated based on description & topic"
-                value={serviceForm.tagline}
-                onChange={(e) => {
-                  setServiceForm({ ...serviceForm, tagline: e.target.value });
-                  setTaglineUserEdited(true);
                 }}
               />
             </div>
@@ -873,15 +774,14 @@ export default function AdminCounselling() {
                     tagline: meta.tagline,
                     includes: meta.includes,
                   }));
-                  setTaglineUserEdited(true);
                   setIncludesUserEdited(true);
-                  showSuccess('Generated tagline & service deliverables from description!');
+                  showSuccess('Service deliverables generated from description!');
                 }}
                 className="text-[11px] text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 cursor-pointer"
-                title="Generate tagline and includes based on this description"
+                title="Generate service deliverables based on this description"
               >
                 <Sparkles className="w-3 h-3 text-indigo-600" />
-                Auto-update Tagline & Includes
+                Auto-fill Includes
               </button>
             </div>
             <textarea
@@ -892,7 +792,7 @@ export default function AdminCounselling() {
               onChange={(e) => {
                 const newDesc = e.target.value;
                 setServiceForm((prev) => {
-                  const autoTagline = !taglineUserEdited || !prev.tagline ? getContextualTagline(prev.name, newDesc) : prev.tagline;
+                  const autoTagline = getContextualTagline(prev.name, newDesc);
                   const autoIncludes = !includesUserEdited || !prev.includes ? getContextualIncludes(prev.name, newDesc) : prev.includes;
                   return { ...prev, description: newDesc, tagline: autoTagline, includes: autoIncludes };
                 });
@@ -933,122 +833,6 @@ export default function AdminCounselling() {
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={serviceForm.isActive} onChange={(e) => setServiceForm({ ...serviceForm, isActive: e.target.checked })} /> Show on website</label>
           <button type="submit" className="btn-primary w-full">{editService ? 'Update service' : 'Create service'}</button>
         </form>
-      </Modal>
-
-      {/* AI Popular Tagline Generator Modal */}
-      <Modal
-        isOpen={taglineModal.open}
-        onClose={() => setTaglineModal((prev) => ({ ...prev, open: false }))}
-        title="Popular & Trending Tagline Generator"
-        size="md"
-      >
-        <div className="space-y-4">
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Service Topic</p>
-                <p className="text-sm font-semibold text-slate-800">{serviceForm.name || 'General Career Mentorship'}</p>
-              </div>
-              <button
-                type="button"
-                disabled={taglineModal.loading}
-                onClick={() => handleOpenAITaglines()}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${taglineModal.loading ? 'animate-spin' : ''}`} />
-                {taglineModal.loading ? 'Generating...' : 'Regenerate'}
-              </button>
-            </div>
-            {serviceForm.description && (
-              <p className="text-xs text-slate-500 line-clamp-1 border-t border-slate-200/60 pt-1">
-                <span className="font-medium text-slate-700">Description context:</span> {serviceForm.description}
-              </p>
-            )}
-          </div>
-
-          <p className="text-xs text-slate-600">
-            Select a high-converting tagline tailored to your service topic & description:
-          </p>
-
-          {taglineModal.loading ? (
-            <div className="py-8 flex flex-col items-center justify-center gap-2">
-              <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-slate-500 font-medium">Analyzing description & fetching trending taglines...</p>
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-              {taglineModal.taglines.map((item, idx) => {
-                const isCurrent = serviceForm.tagline === item;
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => {
-                      setServiceForm((prev) => ({ ...prev, tagline: item }));
-                      setTaglineUserEdited(true);
-                      setTaglineModal((prev) => ({ ...prev, open: false }));
-                      showSuccess('Tagline applied!');
-                    }}
-                    className={`group p-3 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-3 ${
-                      isCurrent
-                        ? 'border-indigo-600 bg-indigo-50/50 shadow-2xs'
-                        : 'border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/20'
-                    }`}
-                  >
-                    <div className="flex items-start gap-2.5">
-                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-bold flex items-center justify-center mt-0.5">
-                        {idx + 1}
-                      </span>
-                      <p className="text-xs text-slate-800 leading-relaxed font-medium group-hover:text-indigo-950">
-                        {item}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      className={`text-[11px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap transition-all flex items-center gap-1 ${
-                        isCurrent
-                          ? 'bg-indigo-600 text-white shadow-2xs'
-                          : 'bg-white text-indigo-600 border border-slate-200 group-hover:border-indigo-300 group-hover:bg-indigo-600 group-hover:text-white'
-                      }`}
-                    >
-                      {isCurrent ? <Check className="w-3 h-3" /> : null}
-                      {isCurrent ? 'Active' : 'Use this'}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {taglineModal.suggestedIncludes && (
-            <div className="bg-indigo-50/70 p-3 rounded-xl border border-indigo-100 flex items-start justify-between gap-3">
-              <div className="text-xs">
-                <p className="font-semibold text-indigo-900 mb-0.5">🎯 Service-Specific Deliverables (Includes):</p>
-                <p className="text-indigo-700 leading-relaxed text-[11px]">{taglineModal.suggestedIncludes}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setServiceForm((prev) => ({ ...prev, includes: taglineModal.suggestedIncludes }));
-                  setIncludesUserEdited(true);
-                  showSuccess('Service-specific deliverables applied!');
-                }}
-                className="px-2.5 py-1 text-[11px] font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-2xs whitespace-nowrap cursor-pointer mt-0.5"
-              >
-                Apply Includes
-              </button>
-            </div>
-          )}
-
-          <div className="pt-2 border-t border-slate-100 flex justify-end">
-            <button
-              type="button"
-              onClick={() => setTaglineModal((prev) => ({ ...prev, open: false }))}
-              className="px-4 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-800 rounded-lg hover:bg-slate-100 transition cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </div>
       </Modal>
 
       <Modal isOpen={showSession} onClose={() => setShowSession(false)} title={editSession ? 'Edit group session' : 'Add group session'} size="lg">
