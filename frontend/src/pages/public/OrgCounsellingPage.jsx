@@ -1,22 +1,54 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getOrgHomepagePublic, getPublicCounselling, createCounsellingOrder, verifyCounsellingPayment, joinCounsellingWaitlist } from '../../api';
+import {
+  getOrgHomepagePublic,
+  getPublicCounselling,
+  createCounsellingOrder,
+  verifyCounsellingPayment,
+  joinCounsellingWaitlist,
+} from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import SEO from '../../components/SEO';
 import {
-  Sparkles, Video, Phone, MessageCircle, Calendar, Clock, Users, CheckCircle2,
-  ArrowRight, ShieldAlert, MapPin, IndianRupee, X
+  Sparkles,
+  Video,
+  Phone,
+  MessageCircle,
+  Calendar,
+  Clock,
+  Users,
+  CheckCircle2,
+  ArrowRight,
+  ShieldAlert,
+  MapPin,
+  X,
+  ShieldCheck,
+  Zap,
+  Check,
+  Award,
+  HelpCircle,
 } from 'lucide-react';
 
 const modeIcons = {
-  video: Video, phone: Phone, whatsapp: MessageCircle,
-  zoom: Video, meet: Video, hall: MapPin, center: MapPin,
+  video: Video,
+  phone: Phone,
+  whatsapp: MessageCircle,
+  zoom: Video,
+  meet: Video,
+  hall: MapPin,
+  center: MapPin,
 };
+
 const modeLabels = {
-  phone: 'Phone', whatsapp: 'WhatsApp', video: 'Video call',
-  zoom: 'Zoom', meet: 'Google Meet', hall: 'Institute hall', center: 'Partner center',
+  phone: 'Phone Call',
+  whatsapp: 'WhatsApp Call',
+  video: 'Video Call',
+  zoom: 'Zoom Meet',
+  meet: 'Google Meet',
+  hall: 'Institute Hall',
+  center: 'Partner Center',
 };
 
 export default function OrgCounsellingPage() {
@@ -29,7 +61,8 @@ export default function OrgCounsellingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', email: '', city: '', message: '', slotId: '' });
 
-  const loadPublic = () => getPublicCounselling().then((res) => setData(res.data || { visible: false, services: [], sessions: [] }));
+  const loadPublic = () =>
+    getPublicCounselling().then((res) => setData(res.data || { visible: false, services: [], sessions: [] }));
 
   useEffect(() => {
     Promise.all([
@@ -43,9 +76,11 @@ export default function OrgCounsellingPage() {
   }, []);
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
-  const orgName = hp?.settings?.orgName || 'Counselling';
+  const orgName = hp?.settings?.orgName || 'Computer Institute';
   const settings = data?.settings || {};
-  const notice = settings.noticeText || 'Counselling fee is non-refundable and not adjustable against course or admission fees.';
+  const notice =
+    settings.noticeText ||
+    'Counselling fee is non-refundable and not adjustable against course admission fees.';
   const whatsapp = (settings.whatsappNumber || '').replace(/\D/g, '');
 
   const openBook = (type, item) => {
@@ -75,6 +110,7 @@ export default function OrgCounsellingPage() {
       }
       return;
     }
+
     setSubmitting(true);
     try {
       const payload = {
@@ -85,8 +121,9 @@ export default function OrgCounsellingPage() {
         city: form.city,
         message: form.message,
       };
-      if (bookFor.type === 'group') payload.sessionId = bookFor.item._id;
-      else {
+      if (bookFor.type === 'group') {
+        payload.sessionId = bookFor.item._id;
+      } else {
         payload.serviceId = bookFor.item._id;
         if (form.slotId) payload.slotId = form.slotId;
       }
@@ -95,14 +132,14 @@ export default function OrgCounsellingPage() {
       const booking = res.data.booking;
 
       if (res.data.freeConfirmed) {
-        showSuccess('Seat booked');
+        showSuccess('Seat booked successfully!');
         setBookFor(null);
         navigate(`/counselling/receipt/${booking.bookingCode}`);
         return;
       }
 
       if (!window.Razorpay || !res.data.razorpayOrderId) {
-        showError('Payment gateway not available. Try again later.');
+        showError('Payment gateway unavailable. Please try again later.');
         return;
       }
 
@@ -123,7 +160,7 @@ export default function OrgCounsellingPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
-            showSuccess('Payment successful');
+            showSuccess('Payment successful!');
             setBookFor(null);
             navigate(`/counselling/receipt/${verifyRes.data.booking.bookingCode}`);
           } catch (err) {
@@ -156,10 +193,20 @@ export default function OrgCounsellingPage() {
       <div className="bg-slate-50 min-h-screen flex flex-col">
         <Navbar activePage="counselling" />
         <div className="flex-1 flex flex-col items-center justify-center py-24 px-4 text-center">
-          <ShieldAlert className="w-14 h-14 text-slate-300 mb-4" />
-          <h1 className="text-2xl font-black text-slate-800">Counselling coming soon</h1>
-          <p className="text-sm text-slate-500 mt-2 max-w-md">Paid career counselling is not published on the website yet.</p>
-          <Link to="/" className="mt-6 text-sm font-bold" style={{ color: themeColor }}>Back to home</Link>
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4 text-slate-400">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-black text-slate-800">Career Counselling Coming Soon</h1>
+          <p className="text-sm text-slate-500 mt-2 max-w-md">
+            Paid career guidance & 1-on-1 mentorship bookings will be opened shortly.
+          </p>
+          <Link
+            to="/"
+            className="mt-6 px-5 py-2.5 rounded-xl text-white text-xs font-bold shadow-sm transition"
+            style={{ backgroundColor: themeColor }}
+          >
+            Back to Home
+          </Link>
         </div>
         <Footer homepageData={hp} />
       </div>
@@ -170,71 +217,190 @@ export default function OrgCounsellingPage() {
   const sessions = data.sessions || [];
 
   return (
-    <div className="bg-slate-50 min-h-screen flex flex-col font-sans">
-      <SEO title={settings.pageTitle || 'Career Counselling'} description={settings.pageSubtitle || ''} />
+    <div className="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
+      <SEO
+        title={settings.pageTitle || '1-on-1 Career Counselling & Guidance'}
+        description={settings.pageSubtitle || 'Personalized career counselling and roadmap consultation'}
+      />
       <Navbar activePage="counselling" />
 
-      <section className="py-16 px-4 text-center bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, white 2px, transparent 2px)', backgroundSize: '32px 32px' }} />
-        <div className="max-w-3xl mx-auto relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold bg-white/10 border border-white/10">
-            <Sparkles className="w-4 h-4 text-indigo-300" />
-            {settings.heroBadge || 'Career Guidance'}
+      {/* Hero Section */}
+      <section className="relative pt-16 pb-20 px-4 overflow-hidden bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white">
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 50% 30%, #6366f1 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        <div className="max-w-4xl mx-auto relative z-10 text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 backdrop-blur-md">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            {settings.heroBadge || 'Expert Career Mentorship'}
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight">{settings.pageTitle || 'Paid Career Counselling'}</h1>
-          <p className="text-sm md:text-base text-slate-300 font-light leading-relaxed">{settings.pageSubtitle}</p>
-          <p className="text-xs text-amber-200/90 max-w-xl mx-auto pt-2">{notice}</p>
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
+            {settings.pageTitle || '1-on-1 Career Counselling'}
+          </h1>
+
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
+            {settings.pageSubtitle ||
+              'Clear confusion, discover the right courses, and build a high-income future with certified mentors.'}
+          </p>
+
+          {/* Trust Highlights */}
+          <div className="pt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-slate-300">
+            <span className="flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" /> Verified Career Experts
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-amber-400" /> 1-on-1 Private Consultation
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-indigo-400" /> Personalized Roadmap
+            </span>
+          </div>
+
+          {notice && (
+            <p className="text-[11px] text-amber-200/80 max-w-lg mx-auto pt-2 font-medium">
+              ⚠️ {notice}
+            </p>
+          )}
         </div>
       </section>
 
+      {/* 1-on-1 Services Section */}
       <section className="py-14 px-4 max-w-6xl mx-auto w-full">
-        <div className="mb-8">
-          <h2 className="text-2xl font-black text-slate-800">1-on-1 sessions</h2>
-          <p className="text-sm text-slate-500 mt-1">Talk privately with a counsellor. Fee is not adjusted in admission.</p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-2">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Personal Guidance</span>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">1-on-1 Counselling Services</h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Select a service below to schedule your private consultation session.
+            </p>
+          </div>
+          {whatsapp && (
+            <a
+              href={`https://wa.me/${whatsapp}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 transition"
+            >
+              <MessageCircle className="w-3.5 h-3.5" /> Quick Doubt on WhatsApp
+            </a>
+          )}
         </div>
+
         {services.length === 0 ? (
-          <p className="text-sm text-slate-400 py-10 text-center border border-dashed rounded-2xl bg-white">No 1-on-1 plans published yet.</p>
+          <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <HelpCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+            <p className="font-bold text-slate-700">No 1-on-1 services available right now</p>
+            <p className="text-xs text-slate-500 mt-1">Please check back soon or browse our group sessions.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          /* Redesigned Compact, Attractive, Professional Service Cards */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((s) => {
               const Icon = modeIcons[s.mode] || Video;
+              const hasDiscount = s.originalPrice > s.price && s.originalPrice > 0;
+              const discountPercent = hasDiscount ? Math.round(((s.originalPrice - s.price) / s.originalPrice) * 100) : 0;
+              const includesList = s.includes || [];
+
               return (
-                <div key={s._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col">
-                  {s.badge && <span className="self-start text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 mb-3">{s.badge}</span>}
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${themeColor}15` }}>
-                      <Icon className="w-5 h-5" style={{ color: themeColor }} />
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-slate-800">{s.name}</h3>
-                      <p className="text-xs text-slate-500">{s.tagline}</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-600 leading-relaxed flex-1">{s.description}</p>
-                  {(s.includes || []).length > 0 && (
-                    <ul className="mt-4 space-y-1.5">
-                      {s.includes.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" /> {item}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  <div className="mt-5 pt-4 border-t flex items-end justify-between gap-3">
-                    <div>
-                      {s.originalPrice > s.price && s.originalPrice > 0 && (
-                        <span className="text-xs text-slate-400 line-through mr-1">₹{s.originalPrice}</span>
+                <div
+                  key={s._id}
+                  className="bg-white rounded-2xl border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between p-5 relative group"
+                >
+                  {/* Top Bar: Mode Badge & Promotional Badge */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        <Icon className="w-3 h-3 text-indigo-600" />
+                        {modeLabels[s.mode] || 'Video Call'}
+                      </span>
+
+                      {s.badge ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-900 border border-amber-200">
+                          {s.badge}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-slate-400" /> {s.duration || '30 min'}
+                        </span>
                       )}
-                      <p className="text-xl font-black text-slate-900">₹{s.price}</p>
-                      <p className="text-[11px] text-slate-500">{s.duration} · {modeLabels[s.mode] || s.mode}</p>
                     </div>
+
+                    {/* Title & Tagline */}
+                    <div>
+                      <h3 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-indigo-600 transition-colors">
+                        {s.name}
+                      </h3>
+                      {s.tagline && (
+                        <p className="text-xs text-indigo-600 font-medium mt-1 line-clamp-1">
+                          {s.tagline}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Description - Neat 2-line clamp */}
+                    {s.description && (
+                      <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                        {s.description}
+                      </p>
+                    )}
+
+                    {/* Compact Feature Chips (Instead of tall bulky bullet list) */}
+                    {includesList.length > 0 && (
+                      <div className="pt-1 flex flex-wrap gap-1.5">
+                        {includesList.slice(0, 3).map((item, i) => (
+                          <span
+                            key={i}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-50 text-slate-700 border border-slate-200/80"
+                          >
+                            <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <span className="truncate max-w-[170px]">{item}</span>
+                          </span>
+                        ))}
+                        {includesList.length > 3 && (
+                          <span className="text-[10px] font-bold text-slate-400 self-center px-1">
+                            +{includesList.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Bottom: Pricing & Action Button */}
+                  <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <div>
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-xl font-black text-slate-900">
+                          ₹{s.price}
+                        </span>
+                        {hasDiscount && (
+                          <>
+                            <span className="text-xs text-slate-400 line-through">
+                              ₹{s.originalPrice}
+                            </span>
+                            <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                              {discountPercent}% OFF
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-slate-400 block font-medium">
+                        1-on-1 • {s.duration || '30 min'}
+                      </span>
+                    </div>
+
                     <button
                       type="button"
                       onClick={() => openBook('one_on_one', s)}
-                      className="px-4 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-1"
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 shadow-sm shadow-indigo-600/20 hover:opacity-95 transition"
                       style={{ backgroundColor: themeColor }}
                     >
-                      Book & pay <ArrowRight className="w-3.5 h-3.5" />
+                      Book Now <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -244,52 +410,93 @@ export default function OrgCounsellingPage() {
         )}
       </section>
 
-      <section className="py-14 px-4 max-w-6xl mx-auto w-full">
-        <div className="mb-8">
-          <h2 className="text-2xl font-black text-slate-800">Upcoming group sessions</h2>
-          <p className="text-sm text-slate-500 mt-1">Fixed date, limited seats. Join with other students and parents.</p>
+      {/* Group Sessions & Masterclasses Section */}
+      <section className="py-12 px-4 max-w-6xl mx-auto w-full">
+        <div className="mb-6">
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Interactive Masterclasses</span>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">Upcoming Group Webinars</h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Topic-focused live masterclasses with limited participants and Q&A.
+          </p>
         </div>
+
         {sessions.length === 0 ? (
-          <p className="text-sm text-slate-400 py-10 text-center border border-dashed rounded-2xl bg-white">No upcoming group sessions.</p>
+          <div className="text-center py-12 bg-white border border-slate-200 rounded-2xl shadow-xs">
+            <Calendar className="w-9 h-9 text-slate-300 mx-auto mb-2" />
+            <p className="font-bold text-slate-700 text-sm">No group sessions scheduled at this moment</p>
+            <p className="text-xs text-slate-500 mt-0.5">New webinars are announced weekly.</p>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {sessions.map((s) => {
               const full = (s.seatsLeft ?? 0) <= 0;
-              const dateLabel = s.date ? new Date(s.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : '';
+              const dateLabel = s.date
+                ? new Date(s.date).toLocaleDateString('en-IN', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                : '';
+
               return (
-                <div key={s._id} className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 flex flex-col md:flex-row md:items-center gap-5">
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <h3 className="font-extrabold text-slate-800 text-lg">{s.title}</h3>
-                    {s.topic && <p className="text-sm text-slate-500">{s.topic}</p>}
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
-                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" /> {dateLabel}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {s.startTime}–{s.endTime} {s.duration ? `(${s.duration})` : ''}</span>
-                      <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {s.seatsLeft} / {s.seats} seats left</span>
-                      <span>{modeLabels[s.mode] || s.mode}{s.counsellorName ? ` · ${s.counsellorName}` : ''}</span>
+                <div
+                  key={s._id}
+                  className="bg-white rounded-2xl border border-slate-200/90 hover:border-indigo-300 transition-all p-5 flex flex-col justify-between shadow-xs hover:shadow-sm"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        {modeLabels[s.mode] || s.mode}
+                      </span>
+                      <span className="text-base font-black text-slate-900">
+                        {s.fee > 0 ? `₹${s.fee}` : 'FREE'}
+                      </span>
                     </div>
-                    {s.description && <p className="text-sm text-slate-600 leading-relaxed">{s.description}</p>}
+
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-base leading-snug">{s.title}</h3>
+                      {s.topic && <p className="text-xs text-indigo-600 font-medium mt-0.5">{s.topic}</p>}
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 text-xs text-slate-600 bg-slate-50 p-2 rounded-xl border border-slate-200/70">
+                      <span className="flex items-center gap-1 font-semibold text-slate-800">
+                        <Calendar className="w-3.5 h-3.5 text-indigo-600" /> {dateLabel}
+                      </span>
+                      <span className="flex items-center gap-1 font-semibold text-slate-800">
+                        <Clock className="w-3.5 h-3.5 text-indigo-600" /> {s.startTime || '11:00'} ({s.duration || '90m'})
+                      </span>
+                      <span className="flex items-center gap-1 font-semibold text-slate-800">
+                        <Users className="w-3.5 h-3.5 text-indigo-600" /> {s.seatsLeft} seats left
+                      </span>
+                    </div>
+
+                    {s.description && (
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{s.description}</p>
+                    )}
                   </div>
-                  <div className="shrink-0 flex flex-col items-start md:items-end gap-2">
-                    <div className="flex items-baseline gap-1">
-                      {s.originalFee > s.fee && s.originalFee > 0 && <span className="text-xs text-slate-400 line-through">₹{s.originalFee}</span>}
-                      <span className="text-2xl font-black text-slate-900 flex items-center"><IndianRupee className="w-5 h-5" />{s.fee}</span>
-                    </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <span className="text-xs text-slate-500 font-medium">
+                      {s.counsellorName ? `By ${s.counsellorName}` : 'By Expert Faculty'}
+                    </span>
+
                     {full ? (
                       <button
                         type="button"
-                        className="px-5 py-2.5 rounded-xl text-xs font-bold border"
                         onClick={() => openBook('waitlist', s)}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition"
                       >
-                        Join waitlist
+                        Join Waitlist
                       </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => openBook('group', s)}
-                        className="px-5 py-2.5 rounded-xl text-xs font-bold text-white"
+                        className="px-4 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs transition"
                         style={{ backgroundColor: themeColor }}
                       >
-                        Book & pay
+                        Book Seat
                       </button>
                     )}
                   </div>
@@ -300,49 +507,153 @@ export default function OrgCounsellingPage() {
         )}
       </section>
 
-      <section className="px-4 pb-16">
-        <div className="max-w-3xl mx-auto bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
-          <p className="text-sm font-semibold text-amber-900">{notice}</p>
-          {whatsapp && (
-            <a
-              href={`https://wa.me/${whatsapp}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 mt-3 text-xs font-bold text-emerald-700"
-            >
-              <MessageCircle className="w-4 h-4" /> WhatsApp counsellor
-            </a>
-          )}
+      {/* Why Book 1-on-1 Counselling - Confidence Section */}
+      <section className="py-12 px-4 max-w-6xl mx-auto w-full">
+        <div className="bg-gradient-to-r from-indigo-900 to-slate-900 text-white rounded-3xl p-8 sm:p-10 relative overflow-hidden shadow-sm">
+          <div className="max-w-2xl space-y-3 relative z-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-300">Why Counselling Matters</span>
+            <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Avoid wrong course choices & wasted years
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Choosing the right qualification depends on your current skills, career aptitude, and market demand.
+              A single 30-minute consultation gives you a clear roadmap and saves you from regret.
+            </p>
+            <div className="pt-2 flex flex-wrap gap-4 text-xs text-slate-300 font-medium">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Real Industry Insights
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Syllabus & Job Scope Comparison
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Placement Consultation
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
+      {/* Booking Drawer / Modal */}
       {bookFor && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             <div className="p-4 text-white relative" style={{ backgroundColor: themeColor }}>
-              <button type="button" onClick={() => setBookFor(null)} className="absolute right-3 top-3 p-1 rounded-lg bg-white/10">
+              <button
+                type="button"
+                onClick={() => setBookFor(null)}
+                className="absolute right-3 top-3 p-1 rounded-lg bg-white/20 hover:bg-white/30 text-white transition"
+              >
                 <X className="w-4 h-4" />
               </button>
-              <h3 className="font-black text-sm pr-8">{bookFor.type === 'waitlist' ? 'Waitlist: ' : 'Pay to book: '}{bookFor.item.name || bookFor.item.title}</h3>
-              <p className="text-xs opacity-90 mt-0.5">{bookFor.type === 'waitlist' ? 'We email you if a seat opens (24 hrs to book).' : `₹${bookFor.type === 'group' ? bookFor.item.fee : bookFor.item.price} · not adjustable against admission`}</p>
+              <h3 className="font-bold text-base pr-8">
+                {bookFor.type === 'waitlist' ? 'Join Waitlist: ' : 'Book Session: '}
+                {bookFor.item.name || bookFor.item.title}
+              </h3>
+              <p className="text-xs opacity-90 mt-0.5 font-medium">
+                {bookFor.type === 'waitlist'
+                  ? 'We will notify you immediately if a seat opens.'
+                  : `₹${bookFor.type === 'group' ? bookFor.item.fee : bookFor.item.price} • ${
+                      modeLabels[bookFor.item.mode] || '1-on-1 Consultation'
+                    }`}
+              </p>
             </div>
-            <form onSubmit={handlePay} className="p-5 space-y-3">
-              <input required className="input-field text-sm" placeholder="Full name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              <input required type="tel" className="input-field text-sm" placeholder="10-digit mobile *" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              <input required type="email" className="input-field text-sm" placeholder="Email (Gmail) *" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <input className="input-field text-sm" placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-              {bookFor.type === 'one_on_one' && (data?.slots || []).filter((sl) => String(sl.serviceId) === String(bookFor.item._id)).length > 0 && (
-                <select className="input-field text-sm" value={form.slotId} onChange={(e) => setForm({ ...form, slotId: e.target.value })}>
-                  <option value="">Any slot (we'll schedule later)</option>
-                  {(data.slots || []).filter((sl) => String(sl.serviceId) === String(bookFor.item._id)).map((sl) => (
-                    <option key={sl._id} value={sl._id}>{new Date(sl.startAt).toLocaleString()}</option>
-                  ))}
-                </select>
-              )}
-              <textarea rows="2" className="input-field text-sm" placeholder="Message (optional)" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-              <button type="submit" disabled={submitting} className="w-full py-2.5 rounded-xl text-white text-sm font-bold" style={{ backgroundColor: themeColor }}>
-                {submitting ? 'Please wait...' : bookFor.type === 'waitlist' ? 'Join waitlist' : 'Pay with Razorpay'}
-              </button>
+
+            <form onSubmit={handlePay} className="p-5 space-y-3 text-xs">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Full Name *</label>
+                <input
+                  required
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  placeholder="Enter student / candidate name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">10-Digit Mobile Phone *</label>
+                <input
+                  required
+                  type="tel"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  placeholder="E.g. 9876543210"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Email Address *</label>
+                <input
+                  required
+                  type="email"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  placeholder="name@gmail.com (for join link)"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">City / Location</label>
+                <input
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  placeholder="E.g. Patna, Delhi, Mumbai"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                />
+              </div>
+
+              {bookFor.type === 'one_on_one' &&
+                (data?.slots || []).filter((sl) => String(sl.serviceId?._id || sl.serviceId) === String(bookFor.item._id)).length > 0 && (
+                  <div>
+                    <label className="block text-slate-700 font-semibold mb-1">Select Available Time Slot</label>
+                    <select
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                      value={form.slotId}
+                      onChange={(e) => setForm({ ...form, slotId: e.target.value })}
+                    >
+                      <option value="">Any slot (we will schedule mutually later)</option>
+                      {(data.slots || [])
+                        .filter((sl) => String(sl.serviceId?._id || sl.serviceId) === String(bookFor.item._id))
+                        .map((sl) => (
+                          <option key={sl._id} value={sl._id}>
+                            {new Date(sl.startAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Your Question / Career Query (Optional)</label>
+                <textarea
+                  rows={2}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  placeholder="What course or career doubt do you want guidance on?"
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full py-2.5 rounded-xl text-white font-bold text-xs shadow-md transition"
+                  style={{ backgroundColor: themeColor }}
+                >
+                  {submitting
+                    ? 'Processing...'
+                    : bookFor.type === 'waitlist'
+                    ? 'Join Waitlist'
+                    : `Pay ₹${bookFor.type === 'group' ? bookFor.item.fee : bookFor.item.price} Securely`}
+                </button>
+                <p className="text-[10px] text-center text-slate-400 mt-1.5">
+                  🔒 Secured with 256-bit SSL & instant confirmation email
+                </p>
+              </div>
             </form>
           </div>
         </div>
