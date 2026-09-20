@@ -10,7 +10,7 @@ import {
 } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
-import { Plus, Edit, Trash2, Save, Users, Video, Calendar, Upload, ClipboardList } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, Users, Video, Calendar, Upload, ClipboardList, Sparkles } from 'lucide-react';
 
 const emptyService = {
   name: '', tagline: '', description: '', duration: '30 min', mode: 'video',
@@ -53,7 +53,36 @@ export default function AdminCounselling() {
   const [editCounsellor, setEditCounsellor] = useState(null);
   const [counsellorForm, setCounsellorForm] = useState({ name: '', email: '', phone: '', password: '', isActive: true });
   const [slotForm, setSlotForm] = useState({ serviceId: '', startAt: '', counsellorId: '' });
+  const [taglineUserEdited, setTaglineUserEdited] = useState(false);
   const { showSuccess, showError } = useToast();
+
+  const getContextualTagline = (name) => {
+    const lower = String(name || '').toLowerCase().trim();
+    if (!lower) return '1-on-1 personalized mentorship to unlock your dream career';
+
+    if (/12th|10th|school|stream|science|arts|commerce/.test(lower)) {
+      return 'Personalized guidance to choose the right stream, courses & college path';
+    }
+    if (/job|placement|interview|resume|salary|fresher|switch/.test(lower)) {
+      return 'Crack top interviews & build a high-impact career profile with 1-on-1 coaching';
+    }
+    if (/it|tech|code|coding|software|web|full stack|data|python|java/.test(lower)) {
+      return 'Structured personalized roadmap to break into high-growth tech careers';
+    }
+    if (/govt|sarkari|upsc|ssc|railway|banking|defense/.test(lower)) {
+      return 'Targeted strategy, exam selection & high-yield preparation guidance';
+    }
+    if (/college|degree|university|admission|bca|mca|btech|diploma/.test(lower)) {
+      return 'Expert clarity on college selection, degree ROI & real industry relevance';
+    }
+    if (/finance|tally|gst|accounting|tax/.test(lower)) {
+      return 'Direct mentorship on modern accounting careers, GST & corporate finance';
+    }
+    if (/design|graphic|ui|ux|multimedia|animation/.test(lower)) {
+      return 'Build a winning design portfolio, freelance profile & creative career';
+    }
+    return `1-on-1 personalized mentorship & actionable roadmap for ${name.trim()}`;
+  };
 
   const load = async () => {
     try {
@@ -96,6 +125,7 @@ export default function AdminCounselling() {
   const openNewService = () => {
     setEditService(null);
     setServiceForm(emptyService);
+    setTaglineUserEdited(false);
     setShowService(true);
   };
 
@@ -108,6 +138,7 @@ export default function AdminCounselling() {
       includes: (s.includes || []).join(', '), badge: s.badge || '',
       image: s.image || '', isActive: s.isActive !== false, counsellorId: s.counsellorId?._id || s.counsellorId || '',
     });
+    setTaglineUserEdited(Boolean(s.tagline));
     setShowService(true);
   };
 
@@ -653,8 +684,49 @@ export default function AdminCounselling() {
       <Modal isOpen={showService} onClose={() => setShowService(false)} title={editService ? 'Edit 1-on-1 service' : 'Add 1-on-1 service'} size="lg">
         <form onSubmit={handleServiceSubmit} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label className="block text-xs font-medium mb-1">Name *</label><input required className="input-field" value={serviceForm.name} onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })} /></div>
-            <div><label className="block text-xs font-medium mb-1">Tagline</label><input className="input-field" value={serviceForm.tagline} onChange={(e) => setServiceForm({ ...serviceForm, tagline: e.target.value })} /></div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Name *</label>
+              <input
+                required
+                className="input-field"
+                placeholder="E.g. Career Guidance after 12th"
+                value={serviceForm.name}
+                onChange={(e) => {
+                  const newName = e.target.value;
+                  setServiceForm((prev) => {
+                    const autoTagline = !taglineUserEdited || !prev.tagline ? getContextualTagline(newName) : prev.tagline;
+                    return { ...prev, name: newName, tagline: autoTagline };
+                  });
+                }}
+              />
+            </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-medium">Tagline</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const generated = getContextualTagline(serviceForm.name);
+                    setServiceForm((prev) => ({ ...prev, tagline: generated }));
+                    setTaglineUserEdited(true);
+                    showSuccess('Tagline auto-generated!');
+                  }}
+                  className="text-[11px] text-indigo-600 hover:text-indigo-700 font-semibold flex items-center gap-1 cursor-pointer"
+                  title="Click to generate or refresh tagline"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Auto generate
+                </button>
+              </div>
+              <input
+                className="input-field"
+                placeholder="Auto-generated based on service name"
+                value={serviceForm.tagline}
+                onChange={(e) => {
+                  setServiceForm({ ...serviceForm, tagline: e.target.value });
+                  setTaglineUserEdited(true);
+                }}
+              />
+            </div>
             <div><label className="block text-xs font-medium mb-1">Duration</label><input className="input-field" value={serviceForm.duration} onChange={(e) => setServiceForm({ ...serviceForm, duration: e.target.value })} /></div>
             <div>
               <label className="block text-xs font-medium mb-1">Mode</label>

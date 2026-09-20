@@ -206,9 +206,49 @@ router.put('/settings', protect, superAdminOnly, async (req, res) => {
   }
 });
 
+const generateServiceTagline = (name, mode = 'video', duration = '30 min') => {
+  const lower = String(name || '').toLowerCase().trim();
+  if (!lower) return '1-on-1 personalized mentorship to unlock your dream career';
+
+  if (/12th|10th|school|stream|science|arts|commerce/.test(lower)) {
+    return 'Personalized guidance to choose the right stream, courses & college path';
+  }
+  if (/job|placement|interview|resume|salary|fresher|switch/.test(lower)) {
+    return 'Crack top interviews & build a high-impact career profile with 1-on-1 coaching';
+  }
+  if (/it|tech|code|coding|software|web|full stack|data|python|java/.test(lower)) {
+    return 'Structured personalized roadmap to break into high-growth tech careers';
+  }
+  if (/govt|sarkari|upsc|ssc|railway|banking|defense/.test(lower)) {
+    return 'Targeted strategy, exam selection & high-yield preparation guidance';
+  }
+  if (/college|degree|university|admission|bca|mca|btech|diploma/.test(lower)) {
+    return 'Expert clarity on college selection, degree ROI & real industry relevance';
+  }
+  if (/finance|tally|gst|accounting|tax/.test(lower)) {
+    return 'Direct mentorship on modern accounting careers, GST & corporate finance';
+  }
+  if (/design|graphic|ui|ux|multimedia|animation/.test(lower)) {
+    return 'Build a winning design portfolio, freelance profile & creative career';
+  }
+  return `1-on-1 personalized mentorship & actionable roadmap for ${name.trim()}`;
+};
+
+router.post('/services/generate-tagline', protect, superAdminOnly, (req, res) => {
+  const { name, mode, duration } = req.body;
+  const tagline = generateServiceTagline(name, mode, duration);
+  res.json({ success: true, tagline });
+});
+
 router.get('/services', protect, superAdminOnly, async (req, res) => {
   try {
     const services = await CounsellingService.find().populate('counsellorId', 'name email').sort({ displayOrder: 1, createdAt: 1 });
+    for (const s of services) {
+      if (!s.tagline || !s.tagline.trim()) {
+        s.tagline = generateServiceTagline(s.name, s.mode, s.duration);
+        await s.save();
+      }
+    }
     res.json({ success: true, count: services.length, services });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -218,8 +258,13 @@ router.get('/services', protect, superAdminOnly, async (req, res) => {
 router.post('/services', protect, superAdminOnly, async (req, res) => {
   try {
     const count = await CounsellingService.countDocuments();
+    const tagline = (req.body.tagline && req.body.tagline.trim())
+      ? req.body.tagline.trim()
+      : generateServiceTagline(req.body.name, req.body.mode, req.body.duration);
+
     const service = await CounsellingService.create({
       ...req.body,
+      tagline,
       displayOrder: req.body.displayOrder ?? count,
       includes: Array.isArray(req.body.includes)
         ? req.body.includes
@@ -241,6 +286,9 @@ router.put('/services/:id', protect, superAdminOnly, async (req, res) => {
     }
     if (payload.price !== undefined) payload.price = Number(payload.price) || 0;
     if (payload.originalPrice !== undefined) payload.originalPrice = Number(payload.originalPrice) || 0;
+    if (payload.name && (!payload.tagline || !String(payload.tagline).trim())) {
+      payload.tagline = generateServiceTagline(payload.name, payload.mode, payload.duration);
+    }
     const service = await CounsellingService.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
     if (!service) return res.status(404).json({ success: false, message: 'Service not found' });
     res.json({ success: true, service });
