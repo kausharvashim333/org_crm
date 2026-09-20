@@ -679,8 +679,27 @@ router.post('/public/waitlist', async (req, res) => {
 
 router.get('/counsellors', protect, superAdminOnly, async (req, res) => {
   try {
-    const counsellors = await User.find({ role: 'counsellor' }).select('name email phone isActive').sort({ name: 1 });
-    res.json({ success: true, counsellors });
+    const counsellors = await User.find({ role: 'counsellor' }).select('name email phone isActive lastLogin createdAt').sort({ name: 1 });
+    const [serviceCounts, sessionCounts] = await Promise.all([
+      CounsellingService.aggregate([{ $match: { counsellorId: { $ne: null } } }, { $group: { _id: '$counsellorId', count: { $sum: 1 } } }]),
+      CounsellingSession.aggregate([{ $match: { counsellorId: { $ne: null } } }, { $group: { _id: '$counsellorId', count: { $sum: 1 } } }]),
+    ]);
+    const svcMap = Object.fromEntries(serviceCounts.map((c) => [String(c._id), c.count]));
+    const sesMap = Object.fromEntries(sessionCounts.map((c) => [String(c._id), c.count]));
+    res.json({
+      success: true,
+      counsellors: counsellors.map((c) => ({
+        _id: c._id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        isActive: c.isActive,
+        lastLogin: c.lastLogin,
+        createdAt: c.createdAt,
+        serviceCount: svcMap[String(c._id)] || 0,
+        sessionCount: sesMap[String(c._id)] || 0,
+      })),
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -704,6 +723,43 @@ router.post('/counsellors', protect, superAdminOnly, async (req, res) => {
       assignedRoleName: 'Counsellor',
     });
     res.status(201).json({ success: true, counsellor: { _id: user._id, name: user.name, email: user.email, phone: user.phone } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/counsellors/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id, role: 'counsellor' });
+    if (!user) return res.status(404).json({ success: false, message: 'Counsellor not found' });
+    const { name, email, phone, isActive, password } = req.body;
+    if (email && email.toLowerCase().trim() !== user.email) {
+      const exists = await User.findOne({ email: email.toLowerCase().trim() });
+      if (exists) return res.status(400).json({ success: false, message: 'Email already registered' });
+      user.email = email.toLowerCase().trim();
+    }
+    if (name) user.name = name.trim();
+    if (phone !== undefined) user.phone = phone;
+    if (isActive !== undefined) user.isActive = !!isActive;
+    if (password) user.password = password;
+    await user.save();
+    res.json({ success: true, counsellor: { _id: user._id, name: user.name, email: user.email, phone: user.phone, isActive: user.isActive } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.delete('/counsellors/:id', protect, superAdminOnly, async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id, role: 'counsellor' });
+    if (!user) return res.status(404).json({ success: false, message: 'Counsellor not found' });
+    await Promise.all([
+      CounsellingService.updateMany({ counsellorId: user._id }, { $unset: { counsellorId: 1 } }),
+      CounsellingSession.updateMany({ counsellorId: user._id }, { $unset: { counsellorId: 1 } }),
+      CounsellingSlot.deleteMany({ counsellorId: user._id, status: 'open' }),
+    ]);
+    await user.deleteOne();
+    res.json({ success: true, message: 'Counsellor deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

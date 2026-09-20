@@ -42,7 +42,7 @@ const tabs = [
 // Map sidebar deep-link section keys to our grouped tabs
 const sectionToTab = {
   hero: 'hero', cta: 'hero',
-  about: 'content', stats: 'content', certifications: 'content',
+  about: 'content', stats: 'content',
   verticals: 'verticals',
   franchise: 'franchise',
   services: 'services',

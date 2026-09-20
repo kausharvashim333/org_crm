@@ -4,7 +4,8 @@ import {
   getCounsellingServices, createCounsellingService, updateCounsellingService, deleteCounsellingService,
   getCounsellingSessions, createCounsellingSession, updateCounsellingSession, deleteCounsellingSession,
   uploadOrgImage, getCounsellingBookings, createManualCounsellingBooking, updateCounsellingBooking,
-  getCounsellors, createCounsellor, copyCounsellingSession, getCounsellingWaitlist,
+  getCounsellors, createCounsellor, updateCounsellor, deleteCounsellor,
+  copyCounsellingSession, getCounsellingWaitlist,
   createCounsellingSlot, getCounsellingSlots, deleteCounsellingSlot, sendCounsellingRecording, resendCounsellingJoin,
 } from '../../api';
 import { useToast } from '../../context/ToastContext';
@@ -49,6 +50,8 @@ export default function AdminCounselling() {
   const [waitlist, setWaitlist] = useState([]);
   const [slots, setSlots] = useState([]);
   const [newCounsellor, setNewCounsellor] = useState({ name: '', email: '', phone: '', password: '' });
+  const [editCounsellor, setEditCounsellor] = useState(null);
+  const [counsellorForm, setCounsellorForm] = useState({ name: '', email: '', phone: '', password: '', isActive: true });
   const [slotForm, setSlotForm] = useState({ serviceId: '', startAt: '', counsellorId: '' });
   const { showSuccess, showError } = useToast();
 
@@ -510,6 +513,57 @@ export default function AdminCounselling() {
             <button className="btn-primary text-sm">Create counsellor</button>
             <p className="text-xs text-slate-500">{counsellors.length} counsellor(s). They login at /counsellor/login</p>
           </form>
+          <div className="card overflow-x-auto">
+            <h3 className="font-bold mb-3">Counsellors</h3>
+            {counsellors.length === 0 ? (
+              <p className="text-sm text-slate-400">No counsellors yet. Create one above.</p>
+            ) : (
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-slate-400 border-b">
+                    <th className="py-2 pr-2">Name</th>
+                    <th className="py-2 pr-2">Email</th>
+                    <th className="py-2 pr-2">Phone</th>
+                    <th className="py-2 pr-2">Assigned</th>
+                    <th className="py-2 pr-2">Last login</th>
+                    <th className="py-2 pr-2">Status</th>
+                    <th className="py-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {counsellors.map((c) => (
+                    <tr key={c._id} className="border-b border-slate-50">
+                      <td className="py-2.5 pr-2 font-semibold">{c.name}</td>
+                      <td className="py-2.5 pr-2">{c.email}</td>
+                      <td className="py-2.5 pr-2">{c.phone || '—'}</td>
+                      <td className="py-2.5 pr-2">{c.serviceCount || 0} svc · {c.sessionCount || 0} sessions</td>
+                      <td className="py-2.5 pr-2">{c.lastLogin ? new Date(c.lastLogin).toLocaleString() : 'Never'}</td>
+                      <td className="py-2.5 pr-2">
+                        <span className={`px-2 py-0.5 rounded-full font-bold ${c.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                          {c.isActive ? 'Active' : 'Disabled'}
+                        </span>
+                      </td>
+                      <td className="py-2.5 whitespace-nowrap">
+                        <button type="button" className="text-indigo-600 mr-3" onClick={() => {
+                          setEditCounsellor(c);
+                          setCounsellorForm({ name: c.name, email: c.email, phone: c.phone || '', password: '', isActive: c.isActive !== false });
+                        }}>Edit</button>
+                        <button type="button" className="text-amber-600 mr-3" onClick={async () => {
+                          try { await updateCounsellor(c._id, { isActive: !c.isActive }); showSuccess(c.isActive ? 'Access disabled' : 'Access enabled'); load(); }
+                          catch (e) { showError(e.response?.data?.message || 'Failed'); }
+                        }}>{c.isActive ? 'Disable' : 'Enable'}</button>
+                        <button type="button" className="text-red-600" onClick={async () => {
+                          if (!confirm(`Delete counsellor ${c.name}? Their assignments will be removed.`)) return;
+                          try { await deleteCounsellor(c._id); showSuccess('Deleted'); load(); }
+                          catch (e) { showError(e.response?.data?.message || 'Failed'); }
+                        }}>Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
           <form className="card space-y-3" onSubmit={async (e) => {
             e.preventDefault();
             try { await createCounsellingSlot(slotForm); showSuccess('Slot added'); setSlotForm({ serviceId: '', startAt: '', counsellorId: '' }); load(); }
@@ -544,6 +598,31 @@ export default function AdminCounselling() {
           </div>
         </div>
       )}
+
+      <Modal isOpen={!!editCounsellor} onClose={() => setEditCounsellor(null)} title={`Edit counsellor — ${editCounsellor?.name || ''}`}>
+        <form className="space-y-3" onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            await updateCounsellor(editCounsellor._id, {
+              name: counsellorForm.name,
+              email: counsellorForm.email,
+              phone: counsellorForm.phone,
+              isActive: counsellorForm.isActive,
+              ...(counsellorForm.password ? { password: counsellorForm.password } : {}),
+            });
+            showSuccess('Counsellor updated');
+            setEditCounsellor(null);
+            load();
+          } catch (err) { showError(err.response?.data?.message || 'Failed'); }
+        }}>
+          <input required className="input-field" placeholder="Name" value={counsellorForm.name} onChange={(e) => setCounsellorForm({ ...counsellorForm, name: e.target.value })} />
+          <input required type="email" className="input-field" placeholder="Email" value={counsellorForm.email} onChange={(e) => setCounsellorForm({ ...counsellorForm, email: e.target.value })} />
+          <input className="input-field" placeholder="Phone" value={counsellorForm.phone} onChange={(e) => setCounsellorForm({ ...counsellorForm, phone: e.target.value })} />
+          <input type="password" className="input-field" placeholder="New password (leave blank to keep current)" value={counsellorForm.password} onChange={(e) => setCounsellorForm({ ...counsellorForm, password: e.target.value })} />
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={counsellorForm.isActive} onChange={(e) => setCounsellorForm({ ...counsellorForm, isActive: e.target.checked })} /> Active (can login)</label>
+          <button type="submit" className="btn-primary w-full">Save counsellor</button>
+        </form>
+      </Modal>
 
       <Modal isOpen={showManual} onClose={() => setShowManual(false)} title="Manual cash booking">
         <form onSubmit={handleManualSubmit} className="space-y-3">
