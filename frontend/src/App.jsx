@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import { SuperAdminRoute, PartnerRoute } from './components/ProtectedRoute';
+import { SuperAdminRoute, PartnerRoute, CounsellorRoute } from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import ScrollProgress from './components/ui/ScrollProgress';
@@ -14,6 +14,8 @@ const OrgHomepage = lazy(() => import('./pages/public/OrgHomepage'));
 const OrgAboutPage = lazy(() => import('./pages/public/OrgAboutPage'));
 const OrgContactPage = lazy(() => import('./pages/public/OrgContactPage'));
 const OrgServicesPage = lazy(() => import('./pages/public/OrgServicesPage'));
+const OrgCounsellingPage = lazy(() => import('./pages/public/OrgCounsellingPage'));
+const OrgCounsellingReceiptPage = lazy(() => import('./pages/public/OrgCounsellingReceiptPage'));
 const OrgCoursesPage = lazy(() => import('./pages/public/OrgCoursesPage'));
 const CourseDetailPage = lazy(() => import('./pages/public/CourseDetailPage'));
 const CourseCheckoutPage = lazy(() => import('./pages/public/CourseCheckoutPage'));
@@ -58,6 +60,7 @@ const SubAdminStaff = lazy(() => import('./pages/superadmin/SubAdminStaff'));
 const AuditLogs = lazy(() => import('./pages/superadmin/AuditLogs'));
 const SecurityAndBackup = lazy(() => import('./pages/superadmin/SecurityAndBackup'));
 const AdminAddons = lazy(() => import('./pages/superadmin/AdminAddons'));
+const AdminCounselling = lazy(() => import('./pages/superadmin/AdminCounselling'));
 const PartnerSettlements = lazy(() => import('./pages/superadmin/PartnerSettlements'));
 
 // Partner Pages (Lazy)
@@ -88,6 +91,8 @@ const StudentCoursePlayer = lazy(() => import('./pages/student/CoursePlayer'));
 const StudentAssessment = lazy(() => import('./pages/student/Assessment'));
 const CertificateView = lazy(() => import('./pages/student/CertificateView'));
 const StudentTakeExam = lazy(() => import('./pages/student/TakeExam'));
+const CounsellorLogin = lazy(() => import('./pages/counsellor/Login'));
+const CounsellorDashboard = lazy(() => import('./pages/counsellor/Dashboard'));
 
 function PageLoader() {
   return (
@@ -134,6 +139,8 @@ export default function App() {
         <Route path="/about" element={<OrgAboutPage />} />
         <Route path="/contact" element={<OrgContactPage />} />
         <Route path="/services" element={<OrgServicesPage />} />
+        <Route path="/counselling" element={<OrgCounsellingPage />} />
+        <Route path="/counselling/receipt/:code" element={<OrgCounsellingReceiptPage />} />
         <Route path="/courses" element={<OrgCoursesPage />} />
         <Route path="/courses/:id" element={<CourseDetailPage />} />
         <Route path="/checkout/:courseId" element={<CourseCheckoutPage />} />
@@ -187,6 +194,7 @@ export default function App() {
                 <Route path="audit-logs" element={<AuditLogs />} />
                 <Route path="security" element={<SecurityAndBackup />} />
                 <Route path="addons" element={<AdminAddons />} />
+                <Route path="counselling" element={<AdminCounselling />} />
                 <Route path="settlements" element={<PartnerSettlements />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Routes>
@@ -231,6 +239,9 @@ export default function App() {
         <Route path="/student/course/:courseId/assessment" element={<StudentAssessment />} />
         <Route path="/student/certificate/:certificateId" element={<CertificateView />} />
         <Route path="/student/exam/:examId" element={<StudentTakeExam />} />
+
+        <Route path="/counsellor/login" element={<CounsellorLogin />} />
+        <Route path="/counsellor/dashboard" element={<CounsellorRoute><CounsellorDashboard /></CounsellorRoute>} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

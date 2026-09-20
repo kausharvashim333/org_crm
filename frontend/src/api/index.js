@@ -280,3 +280,33 @@ export const getEarningsSummary = (params) => API.get('/partner-earnings/summary
 export const getAllEarnings = (params) => API.get('/partner-earnings/all', { params });
 export const settleEarnings = (data) => API.post('/partner-earnings/settle', data);
 export const settleAllEarnings = (data) => API.post('/partner-earnings/settle-all', data);
+
+// Counselling
+export const getPublicCounselling = () => API.get('/counselling/public');
+export const getCounsellingSettings = () => API.get('/counselling/settings');
+export const updateCounsellingSettings = (data) => API.put('/counselling/settings', data);
+export const getCounsellingServices = () => API.get('/counselling/services');
+export const createCounsellingService = (data) => API.post('/counselling/services', data);
+export const updateCounsellingService = (id, data) => API.put(`/counselling/services/${id}`, data);
+export const deleteCounsellingService = (id) => API.delete(`/counselling/services/${id}`);
+export const getCounsellingSessions = () => API.get('/counselling/sessions');
+export const createCounsellingSession = (data) => API.post('/counselling/sessions', data);
+export const updateCounsellingSession = (id, data) => API.put(`/counselling/sessions/${id}`, data);
+export const deleteCounsellingSession = (id) => API.delete(`/counselling/sessions/${id}`);
+export const createCounsellingOrder = (data) => API.post('/counselling/public/create-order', data);
+export const verifyCounsellingPayment = (data) => API.post('/counselling/public/verify', data);
+export const getCounsellingReceipt = (code) => API.get(`/counselling/public/receipt/${code}`);
+export const getCounsellingBookings = (params) => API.get('/counselling/bookings', { params });
+export const createManualCounsellingBooking = (data) => API.post('/counselling/bookings/manual', data);
+export const updateCounsellingBooking = (id, data) => API.put(`/counselling/bookings/${id}`, data);
+export const joinCounsellingWaitlist = (data) => API.post('/counselling/public/waitlist', data);
+export const getCounsellors = () => API.get('/counselling/counsellors');
+export const createCounsellor = (data) => API.post('/counselling/counsellors', data);
+export const copyCounsellingSession = (id, data) => API.post(`/counselling/sessions/${id}/copy`, data);
+export const getCounsellingSlots = (params) => API.get('/counselling/slots', { params });
+export const createCounsellingSlot = (data) => API.post('/counselling/slots', data);
+export const deleteCounsellingSlot = (id) => API.delete(`/counselling/slots/${id}`);
+export const getCounsellingWaitlist = (params) => API.get('/counselling/waitlist', { params });
+export const sendCounsellingRecording = (id, data) => API.post(`/counselling/sessions/${id}/recording`, data);
+export const resendCounsellingJoin = (id) => API.post(`/counselling/bookings/${id}/resend-join`);
+export const getCounsellorPortal = () => API.get('/counselling/portal/mine');

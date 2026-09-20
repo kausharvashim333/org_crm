@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getOrgHomepagePublic } from '../../api';
+import { getOrgHomepagePublic, getPublicCounselling } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import SEO from '../../components/SEO';
@@ -313,6 +313,7 @@ function GallerySlider({ photos }) {
 
 export default function OrgHomepage() {
   const [hp, setHp] = useState(null);
+  const [showCounselling, setShowCounselling] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeCourseTab, setActiveCourseTab] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -331,6 +332,7 @@ export default function OrgHomepage() {
     getOrgHomepagePublic()
       .then(res => { setHp(res.data.homepage); setLoading(false); })
       .catch(() => setLoading(false));
+    getPublicCounselling().then((res) => setShowCounselling(!!res.data?.visible)).catch(() => {});
   }, []);
 
   const scrollToHash = useCallback(() => {
@@ -1598,6 +1600,18 @@ export default function OrgHomepage() {
       <Navbar />
       <main>
         {layoutOrder.map(section => renderSection(section))}
+        {showCounselling && (
+          <section className="py-12 px-4 bg-indigo-50 border-t border-indigo-100">
+            <div className="max-w-3xl mx-auto text-center space-y-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">Paid counselling</p>
+              <h2 className="text-2xl font-black text-slate-900">Confused about the right course?</h2>
+              <p className="text-sm text-slate-600">Book a 1-on-1 or group counselling session. Fee is not adjustable against admission.</p>
+              <Link to="/counselling" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white text-sm font-bold" style={{ backgroundColor: themeColor }}>
+                Book counselling <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </section>
+        )}
       </main>
       <Footer homepageData={hp} />
       {lightboxOpen && (

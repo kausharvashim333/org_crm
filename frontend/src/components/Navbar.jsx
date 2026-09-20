@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { getOrgHomepagePublic, getPublicPartners, submitCentralInquiry, submitPartnerInquiry } from '../api';
+import { getOrgHomepagePublic, getPublicPartners, submitCentralInquiry, submitPartnerInquiry, getPublicCounselling } from '../api';
 import {
   GraduationCap, Search, Menu, X, BookOpen, MapPin, ExternalLink,
   ArrowRight, MessageSquare, LogIn, Lock, ChevronDown, Sparkles,
@@ -12,6 +12,7 @@ export default function Navbar({ activePage }) {
   const { showSuccess, showError } = useToast();
   const [hp, setHp] = useState(null);
   const [partners, setPartners] = useState([]);
+  const [showCounselling, setShowCounselling] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,6 +24,7 @@ export default function Navbar({ activePage }) {
   useEffect(() => {
     getOrgHomepagePublic().then(res => setHp(res.data?.homepage)).catch(() => {});
     getPublicPartners().then(res => setPartners(res.data?.partners || [])).catch(() => {});
+    getPublicCounselling().then(res => setShowCounselling(!!res.data?.visible)).catch(() => {});
   }, []);
 
   // Close dropdown on outside click
@@ -146,6 +148,7 @@ export default function Navbar({ activePage }) {
   const navLinks = [
     { label: 'Courses', to: '/courses', key: 'courses', badge: 'New' },
     { label: 'Services', to: '/services', key: 'services' },
+    ...(showCounselling ? [{ label: 'Counselling', to: '/counselling', key: 'counselling' }] : []),
     { label: 'Partner with Us', to: '/franchise', key: 'franchise' },
     { label: 'Centers', to: '/franchises', key: 'franchises' },
     { label: 'Notices', to: '/notices', key: 'notices' },
@@ -320,6 +323,20 @@ export default function Navbar({ activePage }) {
                   <div>
                     <p className="text-xs font-bold">Partner IMS Login</p>
                     <p className="text-[10px] text-slate-400">Manage Center & Students</p>
+                  </div>
+                </Link>
+
+                <Link
+                  to="/counsellor/login"
+                  onClick={() => setLoginDropdownOpen(false)}
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-slate-800 hover:text-slate-900 group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-200 shrink-0">
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold">Counsellor</p>
+                    <p className="text-[10px] text-slate-400">Sessions & attendance</p>
                   </div>
                 </Link>
 
@@ -607,6 +624,16 @@ export default function Navbar({ activePage }) {
                   <option value="ADCA Pro (Diploma in Computer Applications)">ADCA Pro</option>
                   <option value="Python AI & Data Science">Python AI & Data Science</option>
                   <option value="Graphic Designing & Video Editing">Graphic Designing & Video Editing</option>
+                  {enquiryForm.service && ![
+                    'Computer & IT Training',
+                    'Full Stack Web Development',
+                    'Tally Prime with GST',
+                    'ADCA Pro (Diploma in Computer Applications)',
+                    'Python AI & Data Science',
+                    'Graphic Designing & Video Editing',
+                  ].includes(enquiryForm.service) && (
+                    <option value={enquiryForm.service}>{enquiryForm.service}</option>
+                  )}
                 </select>
               </div>
 

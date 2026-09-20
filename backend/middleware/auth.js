@@ -62,3 +62,10 @@ exports.partnerOrAdmin = (req, res, next) => {
   }
   next();
 };
+
+exports.counsellorOrAdmin = (req, res, next) => {
+  if (!['super_admin', 'admin', 'staff', 'counsellor'].includes(req.user?.role)) {
+    return res.status(403).json({ success: false, message: 'Counsellor or Admin access required' });
+  }
+  next();
+};

@@ -158,6 +158,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/coupons', require('./routes/coupons'));
 app.use('/api/addons', require('./routes/addons'));
 app.use('/api/partner-earnings', require('./routes/partnerEarnings'));
+app.use('/api/counselling', require('./routes/counselling'));
 
 // Centralized Error Handler (Prevent Stack Trace Leakage)
 app.use((err, req, res, next) => {
@@ -222,6 +223,13 @@ const startServer = async () => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Franchise CRM Server running on port ${PORT}`);
   });
+
+  const { runCounsellingReminders } = require('./utils/counsellingEmail');
+  const runReminders = () => {
+    runCounsellingReminders().catch((err) => console.error('[Counselling reminders]', err.message));
+  };
+  setTimeout(runReminders, 20 * 1000);
+  setInterval(runReminders, 30 * 60 * 1000);
 };
 
 startServer();
