@@ -338,16 +338,11 @@ export default function OrgCounsellingPage() {
                         )}
                       </div>
 
-                      {/* Title & Tagline */}
+                      {/* Title */}
                       <div>
                         <h3 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-indigo-600 transition-colors">
                           {s.name}
                         </h3>
-                        {s.tagline && (
-                          <p className="text-xs text-indigo-600 font-medium mt-1 line-clamp-1">
-                            {s.tagline}
-                          </p>
-                        )}
                       </div>
 
                       {/* Description - Neat 2-line clamp */}

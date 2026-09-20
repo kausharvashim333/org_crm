@@ -184,10 +184,10 @@ export default function AdminCounselling() {
     try {
       const payload = {
         ...serviceForm,
-        tagline: serviceForm.tagline || getContextualTagline(serviceForm.name, serviceForm.description),
+        tagline: '',
         price: Number(serviceForm.price) || 0,
         originalPrice: Number(serviceForm.originalPrice) || 0,
-        includes: String(serviceForm.includes).split(',').map((x) => x.trim()).filter(Boolean),
+        includes: String(serviceForm.includes || '').split(',').map((x) => x.trim()).filter(Boolean),
         counsellorId: serviceForm.counsellorId || null,
       };
       if (editService) {
@@ -431,7 +431,6 @@ export default function AdminCounselling() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-bold text-sm text-slate-800">{s.name}</h3>
-                    <p className="text-xs text-slate-500">{s.tagline}</p>
                   </div>
                   <div className="flex gap-1">
                     <button onClick={() => openEditService(s)} className="text-indigo-600"><Edit className="w-4 h-4" /></button>
@@ -729,14 +728,7 @@ export default function AdminCounselling() {
                 className="input-field"
                 placeholder="E.g. Career Guidance after 12th"
                 value={serviceForm.name}
-                onChange={(e) => {
-                  const newName = e.target.value;
-                  setServiceForm((prev) => ({
-                    ...prev,
-                    name: newName,
-                    tagline: getContextualTagline(newName, prev.description),
-                  }));
-                }}
+                onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
               />
             </div>
             <div className="sm:col-span-2">
@@ -789,14 +781,7 @@ export default function AdminCounselling() {
               className="input-field"
               placeholder="Briefly describe what this counselling service covers..."
               value={serviceForm.description}
-              onChange={(e) => {
-                const newDesc = e.target.value;
-                setServiceForm((prev) => ({
-                  ...prev,
-                  description: newDesc,
-                  tagline: getContextualTagline(prev.name, newDesc),
-                }));
-              }}
+              onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
             />
           </div>
           <select className="input-field" value={serviceForm.counsellorId || ''} onChange={(e) => setServiceForm({ ...serviceForm, counsellorId: e.target.value })}>
