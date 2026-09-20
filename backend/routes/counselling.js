@@ -208,134 +208,180 @@ router.put('/settings', protect, superAdminOnly, async (req, res) => {
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const getPopularCuratedTaglines = (name, mode = 'video', duration = '30 min') => {
-  const lower = String(name || '').toLowerCase().trim();
+const getPopularCuratedMeta = (name = '', description = '', mode = 'video', duration = '30 min') => {
+  const combined = `${name || ''} ${description || ''}`.toLowerCase().trim();
 
-  if (/12th|10th|school|stream|science|arts|commerce/.test(lower)) {
-    return [
-      'Personalized guidance to choose the right stream, courses & college path',
-      'Confused after 10th/12th? Get 1-on-1 clarity on high-paying career paths',
-      'Make confident stream & college choices with proven aptitude mapping',
-      'Discover top degrees, eligibility & career scope tailored for your profile',
-      'Step-by-step roadmap from school graduation to top university admissions',
-    ];
-  }
-  if (/job|placement|interview|resume|salary|fresher|switch/.test(lower)) {
-    return [
-      'Crack high-impact job interviews & build an industry-ready resume',
-      '1-on-1 career coaching to accelerate your placement & salary package',
-      'Strategic career switch guidance from active industry experts',
-      'Master technical & HR rounds with personalized mock interview tips',
-      'Turn job rejections into offers with a personalized career upgrade plan',
-    ];
-  }
-  if (/it|tech|code|coding|software|web|full stack|data|python|java|cloud|ai/.test(lower)) {
-    return [
-      'Structured personalized roadmap to break into high-growth tech careers',
-      'Master in-demand software skills with real-world project mentorship',
-      'From beginner to job-ready developer: 1-on-1 tailored tech roadmap',
-      'Portfolio review, coding interview secrets & tech industry navigation',
-      'Accelerate your IT career with practical skills and placement tactics',
-    ];
-  }
-  if (/govt|sarkari|upsc|ssc|railway|banking|defense|police/.test(lower)) {
-    return [
-      'Targeted strategy, exam selection & high-yield preparation guidance',
-      'Smart preparation blueprint to crack competitive exams on first attempt',
-      'Expert mentorship on syllabus prioritization, test series & time mastery',
-      'Clear your doubts on govt job eligibility, vacancies & career security',
-      'Structured study schedule & proven revision tactics by experienced mentors',
-    ];
-  }
-  if (/college|degree|university|admission|bca|mca|btech|diploma|mba/.test(lower)) {
-    return [
-      'Expert clarity on college selection, degree ROI & real industry relevance',
-      'Compare courses & universities to secure the best admission for your future',
-      'Avoid costly degree mistakes with unbiased 1-on-1 college counselling',
-      'Evaluate top accredited colleges, fee structures & campus placement records',
-      'Find the perfect degree aligned with your passions and market demand',
-    ];
-  }
-  if (/finance|tally|gst|accounting|tax|ca|commerce/.test(lower)) {
-    return [
-      'Direct mentorship on modern accounting careers, GST & corporate finance',
-      'Master computerized accounting & unlock high-demand financial roles',
-      'Fast-track your accounting career with practical industry knowledge',
-      'Professional guidance on accounting certifications & corporate compliance',
-      'Step into corporate finance & taxation with verified job-ready skills',
-    ];
-  }
-  if (/design|graphic|ui|ux|multimedia|animation|video editing/.test(lower)) {
-    return [
-      'Build a winning design portfolio, freelance profile & creative career',
-      'Master modern UI/UX and visual design tools with expert feedback',
-      'Turn your creative passion into a high-paying professional design career',
-      'Industry-standard portfolio review and freelance client acquisition tips',
-      'Accelerate your creative journey with 1-on-1 design mentorship',
-    ];
+  if (/12th|10th|school|stream|science|arts|commerce|matric|intermediate/.test(combined)) {
+    return {
+      taglines: [
+        'Personalized guidance to choose the right stream, courses & college path',
+        'Confused after 10th/12th? Get 1-on-1 clarity on high-paying career paths',
+        'Make confident stream & college choices with proven aptitude mapping',
+        'Discover top degrees, eligibility & career scope tailored for your profile',
+        'Step-by-step roadmap from school graduation to top university admissions',
+      ],
+      includes: 'Stream & subject selection guidance, Top 3 degree & career roadmaps, College eligibility & entrance exam tips, Parent-student doubt clearance, Action summary notes',
+    };
   }
 
-  return [
-    `1-on-1 personalized mentorship & actionable roadmap for ${name ? name.trim() : 'your career'}`,
-    'Clear confusion, choose the right direction & fast-track your success',
-    'Personalized career strategy tailored to your strengths, goals & passions',
-    'Get actionable feedback from experienced mentors in a private 1-on-1 call',
-    'Unlock your true potential with an industry-tested career success roadmap',
-  ];
+  if (/job|placement|interview|resume|cv|salary|fresher|switch|hiring|hr round/.test(combined)) {
+    return {
+      taglines: [
+        'Crack high-impact job interviews & build an industry-ready resume',
+        '1-on-1 career coaching to accelerate your placement & salary package',
+        'Strategic career switch guidance from active industry experts',
+        'Master technical & HR rounds with personalized mock interview tips',
+        'Turn job rejections into offers with a personalized career upgrade plan',
+      ],
+      includes: 'ATS-friendly resume audit, LinkedIn profile optimization, Live mock interview & feedback, Salary negotiation strategy, 7-day WhatsApp doubt support',
+    };
+  }
+
+  if (/it|tech|code|coding|software|web|full stack|frontend|backend|data|python|java|cloud|ai|devops/.test(combined)) {
+    return {
+      taglines: [
+        'Structured personalized roadmap to break into high-growth tech careers',
+        'Master in-demand software skills with real-world project mentorship',
+        'From beginner to job-ready developer: 1-on-1 tailored tech roadmap',
+        'Portfolio review, coding interview secrets & tech industry navigation',
+        'Accelerate your IT career with practical skills and placement tactics',
+      ],
+      includes: 'GitHub & project portfolio review, Practical tech roadmap (Languages & Frameworks), DSA & problem-solving strategy, Real tech interview questions breakdown, Curated learning resources',
+    };
+  }
+
+  if (/govt|sarkari|upsc|ssc|railway|banking|defense|police|civil service/.test(combined)) {
+    return {
+      taglines: [
+        'Targeted strategy, exam selection & high-yield preparation guidance',
+        'Smart preparation blueprint to crack competitive exams on first attempt',
+        'Expert mentorship on syllabus prioritization, test series & time mastery',
+        'Clear your doubts on govt job eligibility, vacancies & career security',
+        'Structured study schedule & proven revision tactics by experienced mentors',
+      ],
+      includes: 'Exam syllabus breakdown & scoring topics, Standard booklist & test series guide, Daily preparation & revision schedule, Mistakes to avoid in first attempt, 1-on-1 strategy & doubt solving',
+    };
+  }
+
+  if (/college|degree|university|admission|bca|mca|btech|diploma|mba|bba|campus/.test(combined)) {
+    return {
+      taglines: [
+        'Expert clarity on college selection, degree ROI & real industry relevance',
+        'Compare courses & universities to secure the best admission for your future',
+        'Avoid costly degree mistakes with unbiased 1-on-1 college counselling',
+        'Evaluate top accredited colleges, fee structures & campus placement records',
+        'Find the perfect degree aligned with your passions and market demand',
+      ],
+      includes: 'College vs degree ROI comparison, Cutoff & admission process guide, Direct placement record insights, Course specialization recommendation, Personalized decision checklist',
+    };
+  }
+
+  if (/finance|tally|gst|accounting|tax|ca|commerce|audit|bookkeeping/.test(combined)) {
+    return {
+      taglines: [
+        'Direct mentorship on modern accounting careers, GST & corporate finance',
+        'Master computerized accounting & unlock high-demand financial roles',
+        'Fast-track your accounting career with practical industry knowledge',
+        'Professional guidance on accounting certifications & corporate compliance',
+        'Step into corporate finance & taxation with verified job-ready skills',
+      ],
+      includes: 'Practical accounting workflow breakdown, GST/TDS compliance career scope, Recommended certifications & tools, Corporate entry-level job roadmap, Interview questions cheat sheet',
+    };
+  }
+
+  if (/design|graphic|ui|ux|multimedia|animation|video editing|figma|photoshop/.test(combined)) {
+    return {
+      taglines: [
+        'Build a winning design portfolio, freelance profile & creative career',
+        'Master modern UI/UX and visual design tools with expert feedback',
+        'Turn your creative passion into a high-paying professional design career',
+        'Industry-standard portfolio review and freelance client acquisition tips',
+        'Accelerate your creative journey with 1-on-1 design mentorship',
+      ],
+      includes: 'Portfolio & Behance/Figma audit, Design tools & workflow roadmap, Freelance client pitch & pricing guide, Live creative critique & feedback, Resource pack & typography guidelines',
+    };
+  }
+
+  const topicName = name ? name.trim() : (description ? description.trim().slice(0, 30) : 'your career');
+  return {
+    taglines: [
+      `1-on-1 personalized mentorship & actionable roadmap for ${topicName}`,
+      'Clear confusion, choose the right direction & fast-track your success',
+      'Personalized career strategy tailored to your strengths, goals & passions',
+      'Get actionable feedback from experienced mentors in a private 1-on-1 call',
+      'Unlock your true potential with an industry-tested career success roadmap',
+    ],
+    includes: 'Personalized career action roadmap, Strengths & skill gap analysis, Step-by-step career milestones, Resource & learning recommendations, 1-on-1 private mentoring call',
+  };
 };
 
-const generateServiceTagline = (name, mode = 'video', duration = '30 min') => {
-  const list = getPopularCuratedTaglines(name, mode, duration);
-  return list[0];
+const getPopularCuratedTaglines = (name, mode = 'video', duration = '30 min', description = '') => {
+  return getPopularCuratedMeta(name, description, mode, duration).taglines;
 };
 
-const generateAITaglines = async (name, mode = 'video', duration = '30 min') => {
-  const fallback = getPopularCuratedTaglines(name, mode, duration);
+const generateServiceTagline = (name, mode = 'video', duration = '30 min', description = '') => {
+  const meta = getPopularCuratedMeta(name, description, mode, duration);
+  return meta.taglines[0];
+};
+
+const generateAIServiceMeta = async (name, description = '', mode = 'video', duration = '30 min') => {
+  const fallback = getPopularCuratedMeta(name, description, mode, duration);
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || !name || !name.trim()) return fallback;
+  if (!apiKey || (!name?.trim() && !description?.trim())) return fallback;
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
-    const prompt = `You are a world-class educational marketing copywriter and career coach for modern institutes.
-Generate 5 popular, catchy, high-converting, trending marketing taglines that leading edtech and career institutes (like Coursera, Topmate, UpGrad) use on the internet for this 1-on-1 counselling topic:
-"${name.trim()}"
+    const prompt = `You are a world-class educational marketing copywriter and career coach for modern edtech platforms (Topmate, UpGrad, Coursera).
+Based on the following 1-on-1 counselling service:
+Service Name / Topic: "${(name || '').trim()}"
+Service Description: "${(description || '').trim()}"
 Format / Mode: ${mode || 'Video call'}
 Duration: ${duration || '30 min'}
 
-Rules:
-1. Make them attractive, professional, and inspire immediate action.
-2. Length: between 7 to 15 words each.
-3. Return ONLY a valid JSON array of 5 strings, nothing else. No markdown fences.
-Example: ["Tagline 1", "Tagline 2", "Tagline 3", "Tagline 4", "Tagline 5"]`;
+Requirements:
+1. "taglines": 5 popular, catchy, high-converting taglines (7-15 words). If a description is provided, the taglines MUST closely reflect the value and intent explained in the description.
+2. "includes": A comma-separated string of 4 to 5 realistic, service-specific deliverables/inclusions that a candidate ACTUALLY needs for this exact topic & description (e.g. ATS Resume review, Portfolio critique, Stream assessment, Syllabus blueprint, etc. Strictly relevant to the service, avoid generic fluff).
+
+Return ONLY a valid JSON object in this exact format (no markdown code fence):
+{
+  "taglines": ["Tagline 1", "Tagline 2", "Tagline 3", "Tagline 4", "Tagline 5"],
+  "includes": "Deliverable 1, Deliverable 2, Deliverable 3, Deliverable 4, Deliverable 5"
+}`;
 
     const result = await model.generateContent(prompt);
     let text = result.response.text().trim();
     text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
 
     const parsed = JSON.parse(text);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed.slice(0, 5).map((t) => String(t).trim());
+    if (parsed && Array.isArray(parsed.taglines) && parsed.taglines.length > 0) {
+      return {
+        taglines: parsed.taglines.slice(0, 5).map((t) => String(t).trim()),
+        includes: typeof parsed.includes === 'string' && parsed.includes.trim()
+          ? parsed.includes.trim()
+          : (Array.isArray(parsed.includes) ? parsed.includes.join(', ') : fallback.includes),
+      };
     }
   } catch (err) {
-    console.warn('[AI Tagline Generation Fallback]', err.message);
+    console.warn('[AI Service Meta Generation Fallback]', err.message);
   }
   return fallback;
 };
 
 router.post('/services/generate-tagline', protect, superAdminOnly, async (req, res) => {
   try {
-    const { name, mode, duration } = req.body;
-    const taglines = await generateAITaglines(name, mode, duration);
+    const { name, description, mode, duration } = req.body;
+    const meta = await generateAIServiceMeta(name, description, mode, duration);
     res.json({
       success: true,
-      tagline: taglines[0] || generateServiceTagline(name, mode, duration),
-      taglines,
+      tagline: meta.taglines[0] || generateServiceTagline(name, mode, duration, description),
+      taglines: meta.taglines,
+      includes: meta.includes,
     });
   } catch (error) {
-    const fallback = getPopularCuratedTaglines(req.body?.name, req.body?.mode, req.body?.duration);
-    res.json({ success: true, tagline: fallback[0], taglines: fallback });
+    const fallback = getPopularCuratedMeta(req.body?.name, req.body?.description, req.body?.mode, req.body?.duration);
+    res.json({ success: true, tagline: fallback.taglines[0], taglines: fallback.taglines, includes: fallback.includes });
   }
 });
 

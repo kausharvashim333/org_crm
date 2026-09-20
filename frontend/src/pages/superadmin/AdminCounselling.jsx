@@ -55,76 +55,129 @@ export default function AdminCounselling() {
   const [counsellorForm, setCounsellorForm] = useState({ name: '', email: '', phone: '', password: '', isActive: true });
   const [slotForm, setSlotForm] = useState({ serviceId: '', startAt: '', counsellorId: '' });
   const [taglineUserEdited, setTaglineUserEdited] = useState(false);
+  const [includesUserEdited, setIncludesUserEdited] = useState(false);
   const { showSuccess, showError } = useToast();
 
-  const getContextualTagline = (name) => {
-    const lower = String(name || '').toLowerCase().trim();
-    if (!lower) return '1-on-1 personalized mentorship to unlock your dream career';
+  const getContextualMeta = (name = '', description = '') => {
+    const combined = `${name || ''} ${description || ''}`.toLowerCase().trim();
+    if (!combined) {
+      return {
+        tagline: '1-on-1 personalized mentorship to unlock your dream career',
+        includes: 'Personalized career roadmap, Strengths & gap analysis, 3 actionable milestones, Learning resources, 1-on-1 private mentoring call',
+      };
+    }
 
-    if (/12th|10th|school|stream|science|arts|commerce/.test(lower)) {
-      return 'Personalized guidance to choose the right stream, courses & college path';
+    if (/12th|10th|school|stream|science|arts|commerce|matric|intermediate/.test(combined)) {
+      return {
+        tagline: 'Personalized guidance to choose the right stream, courses & college path',
+        includes: 'Stream & subject selection guidance, Top 3 degree & career roadmaps, College eligibility & entrance exam tips, Parent-student doubt clearance, Action summary notes',
+      };
     }
-    if (/job|placement|interview|resume|salary|fresher|switch/.test(lower)) {
-      return 'Crack top interviews & build a high-impact career profile with 1-on-1 coaching';
+    if (/job|placement|interview|resume|cv|salary|fresher|switch|hiring|hr round/.test(combined)) {
+      return {
+        tagline: 'Crack high-impact job interviews & build an industry-ready resume',
+        includes: 'ATS-friendly resume audit, LinkedIn profile optimization, Live mock interview & feedback, Salary negotiation strategy, 7-day WhatsApp doubt support',
+      };
     }
-    if (/it|tech|code|coding|software|web|full stack|data|python|java/.test(lower)) {
-      return 'Structured personalized roadmap to break into high-growth tech careers';
+    if (/it|tech|code|coding|software|web|full stack|frontend|backend|data|python|java|cloud|ai|devops/.test(combined)) {
+      return {
+        tagline: 'Structured personalized roadmap to break into high-growth tech careers',
+        includes: 'GitHub & project portfolio review, Practical tech roadmap (Languages & Frameworks), DSA & problem-solving strategy, Real tech interview questions breakdown, Curated learning resources',
+      };
     }
-    if (/govt|sarkari|upsc|ssc|railway|banking|defense/.test(lower)) {
-      return 'Targeted strategy, exam selection & high-yield preparation guidance';
+    if (/govt|sarkari|upsc|ssc|railway|banking|defense|police|civil service/.test(combined)) {
+      return {
+        tagline: 'Targeted strategy, exam selection & high-yield preparation guidance',
+        includes: 'Exam syllabus breakdown & scoring topics, Standard booklist & test series guide, Daily preparation & revision schedule, Mistakes to avoid in first attempt, 1-on-1 strategy & doubt solving',
+      };
     }
-    if (/college|degree|university|admission|bca|mca|btech|diploma/.test(lower)) {
-      return 'Expert clarity on college selection, degree ROI & real industry relevance';
+    if (/college|degree|university|admission|bca|mca|btech|diploma|mba|bba|campus/.test(combined)) {
+      return {
+        tagline: 'Expert clarity on college selection, degree ROI & real industry relevance',
+        includes: 'College vs degree ROI comparison, Cutoff & admission process guide, Direct placement record insights, Course specialization recommendation, Personalized decision checklist',
+      };
     }
-    if (/finance|tally|gst|accounting|tax/.test(lower)) {
-      return 'Direct mentorship on modern accounting careers, GST & corporate finance';
+    if (/finance|tally|gst|accounting|tax|ca|commerce|audit|bookkeeping/.test(combined)) {
+      return {
+        tagline: 'Direct mentorship on modern accounting careers, GST & corporate finance',
+        includes: 'Practical accounting workflow breakdown, GST/TDS compliance career scope, Recommended certifications & tools, Corporate entry-level job roadmap, Interview questions cheat sheet',
+      };
     }
-    if (/design|graphic|ui|ux|multimedia|animation/.test(lower)) {
-      return 'Build a winning design portfolio, freelance profile & creative career';
+    if (/design|graphic|ui|ux|multimedia|animation|video editing|figma|photoshop/.test(combined)) {
+      return {
+        tagline: 'Build a winning design portfolio, freelance profile & creative career',
+        includes: 'Portfolio & Behance/Figma audit, Design tools & workflow roadmap, Freelance client pitch & pricing guide, Live creative critique & feedback, Resource pack & typography guidelines',
+      };
     }
-    return `1-on-1 personalized mentorship & actionable roadmap for ${name.trim()}`;
+
+    const topicName = name ? name.trim() : (description ? description.trim().slice(0, 30) : 'your career');
+    return {
+      tagline: `1-on-1 personalized mentorship & actionable roadmap for ${topicName}`,
+      includes: 'Personalized career action roadmap, Strengths & skill gap analysis, Step-by-step career milestones, Resource & learning recommendations, 1-on-1 private mentoring call',
+    };
   };
+
+  const getContextualTagline = (name = '', description = '') => getContextualMeta(name, description).tagline;
+  const getContextualIncludes = (name = '', description = '') => getContextualMeta(name, description).includes;
 
   const [taglineModal, setTaglineModal] = useState({
     open: false,
     loading: false,
     taglines: [],
+    suggestedIncludes: '',
   });
 
-  const handleOpenAITaglines = async (overrideName) => {
+  const handleOpenAITaglines = async (overrideName, overrideDesc) => {
     const targetName = (overrideName !== undefined ? overrideName : serviceForm.name || '').trim();
-    if (!targetName) {
-      showError('Please enter a service name first to generate taglines');
+    const targetDesc = (overrideDesc !== undefined ? overrideDesc : serviceForm.description || '').trim();
+    if (!targetName && !targetDesc) {
+      showError('Please enter a service name or description first');
       return;
     }
-    setTaglineModal({ open: true, loading: true, taglines: [] });
+    setTaglineModal({ open: true, loading: true, taglines: [], suggestedIncludes: '' });
     try {
       const res = await generateCounsellingTagline({
         name: targetName,
+        description: targetDesc,
         mode: serviceForm.mode,
         duration: serviceForm.duration,
       });
       if (res?.data?.success && Array.isArray(res.data.taglines) && res.data.taglines.length > 0) {
-        setTaglineModal({ open: true, loading: false, taglines: res.data.taglines });
+        setTaglineModal({
+          open: true,
+          loading: false,
+          taglines: res.data.taglines,
+          suggestedIncludes: res.data.includes || getContextualIncludes(targetName, targetDesc),
+        });
       } else {
-        const fallbacks = [
-          getContextualTagline(targetName),
-          `1-on-1 personalized mentorship to ace your ${targetName} goals`,
-          `Structured roadmap & expert guidance tailored for ${targetName}`,
-          `Practical step-by-step strategy with industry mentors for ${targetName}`,
-          `Gain absolute clarity, avoid career mistakes & succeed in ${targetName}`,
-        ];
-        setTaglineModal({ open: true, loading: false, taglines: fallbacks });
+        const meta = getContextualMeta(targetName, targetDesc);
+        setTaglineModal({
+          open: true,
+          loading: false,
+          taglines: [
+            meta.tagline,
+            `1-on-1 personalized mentorship to ace your ${targetName || 'goals'}`,
+            `Structured roadmap & expert guidance tailored for ${targetName || 'career growth'}`,
+            `Practical step-by-step strategy with industry mentors for ${targetName || 'success'}`,
+            `Gain absolute clarity, avoid career mistakes & succeed in ${targetName || 'your path'}`,
+          ],
+          suggestedIncludes: meta.includes,
+        });
       }
     } catch (err) {
-      const fallbacks = [
-        getContextualTagline(targetName),
-        `1-on-1 personalized mentorship to ace your ${targetName} goals`,
-        `Structured roadmap & expert guidance tailored for ${targetName}`,
-        `Practical step-by-step strategy with industry mentors for ${targetName}`,
-        `Gain absolute clarity, avoid career mistakes & succeed in ${targetName}`,
-      ];
-      setTaglineModal({ open: true, loading: false, taglines: fallbacks });
+      const meta = getContextualMeta(targetName, targetDesc);
+      setTaglineModal({
+        open: true,
+        loading: false,
+        taglines: [
+          meta.tagline,
+          `1-on-1 personalized mentorship to ace your ${targetName || 'goals'}`,
+          `Structured roadmap & expert guidance tailored for ${targetName || 'career growth'}`,
+          `Practical step-by-step strategy with industry mentors for ${targetName || 'success'}`,
+          `Gain absolute clarity, avoid career mistakes & succeed in ${targetName || 'your path'}`,
+        ],
+        suggestedIncludes: meta.includes,
+      });
     }
   };
 
@@ -170,6 +223,7 @@ export default function AdminCounselling() {
     setEditService(null);
     setServiceForm(emptyService);
     setTaglineUserEdited(false);
+    setIncludesUserEdited(false);
     setShowService(true);
   };
 
@@ -183,6 +237,7 @@ export default function AdminCounselling() {
       image: s.image || '', isActive: s.isActive !== false, counsellorId: s.counsellorId?._id || s.counsellorId || '',
     });
     setTaglineUserEdited(Boolean(s.tagline));
+    setIncludesUserEdited(Boolean(s.includes && s.includes.length));
     setShowService(true);
   };
 
@@ -738,8 +793,9 @@ export default function AdminCounselling() {
                 onChange={(e) => {
                   const newName = e.target.value;
                   setServiceForm((prev) => {
-                    const autoTagline = !taglineUserEdited || !prev.tagline ? getContextualTagline(newName) : prev.tagline;
-                    return { ...prev, name: newName, tagline: autoTagline };
+                    const autoTagline = !taglineUserEdited || !prev.tagline ? getContextualTagline(newName, prev.description) : prev.tagline;
+                    const autoIncludes = !includesUserEdited || !prev.includes ? getContextualIncludes(newName, prev.description) : prev.includes;
+                    return { ...prev, name: newName, tagline: autoTagline, includes: autoIncludes };
                   });
                 }}
               />
@@ -752,7 +808,7 @@ export default function AdminCounselling() {
                     type="button"
                     onClick={() => handleOpenAITaglines()}
                     className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 hover:from-indigo-100 hover:to-purple-100 border border-indigo-200 transition-all cursor-pointer shadow-xs"
-                    title="Generate trending edtech taglines from internet/AI"
+                    title="Generate trending taglines & deliverables from AI"
                   >
                     <Wand2 className="w-3 h-3 text-indigo-600 animate-pulse" />
                     <span>Popular AI Taglines</span>
@@ -760,21 +816,21 @@ export default function AdminCounselling() {
                   <button
                     type="button"
                     onClick={() => {
-                      const generated = getContextualTagline(serviceForm.name);
+                      const generated = getContextualTagline(serviceForm.name, serviceForm.description);
                       setServiceForm((prev) => ({ ...prev, tagline: generated }));
                       setTaglineUserEdited(true);
-                      showSuccess('Tagline quick-filled!');
+                      showSuccess('Tagline auto-generated from description & topic!');
                     }}
                     className="text-[11px] text-slate-500 hover:text-indigo-600 font-medium flex items-center gap-0.5 cursor-pointer"
-                    title="Quick auto-fill"
+                    title="Auto quick-fill from description"
                   >
-                    <Sparkles className="w-3 h-3" /> Quick fill
+                    <Sparkles className="w-3 h-3" /> From description
                   </button>
                 </div>
               </div>
               <input
                 className="input-field"
-                placeholder="Auto-generated or select from popular AI taglines"
+                placeholder="Auto-generated based on description & topic"
                 value={serviceForm.tagline}
                 onChange={(e) => {
                   setServiceForm({ ...serviceForm, tagline: e.target.value });
@@ -805,8 +861,71 @@ export default function AdminCounselling() {
               </div>
             </div>
           </div>
-          <div><label className="block text-xs font-medium mb-1">Description</label><textarea rows="2" className="input-field" value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} /></div>
-          <div><label className="block text-xs font-medium mb-1">Includes (comma separated)</label><input className="input-field" value={serviceForm.includes} onChange={(e) => setServiceForm({ ...serviceForm, includes: e.target.value })} placeholder="Stream recommend, 2 course options, WhatsApp follow-up" /></div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium">Description</label>
+              <button
+                type="button"
+                onClick={() => {
+                  const meta = getContextualMeta(serviceForm.name, serviceForm.description);
+                  setServiceForm((prev) => ({
+                    ...prev,
+                    tagline: meta.tagline,
+                    includes: meta.includes,
+                  }));
+                  setTaglineUserEdited(true);
+                  setIncludesUserEdited(true);
+                  showSuccess('Generated tagline & service deliverables from description!');
+                }}
+                className="text-[11px] text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 cursor-pointer"
+                title="Generate tagline and includes based on this description"
+              >
+                <Sparkles className="w-3 h-3 text-indigo-600" />
+                Auto-update Tagline & Includes
+              </button>
+            </div>
+            <textarea
+              rows="2"
+              className="input-field"
+              placeholder="Briefly describe what this counselling service covers..."
+              value={serviceForm.description}
+              onChange={(e) => {
+                const newDesc = e.target.value;
+                setServiceForm((prev) => {
+                  const autoTagline = !taglineUserEdited || !prev.tagline ? getContextualTagline(prev.name, newDesc) : prev.tagline;
+                  const autoIncludes = !includesUserEdited || !prev.includes ? getContextualIncludes(prev.name, newDesc) : prev.includes;
+                  return { ...prev, description: newDesc, tagline: autoTagline, includes: autoIncludes };
+                });
+              }}
+            />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium">Includes (Service-wise deliverables, comma separated)</label>
+              <button
+                type="button"
+                onClick={() => {
+                  const autoIncludes = getContextualIncludes(serviceForm.name, serviceForm.description);
+                  setServiceForm((prev) => ({ ...prev, includes: autoIncludes }));
+                  setIncludesUserEdited(true);
+                  showSuccess('Service-specific deliverables generated!');
+                }}
+                className="text-[11px] text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 cursor-pointer"
+                title="Generate service-specific inclusions needed for this topic"
+              >
+                <Sparkles className="w-3 h-3 text-indigo-600" /> Auto includes
+              </button>
+            </div>
+            <input
+              className="input-field"
+              value={serviceForm.includes}
+              onChange={(e) => {
+                setServiceForm({ ...serviceForm, includes: e.target.value });
+                setIncludesUserEdited(true);
+              }}
+              placeholder="E.g. ATS Resume review, Mock interview feedback, 7-day follow-up"
+            />
+          </div>
           <select className="input-field" value={serviceForm.counsellorId || ''} onChange={(e) => setServiceForm({ ...serviceForm, counsellorId: e.target.value })}>
             <option value="">Assigned counsellor (optional)</option>
             {counsellors.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -824,33 +943,40 @@ export default function AdminCounselling() {
         size="md"
       >
         <div className="space-y-4">
-          <div className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
-            <div>
-              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Service Topic</p>
-              <p className="text-sm font-semibold text-slate-800">{serviceForm.name || 'General Career Mentorship'}</p>
+          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Service Topic</p>
+                <p className="text-sm font-semibold text-slate-800">{serviceForm.name || 'General Career Mentorship'}</p>
+              </div>
+              <button
+                type="button"
+                disabled={taglineModal.loading}
+                onClick={() => handleOpenAITaglines()}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${taglineModal.loading ? 'animate-spin' : ''}`} />
+                {taglineModal.loading ? 'Generating...' : 'Regenerate'}
+              </button>
             </div>
-            <button
-              type="button"
-              disabled={taglineModal.loading}
-              onClick={() => handleOpenAITaglines()}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs hover:bg-slate-50 transition"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${taglineModal.loading ? 'animate-spin' : ''}`} />
-              {taglineModal.loading ? 'Generating...' : 'Regenerate'}
-            </button>
+            {serviceForm.description && (
+              <p className="text-xs text-slate-500 line-clamp-1 border-t border-slate-200/60 pt-1">
+                <span className="font-medium text-slate-700">Description context:</span> {serviceForm.description}
+              </p>
+            )}
           </div>
 
           <p className="text-xs text-slate-600">
-            Select a high-converting, popular edtech tagline inspired by trending platforms (Topmate, UpGrad, Coursera):
+            Select a high-converting tagline tailored to your service topic & description:
           </p>
 
           {taglineModal.loading ? (
             <div className="py-8 flex flex-col items-center justify-center gap-2">
               <div className="w-7 h-7 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-slate-500 font-medium">Fetching trending taglines from AI & edtech...</p>
+              <p className="text-xs text-slate-500 font-medium">Analyzing description & fetching trending taglines...</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
               {taglineModal.taglines.map((item, idx) => {
                 const isCurrent = serviceForm.tagline === item;
                 return (
@@ -890,6 +1016,26 @@ export default function AdminCounselling() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {taglineModal.suggestedIncludes && (
+            <div className="bg-indigo-50/70 p-3 rounded-xl border border-indigo-100 flex items-start justify-between gap-3">
+              <div className="text-xs">
+                <p className="font-semibold text-indigo-900 mb-0.5">🎯 Service-Specific Deliverables (Includes):</p>
+                <p className="text-indigo-700 leading-relaxed text-[11px]">{taglineModal.suggestedIncludes}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setServiceForm((prev) => ({ ...prev, includes: taglineModal.suggestedIncludes }));
+                  setIncludesUserEdited(true);
+                  showSuccess('Service-specific deliverables applied!');
+                }}
+                className="px-2.5 py-1 text-[11px] font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow-2xs whitespace-nowrap cursor-pointer mt-0.5"
+              >
+                Apply Includes
+              </button>
             </div>
           )}
 
