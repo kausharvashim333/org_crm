@@ -312,3 +312,4 @@ export const getCounsellingWaitlist = (params) => API.get('/counselling/waitlist
 export const sendCounsellingRecording = (id, data) => API.post(`/counselling/sessions/${id}/recording`, data);
 export const resendCounsellingJoin = (id) => API.post(`/counselling/bookings/${id}/resend-join`);
 export const getCounsellorPortal = () => API.get('/counselling/portal/mine');
+export const updateCounsellingSessionMeetingLink = (id, data) => API.patch(`/counselling/sessions/${id}/meeting-link`, data);

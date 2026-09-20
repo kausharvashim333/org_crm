@@ -609,7 +609,7 @@ router.post('/bookings/manual', protect, superAdminOnly, async (req, res) => {
   }
 });
 
-router.put('/bookings/:id', protect, superAdminOnly, async (req, res) => {
+router.put('/bookings/:id', protect, counsellorOrAdmin, async (req, res) => {
   try {
     const booking = await CounsellingBooking.findById(req.params.id);
     if (!booking) return res.status(404).json({ success: false, message: 'Booking not found' });
@@ -899,22 +899,60 @@ router.post('/bookings/:id/resend-join', protect, counsellorOrAdmin, async (req,
   }
 });
 
+router.patch('/sessions/:id/meeting-link', protect, counsellorOrAdmin, async (req, res) => {
+  try {
+    const session = await CounsellingSession.findById(req.params.id);
+    if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
+    if (req.user.role === 'counsellor' && session.counsellorId && String(session.counsellorId) !== String(req.user._id)) {
+      return res.status(403).json({ success: false, message: 'Not your assigned session' });
+    }
+    if (req.body.meetingLink !== undefined) session.meetingLink = req.body.meetingLink;
+    if (req.body.mode !== undefined) session.mode = req.body.mode;
+    await session.save();
+    res.json({ success: true, session });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 router.get('/portal/mine', protect, counsellorOrAdmin, async (req, res) => {
   try {
     const isAdmin = ['super_admin', 'admin', 'staff'].includes(req.user.role);
     const uid = req.user._id;
     const sessionFilter = isAdmin ? {} : { counsellorId: uid };
-    const serviceFilter = isAdmin ? {} : { counsellorId: uid };
+    const serviceFilter = isAdmin
+      ? {}
+      : { $or: [{ counsellorId: uid }, { counsellorId: { $exists: false } }, { counsellorId: null }] };
+
     const sessions = await CounsellingSession.find(sessionFilter).sort({ date: 1 });
-    const services = await CounsellingService.find(serviceFilter);
+    const services = await CounsellingService.find(serviceFilter).sort({ displayOrder: 1, name: 1 });
     const sessionIds = sessions.map((s) => s._id);
     const serviceIds = services.map((s) => s._id);
+
+    const counsellorSlots = await CounsellingSlot.find(isAdmin ? {} : { counsellorId: uid })
+      .populate('serviceId', 'name duration mode price')
+      .sort({ startAt: 1 });
+    const slotIds = counsellorSlots.map((s) => s._id);
+
     const bookingFilter = isAdmin
       ? { paymentStatus: 'paid' }
-      : { paymentStatus: 'paid', $or: [{ sessionId: { $in: sessionIds } }, { serviceId: { $in: serviceIds } }] };
-    const bookings = await CounsellingBooking.find(bookingFilter).sort({ createdAt: -1 }).limit(200);
-    const slots = await CounsellingSlot.find(isAdmin ? {} : { counsellorId: uid }).sort({ startAt: 1 });
-    res.json({ success: true, sessions, services, bookings, slots });
+      : {
+          paymentStatus: 'paid',
+          $or: [
+            { sessionId: { $in: sessionIds } },
+            { serviceId: { $in: serviceIds } },
+            { slotId: { $in: slotIds } },
+          ],
+        };
+
+    const bookings = await CounsellingBooking.find(bookingFilter)
+      .populate('slotId')
+      .populate('sessionId')
+      .populate('serviceId', 'name duration mode price')
+      .sort({ createdAt: -1 })
+      .limit(300);
+
+    res.json({ success: true, sessions, services, bookings, slots: counsellorSlots });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
