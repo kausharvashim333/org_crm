@@ -312,64 +312,51 @@ export default function OrgCounsellingPage() {
                   key={s._id}
                   className="bg-white rounded-2xl border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between p-5 relative group"
                 >
-                  {/* Top Bar: Mode Badge & Promotional Badge */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                        <Icon className="w-3 h-3 text-indigo-600" />
-                        {modeLabels[s.mode] || 'Video Call'}
-                      </span>
-
-                      {s.badge ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-900 border border-amber-200">
-                          {s.badge}
-                        </span>
-                      ) : (
-                        <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-slate-400" /> {s.duration || '30 min'}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Title & Tagline */}
-                    <div>
-                      <h3 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-indigo-600 transition-colors">
-                        {s.name}
-                      </h3>
-                      {s.tagline && (
-                        <p className="text-xs text-indigo-600 font-medium mt-1 line-clamp-1">
-                          {s.tagline}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Description - Neat 2-line clamp */}
-                    {s.description && (
-                      <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
-                        {s.description}
-                      </p>
-                    )}
-
-                    {/* Compact Feature Chips (Instead of tall bulky bullet list) */}
-                    {includesList.length > 0 && (
-                      <div className="pt-1 flex flex-wrap gap-1.5">
-                        {includesList.slice(0, 3).map((item, i) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-50 text-slate-700 border border-slate-200/80"
-                          >
-                            <Check className="w-3 h-3 text-emerald-600 shrink-0" />
-                            <span className="truncate max-w-[170px]">{item}</span>
+                    {/* Top Bar: All 3 Modes Badges & Promotional Badge */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            <Video className="w-2.5 h-2.5 text-indigo-600" /> Video
                           </span>
-                        ))}
-                        {includesList.length > 3 && (
-                          <span className="text-[10px] font-bold text-slate-400 self-center px-1">
-                            +{includesList.length - 3} more
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <Phone className="w-2.5 h-2.5 text-emerald-600" /> Phone
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">
+                            <MessageCircle className="w-2.5 h-2.5 text-green-600" /> WhatsApp
+                          </span>
+                        </div>
+
+                        {s.badge ? (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide bg-amber-100 text-amber-900 border border-amber-200">
+                            {s.badge}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-slate-400" /> {s.duration || '30 min'}
                           </span>
                         )}
                       </div>
-                    )}
-                  </div>
+
+                      {/* Title & Tagline */}
+                      <div>
+                        <h3 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-indigo-600 transition-colors">
+                          {s.name}
+                        </h3>
+                        {s.tagline && (
+                          <p className="text-xs text-indigo-600 font-medium mt-1 line-clamp-1">
+                            {s.tagline}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Description - Neat 2-line clamp */}
+                      {s.description && (
+                        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                          {s.description}
+                        </p>
+                      )}
+                    </div>
 
                   {/* Card Bottom: Pricing & Action Button */}
                   <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
@@ -554,7 +541,9 @@ export default function OrgCounsellingPage() {
                 {bookFor.type === 'waitlist'
                   ? 'We will notify you immediately if a seat opens.'
                   : `₹${bookFor.type === 'group' ? bookFor.item.fee : bookFor.item.price} • ${
-                      modeLabels[bookFor.item.mode] || '1-on-1 Consultation'
+                      bookFor.type === 'group'
+                        ? (modeLabels[bookFor.item.mode] || 'Group Session')
+                        : 'Video • Phone • WhatsApp'
                     }`}
               </p>
             </div>
@@ -604,6 +593,37 @@ export default function OrgCounsellingPage() {
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
                 />
               </div>
+
+              {bookFor.type === 'one_on_one' && (
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">Preferred Consultation Mode</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'video', label: 'Video Call', icon: Video, color: 'text-indigo-600' },
+                      { id: 'phone', label: 'Phone Call', icon: Phone, color: 'text-emerald-600' },
+                      { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: 'text-green-600' },
+                    ].map((m) => {
+                      const Icon = m.icon;
+                      const isSel = (form.mode || 'video') === m.id;
+                      return (
+                        <button
+                          type="button"
+                          key={m.id}
+                          onClick={() => setForm({ ...form, mode: m.id })}
+                          className={`flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl border text-xs font-semibold transition cursor-pointer ${
+                            isSel
+                              ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-2xs ring-1 ring-indigo-200'
+                              : 'border-slate-200 hover:border-slate-300 text-slate-600 bg-white'
+                          }`}
+                        >
+                          <Icon className={`w-3.5 h-3.5 ${m.color}`} />
+                          <span>{m.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {bookFor.type === 'one_on_one' &&
                 (data?.slots || []).filter((sl) => String(sl.serviceId?._id || sl.serviceId) === String(bookFor.item._id)).length > 0 && (

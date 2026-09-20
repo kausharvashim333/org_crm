@@ -10,7 +10,7 @@ import {
 } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import Modal from '../../components/Modal';
-import { Plus, Edit, Trash2, Save, Users, Video, Calendar, Upload, ClipboardList, Sparkles } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, Users, Video, Calendar, Upload, ClipboardList, Sparkles, Phone, MessageCircle } from 'lucide-react';
 
 const emptyService = {
   name: '', tagline: '', description: '', duration: '30 min', mode: 'video',
@@ -440,7 +440,7 @@ export default function AdminCounselling() {
                 </div>
                 <p className="text-xs text-slate-500 line-clamp-2">{s.description}</p>
                 <div className="flex items-center justify-between text-xs pt-2 border-t">
-                  <span className="font-bold text-indigo-700">₹{s.price} · {s.duration} · {modeLabels[s.mode] || s.mode}</span>
+                  <span className="font-bold text-indigo-700">₹{s.price} · {s.duration} · Video • Phone • WhatsApp</span>
                   {s.isActive ? <span className="badge badge-success text-[10px]">Live</span> : <span className="badge badge-warning text-[10px]">Hidden</span>}
                 </div>
               </div>
@@ -731,27 +731,47 @@ export default function AdminCounselling() {
                 value={serviceForm.name}
                 onChange={(e) => {
                   const newName = e.target.value;
-                  setServiceForm((prev) => {
-                    const autoTagline = getContextualTagline(newName, prev.description);
-                    const autoIncludes = !includesUserEdited || !prev.includes ? getContextualIncludes(newName, prev.description) : prev.includes;
-                    return { ...prev, name: newName, tagline: autoTagline, includes: autoIncludes };
-                  });
+                  setServiceForm((prev) => ({
+                    ...prev,
+                    name: newName,
+                    tagline: getContextualTagline(newName, prev.description),
+                  }));
                 }}
               />
             </div>
-            <div><label className="block text-xs font-medium mb-1">Duration</label><input className="input-field" value={serviceForm.duration} onChange={(e) => setServiceForm({ ...serviceForm, duration: e.target.value })} /></div>
-            <div>
-              <label className="block text-xs font-medium mb-1">Mode</label>
-              <select className="input-field" value={serviceForm.mode} onChange={(e) => setServiceForm({ ...serviceForm, mode: e.target.value })}>
-                <option value="video">Video</option>
-                <option value="phone">Phone</option>
-                <option value="whatsapp">WhatsApp</option>
-              </select>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium mb-1.5">Consultation Modes (Available to students)</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'video', label: 'Video Call', icon: Video, color: 'text-indigo-600' },
+                  { id: 'phone', label: 'Phone Call', icon: Phone, color: 'text-emerald-600' },
+                  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: 'text-green-600' },
+                ].map((m) => {
+                  const Icon = m.icon;
+                  const isSelected = (serviceForm.mode || 'video') === m.id;
+                  return (
+                    <button
+                      type="button"
+                      key={m.id}
+                      onClick={() => setServiceForm({ ...serviceForm, mode: m.id })}
+                      className={`flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border text-xs font-semibold transition cursor-pointer ${
+                        isSelected
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-200 shadow-2xs'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Icon className={`w-3.5 h-3.5 ${isSelected ? m.color : 'text-slate-400'}`} />
+                      <span>{m.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+            <div><label className="block text-xs font-medium mb-1">Duration</label><input className="input-field" value={serviceForm.duration} onChange={(e) => setServiceForm({ ...serviceForm, duration: e.target.value })} /></div>
+            <div><label className="block text-xs font-medium mb-1">Badge</label><input className="input-field" placeholder="Popular / New" value={serviceForm.badge} onChange={(e) => setServiceForm({ ...serviceForm, badge: e.target.value })} /></div>
             <div><label className="block text-xs font-medium mb-1">Price (₹)</label><input type="number" min="0" className="input-field" value={serviceForm.price} onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })} /></div>
             <div><label className="block text-xs font-medium mb-1">Original price (optional)</label><input type="number" min="0" className="input-field" value={serviceForm.originalPrice} onChange={(e) => setServiceForm({ ...serviceForm, originalPrice: e.target.value })} /></div>
-            <div><label className="block text-xs font-medium mb-1">Badge</label><input className="input-field" placeholder="Popular / New" value={serviceForm.badge} onChange={(e) => setServiceForm({ ...serviceForm, badge: e.target.value })} /></div>
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-xs font-medium mb-1">Image</label>
               <div className="flex gap-2">
                 <input className="input-field text-xs" value={serviceForm.image} onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })} />
@@ -763,27 +783,7 @@ export default function AdminCounselling() {
             </div>
           </div>
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-medium">Description</label>
-              <button
-                type="button"
-                onClick={() => {
-                  const meta = getContextualMeta(serviceForm.name, serviceForm.description);
-                  setServiceForm((prev) => ({
-                    ...prev,
-                    tagline: meta.tagline,
-                    includes: meta.includes,
-                  }));
-                  setIncludesUserEdited(true);
-                  showSuccess('Service deliverables generated from description!');
-                }}
-                className="text-[11px] text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 cursor-pointer"
-                title="Generate service deliverables based on this description"
-              >
-                <Sparkles className="w-3 h-3 text-indigo-600" />
-                Auto-fill Includes
-              </button>
-            </div>
+            <label className="block text-xs font-medium mb-1">Description</label>
             <textarea
               rows="2"
               className="input-field"
@@ -791,39 +791,12 @@ export default function AdminCounselling() {
               value={serviceForm.description}
               onChange={(e) => {
                 const newDesc = e.target.value;
-                setServiceForm((prev) => {
-                  const autoTagline = getContextualTagline(prev.name, newDesc);
-                  const autoIncludes = !includesUserEdited || !prev.includes ? getContextualIncludes(prev.name, newDesc) : prev.includes;
-                  return { ...prev, description: newDesc, tagline: autoTagline, includes: autoIncludes };
-                });
+                setServiceForm((prev) => ({
+                  ...prev,
+                  description: newDesc,
+                  tagline: getContextualTagline(prev.name, newDesc),
+                }));
               }}
-            />
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-medium">Includes (Service-wise deliverables, comma separated)</label>
-              <button
-                type="button"
-                onClick={() => {
-                  const autoIncludes = getContextualIncludes(serviceForm.name, serviceForm.description);
-                  setServiceForm((prev) => ({ ...prev, includes: autoIncludes }));
-                  setIncludesUserEdited(true);
-                  showSuccess('Service-specific deliverables generated!');
-                }}
-                className="text-[11px] text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1 cursor-pointer"
-                title="Generate service-specific inclusions needed for this topic"
-              >
-                <Sparkles className="w-3 h-3 text-indigo-600" /> Auto includes
-              </button>
-            </div>
-            <input
-              className="input-field"
-              value={serviceForm.includes}
-              onChange={(e) => {
-                setServiceForm({ ...serviceForm, includes: e.target.value });
-                setIncludesUserEdited(true);
-              }}
-              placeholder="E.g. ATS Resume review, Mock interview feedback, 7-day follow-up"
             />
           </div>
           <select className="input-field" value={serviceForm.counsellorId || ''} onChange={(e) => setServiceForm({ ...serviceForm, counsellorId: e.target.value })}>
