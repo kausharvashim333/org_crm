@@ -313,3 +313,4 @@ export const sendCounsellingRecording = (id, data) => API.post(`/counselling/ses
 export const resendCounsellingJoin = (id) => API.post(`/counselling/bookings/${id}/resend-join`);
 export const getCounsellorPortal = () => API.get('/counselling/portal/mine');
 export const updateCounsellingSessionMeetingLink = (id, data) => API.patch(`/counselling/sessions/${id}/meeting-link`, data);
+export const generateCounsellingTagline = (data) => API.post('/counselling/services/generate-tagline', data);

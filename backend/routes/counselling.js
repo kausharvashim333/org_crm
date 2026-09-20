@@ -206,38 +206,137 @@ router.put('/settings', protect, superAdminOnly, async (req, res) => {
   }
 });
 
-const generateServiceTagline = (name, mode = 'video', duration = '30 min') => {
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const getPopularCuratedTaglines = (name, mode = 'video', duration = '30 min') => {
   const lower = String(name || '').toLowerCase().trim();
-  if (!lower) return '1-on-1 personalized mentorship to unlock your dream career';
 
   if (/12th|10th|school|stream|science|arts|commerce/.test(lower)) {
-    return 'Personalized guidance to choose the right stream, courses & college path';
+    return [
+      'Personalized guidance to choose the right stream, courses & college path',
+      'Confused after 10th/12th? Get 1-on-1 clarity on high-paying career paths',
+      'Make confident stream & college choices with proven aptitude mapping',
+      'Discover top degrees, eligibility & career scope tailored for your profile',
+      'Step-by-step roadmap from school graduation to top university admissions',
+    ];
   }
   if (/job|placement|interview|resume|salary|fresher|switch/.test(lower)) {
-    return 'Crack top interviews & build a high-impact career profile with 1-on-1 coaching';
+    return [
+      'Crack high-impact job interviews & build an industry-ready resume',
+      '1-on-1 career coaching to accelerate your placement & salary package',
+      'Strategic career switch guidance from active industry experts',
+      'Master technical & HR rounds with personalized mock interview tips',
+      'Turn job rejections into offers with a personalized career upgrade plan',
+    ];
   }
-  if (/it|tech|code|coding|software|web|full stack|data|python|java/.test(lower)) {
-    return 'Structured personalized roadmap to break into high-growth tech careers';
+  if (/it|tech|code|coding|software|web|full stack|data|python|java|cloud|ai/.test(lower)) {
+    return [
+      'Structured personalized roadmap to break into high-growth tech careers',
+      'Master in-demand software skills with real-world project mentorship',
+      'From beginner to job-ready developer: 1-on-1 tailored tech roadmap',
+      'Portfolio review, coding interview secrets & tech industry navigation',
+      'Accelerate your IT career with practical skills and placement tactics',
+    ];
   }
-  if (/govt|sarkari|upsc|ssc|railway|banking|defense/.test(lower)) {
-    return 'Targeted strategy, exam selection & high-yield preparation guidance';
+  if (/govt|sarkari|upsc|ssc|railway|banking|defense|police/.test(lower)) {
+    return [
+      'Targeted strategy, exam selection & high-yield preparation guidance',
+      'Smart preparation blueprint to crack competitive exams on first attempt',
+      'Expert mentorship on syllabus prioritization, test series & time mastery',
+      'Clear your doubts on govt job eligibility, vacancies & career security',
+      'Structured study schedule & proven revision tactics by experienced mentors',
+    ];
   }
-  if (/college|degree|university|admission|bca|mca|btech|diploma/.test(lower)) {
-    return 'Expert clarity on college selection, degree ROI & real industry relevance';
+  if (/college|degree|university|admission|bca|mca|btech|diploma|mba/.test(lower)) {
+    return [
+      'Expert clarity on college selection, degree ROI & real industry relevance',
+      'Compare courses & universities to secure the best admission for your future',
+      'Avoid costly degree mistakes with unbiased 1-on-1 college counselling',
+      'Evaluate top accredited colleges, fee structures & campus placement records',
+      'Find the perfect degree aligned with your passions and market demand',
+    ];
   }
-  if (/finance|tally|gst|accounting|tax/.test(lower)) {
-    return 'Direct mentorship on modern accounting careers, GST & corporate finance';
+  if (/finance|tally|gst|accounting|tax|ca|commerce/.test(lower)) {
+    return [
+      'Direct mentorship on modern accounting careers, GST & corporate finance',
+      'Master computerized accounting & unlock high-demand financial roles',
+      'Fast-track your accounting career with practical industry knowledge',
+      'Professional guidance on accounting certifications & corporate compliance',
+      'Step into corporate finance & taxation with verified job-ready skills',
+    ];
   }
-  if (/design|graphic|ui|ux|multimedia|animation/.test(lower)) {
-    return 'Build a winning design portfolio, freelance profile & creative career';
+  if (/design|graphic|ui|ux|multimedia|animation|video editing/.test(lower)) {
+    return [
+      'Build a winning design portfolio, freelance profile & creative career',
+      'Master modern UI/UX and visual design tools with expert feedback',
+      'Turn your creative passion into a high-paying professional design career',
+      'Industry-standard portfolio review and freelance client acquisition tips',
+      'Accelerate your creative journey with 1-on-1 design mentorship',
+    ];
   }
-  return `1-on-1 personalized mentorship & actionable roadmap for ${name.trim()}`;
+
+  return [
+    `1-on-1 personalized mentorship & actionable roadmap for ${name ? name.trim() : 'your career'}`,
+    'Clear confusion, choose the right direction & fast-track your success',
+    'Personalized career strategy tailored to your strengths, goals & passions',
+    'Get actionable feedback from experienced mentors in a private 1-on-1 call',
+    'Unlock your true potential with an industry-tested career success roadmap',
+  ];
 };
 
-router.post('/services/generate-tagline', protect, superAdminOnly, (req, res) => {
-  const { name, mode, duration } = req.body;
-  const tagline = generateServiceTagline(name, mode, duration);
-  res.json({ success: true, tagline });
+const generateServiceTagline = (name, mode = 'video', duration = '30 min') => {
+  const list = getPopularCuratedTaglines(name, mode, duration);
+  return list[0];
+};
+
+const generateAITaglines = async (name, mode = 'video', duration = '30 min') => {
+  const fallback = getPopularCuratedTaglines(name, mode, duration);
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || !name || !name.trim()) return fallback;
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+
+    const prompt = `You are a world-class educational marketing copywriter and career coach for modern institutes.
+Generate 5 popular, catchy, high-converting, trending marketing taglines that leading edtech and career institutes (like Coursera, Topmate, UpGrad) use on the internet for this 1-on-1 counselling topic:
+"${name.trim()}"
+Format / Mode: ${mode || 'Video call'}
+Duration: ${duration || '30 min'}
+
+Rules:
+1. Make them attractive, professional, and inspire immediate action.
+2. Length: between 7 to 15 words each.
+3. Return ONLY a valid JSON array of 5 strings, nothing else. No markdown fences.
+Example: ["Tagline 1", "Tagline 2", "Tagline 3", "Tagline 4", "Tagline 5"]`;
+
+    const result = await model.generateContent(prompt);
+    let text = result.response.text().trim();
+    text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed.slice(0, 5).map((t) => String(t).trim());
+    }
+  } catch (err) {
+    console.warn('[AI Tagline Generation Fallback]', err.message);
+  }
+  return fallback;
+};
+
+router.post('/services/generate-tagline', protect, superAdminOnly, async (req, res) => {
+  try {
+    const { name, mode, duration } = req.body;
+    const taglines = await generateAITaglines(name, mode, duration);
+    res.json({
+      success: true,
+      tagline: taglines[0] || generateServiceTagline(name, mode, duration),
+      taglines,
+    });
+  } catch (error) {
+    const fallback = getPopularCuratedTaglines(req.body?.name, req.body?.mode, req.body?.duration);
+    res.json({ success: true, tagline: fallback[0], taglines: fallback });
+  }
 });
 
 router.get('/services', protect, superAdminOnly, async (req, res) => {
