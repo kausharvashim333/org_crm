@@ -226,9 +226,9 @@ export default function AdminCourses() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Deactivate this course?')) return;
-    try { await deleteCourse(id); showSuccess('Course deactivated'); load(); }
-    catch { showError('Failed'); }
+    if (!confirm('Delete this course? It will be removed from the website and course catalog.')) return;
+    try { await deleteCourse(id); showSuccess('Course deleted'); load(); }
+    catch (error) { showError(error.response?.data?.message || 'Failed to delete course'); }
   };
 
   const togglePartnerAccess = async (c) => {

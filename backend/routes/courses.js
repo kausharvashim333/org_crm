@@ -96,7 +96,7 @@ router.get('/public', async (req, res) => {
 
 router.get('/', protect, async (req, res) => {
   try {
-    let filter = {};
+    let filter = { isActive: { $ne: false } };
     if (req.user.role === 'partner') {
       const Partner = require('../models/Partner');
       const partnerObj = await Partner.findById(req.user.partnerId);
@@ -279,10 +279,14 @@ router.delete('/:id', protect, async (req, res) => {
       if (!req.user.partnerId || !course.partnerId || course.partnerId.toString() !== req.user.partnerId.toString()) {
         return res.status(403).json({ success: false, message: 'Not authorized' });
       }
+    } else if (!['super_admin', 'admin', 'staff'].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
     }
-    course.isActive = false;
-    await course.save();
-    res.json({ success: true, message: 'Course deactivated' });
+
+    // Hard-delete so it disappears from admin/website lists.
+    // updateOne/deleteOne avoids full-document validation (empty chapter videoUrl used to 500 on save).
+    await Course.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Course deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

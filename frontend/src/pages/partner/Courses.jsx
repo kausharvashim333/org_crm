@@ -58,9 +58,9 @@ export default function PartnerCourses() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Deactivate this course?')) return;
-    try { await deleteCourse(id); showSuccess('Deactivated'); load(); }
-    catch (error) { showError('Failed'); }
+    if (!confirm('Delete this course? It will be removed from your catalog.')) return;
+    try { await deleteCourse(id); showSuccess('Course deleted'); load(); }
+    catch (error) { showError(error.response?.data?.message || 'Failed to delete course'); }
   };
 
   return (
