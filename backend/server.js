@@ -159,6 +159,7 @@ app.use('/api/coupons', require('./routes/coupons'));
 app.use('/api/addons', require('./routes/addons'));
 app.use('/api/partner-earnings', require('./routes/partnerEarnings'));
 app.use('/api/counselling', require('./routes/counselling'));
+app.use('/api/trainer', require('./routes/trainer'));
 
 // Centralized Error Handler (Prevent Stack Trace Leakage)
 app.use((err, req, res, next) => {

@@ -341,6 +341,20 @@ export default function Navbar({ activePage }) {
                 </Link>
 
                 <Link
+                  to="/trainer/login"
+                  onClick={() => setLoginDropdownOpen(false)}
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-slate-800 hover:text-slate-900 group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-200 shrink-0">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold">Trainer Portal</p>
+                    <p className="text-[10px] text-slate-400">Batches & Live Classes</p>
+                  </div>
+                </Link>
+
+                <Link
                   to="/admin/login"
                   onClick={() => setLoginDropdownOpen(false)}
                   className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-slate-800 hover:text-slate-900 group"

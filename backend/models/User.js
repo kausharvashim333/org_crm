@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   role: {
     type: String,
-    enum: ['super_admin', 'partner', 'staff', 'student', 'counsellor'],
+    enum: ['super_admin', 'partner', 'staff', 'student', 'counsellor', 'trainer'],
     required: true,
   },
   partnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Partner' },

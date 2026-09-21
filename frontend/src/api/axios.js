@@ -23,6 +23,8 @@ API.interceptors.request.use((config) => {
     token = localStorage.getItem('student_token');
   } else if (path.startsWith('/counsellor') && !path.includes('/login')) {
     token = localStorage.getItem('counsellor_token');
+  } else if (path.startsWith('/trainer') && !path.includes('/login')) {
+    token = localStorage.getItem('trainer_token');
   } else {
     // On public and login routes, do not send stale portal tokens
     token = null;
@@ -67,6 +69,11 @@ API.interceptors.response.use(
           localStorage.removeItem('counsellor_token');
           localStorage.removeItem('counsellor_user');
           window.location.href = '/counsellor/login';
+        } else if (path.startsWith('/trainer') && !path.includes('/login')) {
+          isRedirecting = true;
+          localStorage.removeItem('trainer_token');
+          localStorage.removeItem('trainer_user');
+          window.location.href = '/trainer/login';
         }
       }
     }

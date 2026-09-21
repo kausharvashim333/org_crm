@@ -19,6 +19,9 @@ const getRoleKeysForPath = (path = window.location.pathname) => {
   if (path.startsWith('/counsellor')) {
     return { tokenKey: 'counsellor_token', userKey: 'counsellor_user', role: 'counsellor' };
   }
+  if (path.startsWith('/trainer')) {
+    return { tokenKey: 'trainer_token', userKey: 'trainer_user', role: 'trainer' };
+  }
   return { tokenKey: 'admin_token', userKey: 'admin_user', role: 'super_admin' };
 };
 
@@ -28,7 +31,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const path = window.location.pathname;
-    const isProtectedRoute = path.startsWith('/admin') || path.startsWith('/partner') || path.startsWith('/student') || path.startsWith('/counsellor');
+    const isProtectedRoute = path.startsWith('/admin') || path.startsWith('/partner') || path.startsWith('/student') || path.startsWith('/counsellor') || path.startsWith('/trainer');
 
     // On public pages, don't attempt getMe() — the request interceptor won't attach
     // a token on public routes, so getMe() would return 401 and wrongly clear the token.
@@ -91,6 +94,9 @@ export const AuthProvider = ({ children }) => {
     } else if (role === 'counsellor') {
       tokenKey = 'counsellor_token';
       userKey = 'counsellor_user';
+    } else if (role === 'trainer') {
+      tokenKey = 'trainer_token';
+      userKey = 'trainer_user';
     }
 
     localStorage.setItem(tokenKey, userData.token);

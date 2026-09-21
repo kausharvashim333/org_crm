@@ -16,9 +16,10 @@ router.get('/', protect, partnerOrAdmin, async (req, res) => {
     if (req.query.status) filter.status = req.query.status;
     if (req.query.courseId) filter.courseId = req.query.courseId;
     const batches = await Batch.find(filter)
-      .populate('courseId', 'name fee duration')
+      .populate('courseId', 'name fee duration code')
       .populate('teacherId', 'name')
-      .populate('enrolledStudents', 'fullName phone')
+      .populate('trainerId', 'name email phone avatar')
+      .populate('enrolledStudents', 'fullName phone email')
       .sort({ createdAt: -1 });
     res.json({ success: true, count: batches.length, batches });
   } catch (error) {
@@ -31,9 +32,10 @@ router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
     const batch = await Batch.findById(req.params.id)
       .populate('courseId')
       .populate('teacherId', 'name phone qualification subjects')
+      .populate('trainerId', 'name email phone avatar')
       .populate('enrolledStudents', 'fullName phone email photo status');
     if (!batch) return res.status(404).json({ success: false, message: 'Batch not found' });
-    if (req.user.role === 'partner' && (!req.user.partnerId || batch.partnerId.toString() !== req.user.partnerId.toString())) {
+    if (req.user.role === 'partner' && (!req.user.partnerId || (batch.partnerId && batch.partnerId.toString() !== req.user.partnerId.toString()))) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     res.json({ success: true, batch });
@@ -44,19 +46,26 @@ router.get('/:id', protect, partnerOrAdmin, async (req, res) => {
 
 router.post('/', protect, partnerOrAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'partner') {
-      return res.status(403).json({ success: false, message: 'Only partners can create batches' });
-    }
-    if (!req.user.partnerId) {
-      return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
-    }
+    const isPartner = req.user.role === 'partner';
     const cleanBody = { ...req.body };
     if (!cleanBody.teacherId) delete cleanBody.teacherId;
+    if (!cleanBody.trainerId) delete cleanBody.trainerId;
     if (!cleanBody.endDate) delete cleanBody.endDate;
     if (!cleanBody.courseId) {
       return res.status(400).json({ success: false, message: 'Course is required' });
     }
-    const batch = await Batch.create({ ...cleanBody, partnerId: req.user.partnerId });
+
+    let partnerId = undefined;
+    if (isPartner) {
+      if (!req.user.partnerId) {
+        return res.status(400).json({ success: false, message: 'Partner profile not found. Please contact support.' });
+      }
+      partnerId = req.user.partnerId;
+    } else if (cleanBody.partnerId) {
+      partnerId = cleanBody.partnerId;
+    }
+
+    const batch = await Batch.create({ ...cleanBody, partnerId });
     res.status(201).json({ success: true, batch });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

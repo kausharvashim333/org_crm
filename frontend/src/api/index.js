@@ -315,3 +315,24 @@ export const resendCounsellingJoin = (id) => API.post(`/counselling/bookings/${i
 export const getCounsellorPortal = () => API.get('/counselling/portal/mine');
 export const updateCounsellingSessionMeetingLink = (id, data) => API.patch(`/counselling/sessions/${id}/meeting-link`, data);
 export const generateCounsellingTagline = (data) => API.post('/counselling/services/generate-tagline', data);
+
+// Trainer Portal APIs
+export const getTrainerDashboard = () => API.get('/trainer/dashboard');
+export const getTrainerBatches = (params) => API.get('/trainer/batches', { params });
+export const getTrainerBatch = (id) => API.get(`/trainer/batches/${id}`);
+export const updateTrainerBatchProgress = (id, data) => API.put(`/trainer/batches/${id}/progress`, data);
+export const updateTrainerMeetingLink = (id, data) => API.put(`/trainer/batches/${id}/meeting-link`, data);
+export const getTrainerStudents = (params) => API.get('/trainer/students', { params });
+
+// Admin Trainer & Batch Management APIs
+export const getAdminTrainers = () => API.get('/trainer/admin/trainers');
+export const createAdminTrainer = (data) => API.post('/trainer/admin/trainers', data);
+export const updateAdminTrainer = (id, data) => API.put(`/trainer/admin/trainers/${id}`, data);
+export const deleteAdminTrainer = (id) => API.delete(`/trainer/admin/trainers/${id}`);
+export const createAdminBatch = (data) => API.post('/trainer/admin/batches', data);
+export const updateAdminBatch = (id, data) => API.put(`/trainer/admin/batches/${id}`, data);
+export const deleteAdminBatch = (id) => API.delete(`/trainer/admin/batches/${id}`);
+export const getAdminCourseStudents = (courseId) => API.get(`/trainer/admin/course-students/${courseId}`);
+export const enrollStudentsToBatch = (batchId, studentIds) => API.post(`/trainer/admin/batches/${batchId}/enroll-students`, { studentIds });
+export const removeStudentFromBatch = (batchId, studentId) => API.post(`/trainer/admin/batches/${batchId}/remove-student`, { studentId });
+

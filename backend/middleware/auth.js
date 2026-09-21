@@ -69,3 +69,11 @@ exports.counsellorOrAdmin = (req, res, next) => {
   }
   next();
 };
+
+exports.trainerOrAdmin = (req, res, next) => {
+  if (!['super_admin', 'admin', 'staff', 'trainer'].includes(req.user?.role)) {
+    return res.status(403).json({ success: false, message: 'Trainer or Admin access required' });
+  }
+  next();
+};
+

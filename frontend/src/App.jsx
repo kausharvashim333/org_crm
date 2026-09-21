@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import { SuperAdminRoute, PartnerRoute, CounsellorRoute } from './components/ProtectedRoute';
+import { SuperAdminRoute, PartnerRoute, CounsellorRoute, TrainerRoute } from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import ScrollProgress from './components/ui/ScrollProgress';
@@ -45,6 +45,7 @@ const SuperAdminDashboard = lazy(() => import('./pages/superadmin/Dashboard'));
 const Franchises = lazy(() => import('./pages/superadmin/Franchises'));
 const AllStudents = lazy(() => import('./pages/superadmin/AllStudents'));
 const AdminCourses = lazy(() => import('./pages/superadmin/Courses'));
+const AdminTrainers = lazy(() => import('./pages/superadmin/TrainersAndBatches'));
 const AdminOrders = lazy(() => import('./pages/superadmin/AdminOrders'));
 const AdminCoupons = lazy(() => import('./pages/superadmin/AdminCoupons'));
 const AdminProjects = lazy(() => import('./pages/superadmin/Projects'));
@@ -62,6 +63,10 @@ const SecurityAndBackup = lazy(() => import('./pages/superadmin/SecurityAndBacku
 const AdminAddons = lazy(() => import('./pages/superadmin/AdminAddons'));
 const AdminCounselling = lazy(() => import('./pages/superadmin/AdminCounselling'));
 const PartnerSettlements = lazy(() => import('./pages/superadmin/PartnerSettlements'));
+
+// Trainer Pages (Lazy)
+const TrainerLogin = lazy(() => import('./pages/trainer/Login'));
+const TrainerDashboard = lazy(() => import('./pages/trainer/Dashboard'));
 
 // Partner Pages (Lazy)
 const PartnerLogin = lazy(() => import('./pages/partner/Login'));
@@ -180,6 +185,8 @@ export default function App() {
                 <Route path="franchises" element={<Franchises />} />
                 <Route path="students" element={<AllStudents />} />
                 <Route path="courses" element={<AdminCourses />} />
+                <Route path="trainers" element={<AdminTrainers />} />
+                <Route path="batches" element={<AdminTrainers />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="coupons" element={<AdminCoupons />} />
                 <Route path="projects" element={<AdminProjects />} />
@@ -240,8 +247,14 @@ export default function App() {
         <Route path="/student/certificate/:certificateId" element={<CertificateView />} />
         <Route path="/student/exam/:examId" element={<StudentTakeExam />} />
 
+        {/* Counsellor Portal Routes */}
         <Route path="/counsellor/login" element={<CounsellorLogin />} />
         <Route path="/counsellor/dashboard" element={<CounsellorRoute><CounsellorDashboard /></CounsellorRoute>} />
+
+        {/* Trainer Portal Routes */}
+        <Route path="/trainer/login" element={<TrainerLogin />} />
+        <Route path="/trainer/dashboard" element={<TrainerRoute><TrainerDashboard /></TrainerRoute>} />
+        <Route path="/trainer" element={<Navigate to="/trainer/dashboard" />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

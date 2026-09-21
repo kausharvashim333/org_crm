@@ -82,6 +82,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       links: [
         { to: '/admin/all-students', icon: Users, label: 'All Enrolled Students' },
         { to: '/admin/courses', icon: BookOpen, label: 'Course Catalog' },
+        { to: '/admin/trainers', icon: GraduationCap, label: 'Trainers & Batches' },
         { to: '/admin/counselling', icon: MessageCircle, label: 'Counselling' },
         { to: '/admin/materials', icon: FolderOpen, label: 'Study Materials' },
         { to: '/admin/certificates', icon: Award, label: 'Certificates' },
