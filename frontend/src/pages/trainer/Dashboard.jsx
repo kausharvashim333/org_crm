@@ -8,6 +8,8 @@ import {
   updateTrainerMeetingLink,
   getTrainerStudents,
   changePassword,
+  updateProfile,
+  getOrgHomepagePublic,
 } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -40,14 +42,17 @@ import {
   MessageSquare,
   ShieldCheck,
   Building,
+  User,
+  Check,
 } from 'lucide-react';
 
 export default function TrainerDashboard() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
 
   const [loading, setLoading] = useState(true);
+  const [orgSettings, setOrgSettings] = useState(null);
   const [stats, setStats] = useState({
     totalBatches: 0,
     runningBatchesCount: 0,
@@ -82,18 +87,21 @@ export default function TrainerDashboard() {
   const [allStudentsLoading, setAllStudentsLoading] = useState(false);
   const [studentFilterBatch, setStudentFilterBatch] = useState('');
 
-  // Change Password Modal
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  // Change Password & Profile Modal
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: '', phone: '' });
   const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Initial Data Fetch
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashRes, batchRes] = await Promise.all([
+      const [dashRes, batchRes, orgRes] = await Promise.all([
         getTrainerDashboard(),
         getTrainerBatches(),
+        getOrgHomepagePublic().catch(() => ({ data: {} })),
       ]);
 
       if (dashRes.data.success) {
@@ -101,6 +109,9 @@ export default function TrainerDashboard() {
       }
       if (batchRes.data.success) {
         setBatches(batchRes.data.batches || []);
+      }
+      if (orgRes?.data?.homepage?.settings) {
+        setOrgSettings(orgRes.data.homepage.settings);
       }
     } catch (err) {
       console.error('Failed to load trainer dashboard:', err);
@@ -112,7 +123,10 @@ export default function TrainerDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+    if (user) {
+      setProfileForm({ name: user.name || '', phone: user.phone || '' });
+    }
+  }, [user]);
 
   // Fetch All Students when switching to 'all-students' tab
   useEffect(() => {
@@ -259,6 +273,21 @@ export default function TrainerDashboard() {
     }
   };
 
+  // Profile Form Submit
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setProfileLoading(true);
+    try {
+      const res = await updateProfile(profileForm);
+      if (updateUser) updateUser(res.data?.user || profileForm);
+      showSuccess('Profile details updated successfully');
+    } catch (err) {
+      showError(err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   // Change Password Form Submit
   const handleChangePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -277,7 +306,7 @@ export default function TrainerDashboard() {
         newPassword: passwordData.newPassword,
       });
       showSuccess('Password updated successfully!');
-      setShowPasswordModal(false);
+      setShowProfileModal(false);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
       showError(err.response?.data?.message || 'Failed to change password');
@@ -351,47 +380,50 @@ export default function TrainerDashboard() {
   }, [allStudents, studentFilterBatch, searchQuery, activeTab]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
-      {/* Top Header / Navbar */}
-      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3.5 shadow-lg shadow-black/40">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-16">
+      {/* Top Header / Sticky Navbar */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 py-3.5 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-600/30 text-white">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-xs text-indigo-600">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base font-black tracking-tight text-white">
+                <span className="text-base font-black tracking-tight text-slate-900">
                   Trainer LMS Portal
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] uppercase font-bold tracking-widest bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
                   Faculty Active
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className="text-xs text-slate-500 hidden sm:block">
                 Course Batches, Live Training & Student Roster Management
               </p>
             </div>
           </div>
 
           {/* User Profile & Actions */}
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex flex-col text-right">
-              <span className="text-xs font-bold text-white">{user?.name || 'Trainer Faculty'}</span>
-              <span className="text-[11px] text-slate-400">{user?.email}</span>
-            </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={fetchDashboardData}
+              title="Refresh Data"
+              className="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 border border-slate-200/60 transition-colors cursor-pointer"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-indigo-600' : ''}`} />
+            </button>
 
             <button
-              onClick={() => setShowPasswordModal(true)}
-              title="Change Password"
-              className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 transition-colors"
+              onClick={() => setShowProfileModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-xl border border-slate-200 shadow-xs transition-colors cursor-pointer"
             >
-              <Key className="w-4 h-4" />
+              <User className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="hidden sm:inline">{user?.name || 'Profile & Security'}</span>
             </button>
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-semibold transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200 shadow-xs transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -401,42 +433,39 @@ export default function TrainerDashboard() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         {/* Welcome Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-900 border border-slate-800 p-6 sm:p-8 mb-8 shadow-xl">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-50/90 via-white to-violet-50/90 border border-indigo-100 p-6 sm:p-8 shadow-xs">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-3">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                Faculty Dashboard
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200 mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                Faculty Workspace
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Namaste, {user?.name?.split(' ')[0] || 'Trainer'}!
               </h1>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                Here is the real-time status of your allotted courses, active classroom batches, upcoming schedules, and enrolled students.
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                Welcome to your teaching hub. Manage your running live batches, upcoming curricula, live Google Meet / Zoom links, and student attendance rosters.
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2.5 shrink-0">
-              <button
-                onClick={fetchDashboardData}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700/80 rounded-xl text-xs font-semibold text-slate-200 transition-colors shadow-sm"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                Refresh Data
-              </button>
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <span className="px-3 py-2 bg-white/80 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-2xs">
+                🎓 {stats.totalBatches} Total Batches
+              </span>
+              <span className="px-3 py-2 bg-white/80 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-2xs">
+                👥 {stats.totalStudentsCount} Enrolled Students
+              </span>
             </div>
           </div>
         </div>
 
-        {/* 4 Stat Metric Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-all">
+        {/* 4 Stat Metric Cards (Light Clean Design) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white border border-slate-200 hover:border-emerald-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
                 <Video className="w-5 h-5" />
               </div>
               <span className="flex h-2.5 w-2.5 relative">
@@ -444,71 +473,71 @@ export default function TrainerDashboard() {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
             </div>
-            <p className="text-xs font-medium text-slate-400">Running Batches</p>
-            <h3 className="text-2xl sm:text-3xl font-black text-white mt-1">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Running Batches</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
               {stats.runningBatchesCount}
             </h3>
-            <p className="text-[11px] text-emerald-400/90 mt-1">Currently in progress</p>
+            <p className="text-[11px] font-semibold text-emerald-600 mt-1">Currently in progress</p>
           </div>
 
-          <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 relative overflow-hidden group hover:border-indigo-500/40 transition-all">
+          <div className="bg-white border border-slate-200 hover:border-indigo-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
                 <Calendar className="w-5 h-5" />
               </div>
-              <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
                 Scheduled
               </span>
             </div>
-            <p className="text-xs font-medium text-slate-400">Upcoming Batches</p>
-            <h3 className="text-2xl sm:text-3xl font-black text-white mt-1">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Upcoming Batches</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
               {stats.upcomingBatchesCount}
             </h3>
-            <p className="text-[11px] text-indigo-300/80 mt-1">Starting soon</p>
+            <p className="text-[11px] font-semibold text-indigo-600 mt-1">Starting soon</p>
           </div>
 
-          <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 relative overflow-hidden group hover:border-violet-500/40 transition-all">
+          <div className="bg-white border border-slate-200 hover:border-violet-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+              <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600">
                 <Users className="w-5 h-5" />
               </div>
-              <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full border border-violet-500/20">
-                Total
+              <span className="text-[10px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">
+                Roster
               </span>
             </div>
-            <p className="text-xs font-medium text-slate-400">Enrolled Students</p>
-            <h3 className="text-2xl sm:text-3xl font-black text-white mt-1">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Enrolled Students</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
               {stats.totalStudentsCount}
             </h3>
-            <p className="text-[11px] text-violet-300/80 mt-1">Under your training</p>
+            <p className="text-[11px] font-semibold text-violet-600 mt-1">Under your training</p>
           </div>
 
-          <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 relative overflow-hidden group hover:border-amber-500/40 transition-all">
+          <div className="bg-white border border-slate-200 hover:border-amber-300 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
                 <BookOpen className="w-5 h-5" />
               </div>
-              <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                Active
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                Curricula
               </span>
             </div>
-            <p className="text-xs font-medium text-slate-400">Assigned Courses</p>
-            <h3 className="text-2xl sm:text-3xl font-black text-white mt-1">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Assigned Courses</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
               {stats.coursesCount}
             </h3>
-            <p className="text-[11px] text-amber-300/80 mt-1">Unique curricula</p>
+            <p className="text-[11px] font-semibold text-amber-600 mt-1">Website course training</p>
           </div>
         </div>
 
         {/* Tab Selection & Search Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-slate-800 pb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-3">
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveTab('running')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'running'
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs'
               }`}
             >
               <Video className="w-3.5 h-3.5" />
@@ -519,8 +548,8 @@ export default function TrainerDashboard() {
               onClick={() => setActiveTab('upcoming')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'upcoming'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs'
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
@@ -531,8 +560,8 @@ export default function TrainerDashboard() {
               onClick={() => setActiveTab('completed')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'completed'
-                  ? 'bg-slate-700 text-white shadow-md'
-                  : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-slate-800 text-white shadow-sm'
+                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs'
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -543,8 +572,8 @@ export default function TrainerDashboard() {
               onClick={() => setActiveTab('all-students')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'all-students'
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-violet-600 text-white shadow-sm shadow-violet-600/30'
+                  : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs'
               }`}
             >
               <Users className="w-3.5 h-3.5" />
@@ -552,15 +581,15 @@ export default function TrainerDashboard() {
             </button>
           </div>
 
-          {/* Quick Search */}
+          {/* Search Input */}
           <div className="relative w-full md:w-72">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={activeTab === 'all-students' ? 'Search student name, roll...' : 'Search batch or course...'}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:border-indigo-500 transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-2xs"
             />
           </div>
         </div>
@@ -569,15 +598,15 @@ export default function TrainerDashboard() {
         {activeTab !== 'all-students' && (
           <div>
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin mb-3" />
-                <p className="text-sm font-medium text-slate-400">Loading your batches...</p>
+              <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-xs">
+                <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin mb-3" />
+                <p className="text-sm font-semibold text-slate-500">Loading batches...</p>
               </div>
             ) : filteredBatches.length === 0 ? (
-              <div className="bg-slate-900/60 border border-dashed border-slate-800 rounded-3xl p-12 text-center">
-                <GraduationCap className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-white">No {activeTab} batches found</h3>
-                <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+              <div className="bg-white border border-dashed border-slate-300 rounded-3xl p-12 text-center shadow-xs">
+                <GraduationCap className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-slate-800">No {activeTab} batches found</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
                   {searchQuery
                     ? 'Try adjusting your search terms.'
                     : activeTab === 'running'
@@ -598,21 +627,21 @@ export default function TrainerDashboard() {
                   return (
                     <div
                       key={batch._id}
-                      className="bg-slate-900/90 border border-slate-800/90 hover:border-slate-700/80 rounded-2xl p-5 flex flex-col justify-between shadow-xl shadow-black/20 hover:shadow-indigo-500/5 transition-all group"
+                      className="bg-white border border-slate-200 hover:border-indigo-300 rounded-2xl p-5 flex flex-col justify-between shadow-xs hover:shadow-md transition-all group"
                     >
                       <div>
                         {/* Course & Status Badge */}
                         <div className="flex items-start justify-between gap-2 mb-3">
-                          <span className="text-[11px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg truncate max-w-[200px]">
+                          <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg truncate max-w-[200px]">
                             {batch.courseId?.name || 'Course Training'}
                           </span>
                           <span
                             className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                               batch.status === 'active'
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 : batch.status === 'upcoming'
-                                ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
+                                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                : 'bg-slate-100 text-slate-600 border-slate-200'
                             }`}
                           >
                             {batch.status}
@@ -620,7 +649,7 @@ export default function TrainerDashboard() {
                         </div>
 
                         {/* Batch Name & Code */}
-                        <h3 className="text-base font-black text-white group-hover:text-indigo-300 transition-colors">
+                        <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                           {batch.name}
                         </h3>
                         <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
@@ -628,58 +657,58 @@ export default function TrainerDashboard() {
                         </p>
 
                         {/* Schedule & Timing Info */}
-                        <div className="space-y-2 mt-4 text-xs text-slate-300">
+                        <div className="space-y-2 mt-4 text-xs text-slate-600">
                           <div className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                            <span>{batch.timing || 'Timings to be announced'}</span>
+                            <Clock className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                            <span className="font-medium">{batch.timing || 'Timings to be announced'}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                            <Calendar className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                             <span>
                               {batch.schedule || 'Schedule'} &bull; Starts{' '}
                               {batch.startDate ? new Date(batch.startDate).toLocaleDateString() : 'TBA'}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Users className="w-3.5 h-3.5 text-violet-400 shrink-0" />
-                            <span className="font-semibold text-white">
+                            <Users className="w-3.5 h-3.5 text-violet-500 shrink-0" />
+                            <span className="font-bold text-slate-900">
                               {enrolledCount} / {batch.maxStudents || 30}
                             </span>
-                            <span className="text-slate-400">Students Enrolled</span>
+                            <span>Students Enrolled</span>
                           </div>
                         </div>
 
                         {/* Syllabus Progress Bar */}
                         {totalModulesCount > 0 && (
-                          <div className="mt-4 pt-3 border-t border-slate-800/80">
+                          <div className="mt-4 pt-3 border-t border-slate-100">
                             <div className="flex items-center justify-between text-[11px] mb-1.5">
-                              <span className="text-slate-400">Curriculum Progress</span>
-                              <span className="font-bold text-indigo-400">{progressPct}%</span>
+                              <span className="text-slate-500">Curriculum Progress</span>
+                              <span className="font-bold text-indigo-600">{progressPct}%</span>
                             </div>
-                            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                               <div
                                 className="bg-gradient-to-r from-indigo-500 to-violet-500 h-full rounded-full transition-all duration-500"
                                 style={{ width: `${progressPct}%` }}
                               />
                             </div>
-                            <span className="text-[10px] text-slate-500 mt-1 block">
+                            <span className="text-[10px] text-slate-400 mt-1 block">
                               {completedModulesCount} of {totalModulesCount} modules completed
                             </span>
                           </div>
                         )}
 
-                        {/* Meeting Link Banner (if present) */}
+                        {/* Meeting Link Banner */}
                         {batch.meetingLink ? (
-                          <div className="mt-4 p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/60 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 truncate text-xs text-emerald-400">
-                              <Video className="w-3.5 h-3.5 shrink-0" />
-                              <span className="truncate">{batch.meetingLink}</span>
+                          <div className="mt-4 p-2.5 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 truncate text-xs text-emerald-800">
+                              <Video className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                              <span className="truncate font-medium">{batch.meetingLink}</span>
                             </div>
                             <a
                               href={batch.meetingLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 shrink-0 transition-colors"
+                              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 shrink-0 transition-colors shadow-2xs"
                             >
                               Join <ExternalLink className="w-3 h-3" />
                             </a>
@@ -687,7 +716,7 @@ export default function TrainerDashboard() {
                         ) : (
                           <button
                             onClick={() => handleOpenLinkModal(batch)}
-                            className="mt-4 w-full py-2 bg-slate-800/40 hover:bg-slate-800 border border-dashed border-slate-700/80 rounded-xl text-xs text-indigo-400 flex items-center justify-center gap-1.5 transition-colors"
+                            className="mt-4 w-full py-2 bg-slate-50 hover:bg-indigo-50 border border-dashed border-slate-300 hover:border-indigo-300 rounded-xl text-xs text-indigo-600 font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                           >
                             <Video className="w-3.5 h-3.5" />
                             + Set Online Class Link
@@ -696,10 +725,10 @@ export default function TrainerDashboard() {
                       </div>
 
                       {/* Card Action Buttons */}
-                      <div className="mt-5 pt-4 border-t border-slate-800 flex flex-col gap-2">
+                      <div className="mt-5 pt-4 border-t border-slate-100 flex flex-col gap-2">
                         <button
                           onClick={() => handleOpenStudentsModal(batch)}
-                          className="w-full py-2.5 px-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                          className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-sm shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
                         >
                           <Users className="w-4 h-4" />
                           View Enrolled Students ({enrolledCount})
@@ -708,17 +737,17 @@ export default function TrainerDashboard() {
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={() => handleOpenProgressModal(batch)}
-                            className="py-2 px-2 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700/80 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                            className="py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                           >
-                            <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                            <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
                             Syllabus ({progressPct}%)
                           </button>
 
                           <button
                             onClick={() => handleOpenLinkModal(batch)}
-                            className="py-2 px-2 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700/80 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                            className="py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                           >
-                            <Edit3 className="w-3.5 h-3.5 text-violet-400" />
+                            <Edit3 className="w-3.5 h-3.5 text-violet-600" />
                             Class Link
                           </button>
                         </div>
@@ -734,26 +763,26 @@ export default function TrainerDashboard() {
         {/* TAB 4: ALL ENROLLED STUDENTS ROSTER */}
         {activeTab === 'all-students' && (
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-violet-600/20 text-violet-400 flex items-center justify-center border border-violet-500/30">
+                <div className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 text-violet-600 flex items-center justify-center">
                   <Users className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Unified Student Roster</h3>
-                  <p className="text-xs text-slate-400">
-                    All students enrolled in your allotted course batches
+                  <h3 className="text-sm font-bold text-slate-900">Unified Student Directory</h3>
+                  <p className="text-xs text-slate-500">
+                    All students enrolled across your allotted course batches
                   </p>
                 </div>
               </div>
 
               {/* Batch Filter Dropdown */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400">Filter by Batch:</span>
+                <span className="text-xs text-slate-500 font-medium">Filter by Batch:</span>
                 <select
                   value={studentFilterBatch}
                   onChange={(e) => setStudentFilterBatch(e.target.value)}
-                  className="bg-slate-800 border border-slate-700 text-white text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="bg-white border border-slate-200 text-slate-800 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
                 >
                   <option value="">All Batches ({batches.length})</option>
                   {batches.map((b) => (
@@ -766,23 +795,23 @@ export default function TrainerDashboard() {
             </div>
 
             {allStudentsLoading ? (
-              <div className="flex flex-col items-center justify-center py-20">
-                <RefreshCw className="w-8 h-8 text-violet-500 animate-spin mb-3" />
-                <p className="text-sm font-medium text-slate-400">Loading enrolled students...</p>
+              <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-xs">
+                <RefreshCw className="w-8 h-8 text-violet-600 animate-spin mb-3" />
+                <p className="text-sm font-semibold text-slate-500">Loading enrolled students...</p>
               </div>
             ) : filteredAllStudents.length === 0 ? (
-              <div className="bg-slate-900/60 border border-dashed border-slate-800 rounded-3xl p-12 text-center">
-                <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-white">No enrolled students found</h3>
-                <p className="text-xs text-slate-400 max-w-md mx-auto mt-1">
+              <div className="bg-white border border-dashed border-slate-300 rounded-3xl p-12 text-center shadow-xs">
+                <Users className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-slate-800">No enrolled students found</h3>
+                <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
                   Once students enroll in your assigned batches, their complete contact and learning details will appear here.
                 </p>
               </div>
             ) : (
-              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-300">
-                    <thead className="bg-slate-800/80 text-[11px] font-extrabold uppercase text-slate-400 border-b border-slate-700/80">
+                  <table className="w-full text-left text-xs text-slate-600">
+                    <thead className="bg-slate-50 text-[11px] font-bold uppercase text-slate-500 border-b border-slate-200">
                       <tr>
                         <th className="py-3.5 px-4">Student</th>
                         <th className="py-3.5 px-4">ID / Roll No</th>
@@ -793,21 +822,21 @@ export default function TrainerDashboard() {
                         <th className="py-3.5 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/80">
+                    <tbody className="divide-y divide-slate-100">
                       {filteredAllStudents.map((st) => (
-                        <tr key={st._id} className="hover:bg-slate-800/40 transition-colors">
+                        <tr key={st._id} className="hover:bg-slate-50/80 transition-colors">
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-xs uppercase shadow-xs">
                                 {st.fullName?.charAt(0) || 'S'}
                               </div>
                               <div>
-                                <p className="font-bold text-white">{st.fullName}</p>
+                                <p className="font-bold text-slate-900">{st.fullName}</p>
                                 <p className="text-[11px] text-slate-400">{st.email}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="py-3.5 px-4 font-mono font-semibold text-indigo-400">
+                          <td className="py-3.5 px-4 font-mono font-semibold text-indigo-600">
                             {st.studentIdNo || st.applicationNo || 'N/A'}
                           </td>
                           <td className="py-3.5 px-4">
@@ -815,7 +844,7 @@ export default function TrainerDashboard() {
                               {(st.batches || []).map((b, i) => (
                                 <span
                                   key={i}
-                                  className="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-[10px] font-medium"
+                                  className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100 text-[10px] font-medium"
                                 >
                                   {b.batchName}
                                 </span>
@@ -823,12 +852,12 @@ export default function TrainerDashboard() {
                             </div>
                           </td>
                           <td className="py-3.5 px-4">
-                            <p className="font-semibold text-slate-200">{st.phone || 'N/A'}</p>
+                            <p className="font-semibold text-slate-800">{st.phone || 'N/A'}</p>
                           </td>
-                          <td className="py-3.5 px-4 text-slate-400">
+                          <td className="py-3.5 px-4 text-slate-500">
                             {st.city ? `${st.city}${st.state ? `, ${st.state}` : ''}` : 'Online / Direct'}
                           </td>
-                          <td className="py-3.5 px-4 text-slate-400">
+                          <td className="py-3.5 px-4 text-slate-500">
                             {st.enrollmentDate ? new Date(st.enrollmentDate).toLocaleDateString() : 'N/A'}
                           </td>
                           <td className="py-3.5 px-4 text-right">
@@ -839,7 +868,7 @@ export default function TrainerDashboard() {
                                   target="_blank"
                                   rel="noreferrer"
                                   title="WhatsApp Student"
-                                  className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                                  className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 transition-colors"
                                 >
                                   <MessageSquare className="w-3.5 h-3.5" />
                                 </a>
@@ -848,7 +877,7 @@ export default function TrainerDashboard() {
                                 <a
                                   href={`tel:${st.phone}`}
                                   title="Call Student"
-                                  className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                                  className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-colors"
                                 >
                                   <Phone className="w-3.5 h-3.5" />
                                 </a>
@@ -857,7 +886,7 @@ export default function TrainerDashboard() {
                                 <a
                                   href={`mailto:${st.email}`}
                                   title="Email Student"
-                                  className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-colors"
+                                  className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 transition-colors"
                                 >
                                   <Mail className="w-3.5 h-3.5" />
                                 </a>
@@ -879,20 +908,20 @@ export default function TrainerDashboard() {
       {/* MODAL 1: BATCH ENROLLED STUDENTS ROSTER MODAL */}
       {/* ==================================================== */}
       {showStudentsModal && selectedBatch && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 w-full max-w-4xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
             {/* Header */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-800">
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-200">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100">
                     {selectedBatch.courseId?.name || 'Course'}
                   </span>
                   <span className="text-xs text-slate-400">&bull;</span>
-                  <span className="text-xs text-slate-400">{selectedBatch.timing || 'Schedule TBA'}</span>
+                  <span className="text-xs text-slate-500 font-medium">{selectedBatch.timing || 'Schedule TBA'}</span>
                 </div>
-                <h2 className="text-xl font-black text-white">{selectedBatch.name} &bull; Enrolled Students</h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <h2 className="text-xl font-black text-slate-900">{selectedBatch.name} &bull; Enrolled Students</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
                   Showing {modalEnrolledStudents.length} of {selectedBatch.enrolledStudents?.length || 0} students enrolled in this batch
                 </p>
               </div>
@@ -900,7 +929,7 @@ export default function TrainerDashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleExportStudentsCSV(selectedBatch)}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl flex items-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 border border-slate-200 transition-colors cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   Export CSV
@@ -908,7 +937,7 @@ export default function TrainerDashboard() {
 
                 <button
                   onClick={() => setShowStudentsModal(false)}
-                  className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                  className="p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -918,13 +947,13 @@ export default function TrainerDashboard() {
             {/* Modal Search Bar */}
             <div className="py-3">
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={batchStudentSearch}
                   onChange={(e) => setBatchStudentSearch(e.target.value)}
                   placeholder="Search students by name, email, phone, roll number..."
-                  className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 />
               </div>
             </div>
@@ -933,13 +962,13 @@ export default function TrainerDashboard() {
             <div className="flex-1 overflow-y-auto pr-1">
               {batchStudentsLoading ? (
                 <div className="flex flex-col items-center justify-center py-16">
-                  <RefreshCw className="w-7 h-7 text-indigo-500 animate-spin mb-2" />
-                  <p className="text-xs text-slate-400">Loading student profiles...</p>
+                  <RefreshCw className="w-7 h-7 text-indigo-600 animate-spin mb-2" />
+                  <p className="text-xs text-slate-500">Loading student profiles...</p>
                 </div>
               ) : modalEnrolledStudents.length === 0 ? (
                 <div className="py-12 text-center">
-                  <Users className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-white">No students match your search</p>
+                  <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-slate-800">No students match your search</p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     {batchStudentSearch
                       ? 'Try clearing the search query.'
@@ -947,24 +976,24 @@ export default function TrainerDashboard() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-800/80">
+                <div className="divide-y divide-slate-100">
                   {modalEnrolledStudents.map((student, idx) => (
                     <div
                       key={student._id || idx}
-                      className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/30 px-3 rounded-xl transition-colors"
+                      className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 px-3 rounded-xl transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-sm uppercase shadow-sm shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-bold text-sm uppercase shadow-2xs shrink-0">
                           {student.fullName?.charAt(0) || 'S'}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-white text-sm">{student.fullName}</h4>
-                            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                            <h4 className="font-bold text-slate-900 text-sm">{student.fullName}</h4>
+                            <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100">
                               {student.studentIdNo || student.applicationNo || 'ID'}
                             </span>
                           </div>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400 mt-0.5">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mt-0.5">
                             <span>{student.email}</span>
                             <span>&bull;</span>
                             <span>{student.phone || 'No phone'}</span>
@@ -985,7 +1014,7 @@ export default function TrainerDashboard() {
                             href={`https://wa.me/${student.phone.replace(/[^0-9]/g, '')}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-xs font-semibold rounded-xl flex items-center gap-1 border border-emerald-500/30 transition-colors"
+                            className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-xl flex items-center gap-1 border border-emerald-200 transition-colors"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
                             WhatsApp
@@ -994,7 +1023,7 @@ export default function TrainerDashboard() {
                         {student.phone && (
                           <a
                             href={`tel:${student.phone}`}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
+                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl border border-slate-200 transition-colors"
                             title="Call"
                           >
                             <Phone className="w-3.5 h-3.5" />
@@ -1003,7 +1032,7 @@ export default function TrainerDashboard() {
                         {student.email && (
                           <a
                             href={`mailto:${student.email}`}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors"
+                            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl border border-slate-200 transition-colors"
                             title="Email"
                           >
                             <Mail className="w-3.5 h-3.5" />
@@ -1017,11 +1046,11 @@ export default function TrainerDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-              <span>Super Admin manages student admissions & batch allotments</span>
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+              <span>Super Admin manages central admissions & batch allotments</span>
               <button
                 onClick={() => setShowStudentsModal(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded-xl cursor-pointer"
               >
                 Close
               </button>
@@ -1034,19 +1063,19 @@ export default function TrainerDashboard() {
       {/* MODAL 2: SYLLABUS & PROGRESS TRACKER MODAL */}
       {/* ==================================================== */}
       {showProgressModal && selectedBatch && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 w-full max-w-2xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[90vh]">
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-200">
               <div>
-                <h2 className="text-xl font-black text-white">Curriculum & Syllabus Progress</h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Batch: <span className="font-semibold text-white">{selectedBatch.name}</span> &bull;{' '}
+                <h2 className="text-xl font-black text-slate-900">Curriculum & Syllabus Progress</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Batch: <span className="font-semibold text-slate-800">{selectedBatch.name}</span> &bull;{' '}
                   {selectedBatch.courseId?.name}
                 </p>
               </div>
               <button
                 onClick={() => setShowProgressModal(false)}
-                className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1055,11 +1084,11 @@ export default function TrainerDashboard() {
             <div className="flex-1 overflow-y-auto py-4 space-y-5 pr-1">
               {/* Batch Status Picker */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Batch Status</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Batch Status</label>
                 <select
                   value={batchStatus}
                   onChange={(e) => setBatchStatus(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 >
                   <option value="upcoming">Upcoming (Scheduled to start)</option>
                   <option value="active">Active / Running (Live Classes Ongoing)</option>
@@ -1071,14 +1100,14 @@ export default function TrainerDashboard() {
               {/* Modules Checklist */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold text-slate-300">
+                  <label className="text-xs font-bold text-slate-700">
                     Course Modules Checklist ({syllabusModules.filter((m) => m.completed).length} /{' '}
                     {syllabusModules.length} Completed)
                   </label>
                 </div>
 
                 {syllabusModules.length === 0 ? (
-                  <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs text-slate-400 text-center">
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 text-center">
                     No curriculum modules mapped for this course. You can add batch notes below.
                   </div>
                 ) : (
@@ -1089,22 +1118,22 @@ export default function TrainerDashboard() {
                         onClick={() => handleToggleModule(idx)}
                         className={`p-3 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-colors ${
                           moduleItem.completed
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                            : 'bg-slate-800/70 border-slate-700/70 text-slate-300 hover:bg-slate-800'
+                            ? 'bg-emerald-50/70 border-emerald-200 text-emerald-800'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           {moduleItem.completed ? (
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
                           ) : (
-                            <Circle className="w-5 h-5 text-slate-500 shrink-0" />
+                            <Circle className="w-5 h-5 text-slate-400 shrink-0" />
                           )}
                           <span className={`text-xs font-semibold ${moduleItem.completed ? 'line-through text-slate-400' : ''}`}>
                             Module {idx + 1}: {moduleItem.module}
                           </span>
                         </div>
                         {moduleItem.completed && moduleItem.completedDate && (
-                          <span className="text-[10px] text-emerald-400 shrink-0 font-medium">
+                          <span className="text-[10px] text-emerald-700 shrink-0 font-medium">
                             {new Date(moduleItem.completedDate).toLocaleDateString()}
                           </span>
                         )}
@@ -1116,7 +1145,7 @@ export default function TrainerDashboard() {
 
               {/* Batch Notes */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Trainer Notes & Announcements
                 </label>
                 <textarea
@@ -1124,16 +1153,16 @@ export default function TrainerDashboard() {
                   value={batchNotes}
                   onChange={(e) => setBatchNotes(e.target.value)}
                   placeholder="e.g. Next session topic, homework links, project submission instructions..."
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-2">
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowProgressModal(false)}
-                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer"
               >
                 Cancel
               </button>
@@ -1141,7 +1170,7 @@ export default function TrainerDashboard() {
                 type="button"
                 disabled={savingProgress}
                 onClick={handleSaveProgress}
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
               >
                 {savingProgress ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                 Save Progress
@@ -1155,16 +1184,16 @@ export default function TrainerDashboard() {
       {/* MODAL 3: MEETING LINK & CLASS SCHEDULE MODAL */}
       {/* ==================================================== */}
       {showLinkModal && selectedBatch && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl relative">
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-2xl relative">
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-200">
               <div>
-                <h2 className="text-lg font-black text-white">Live Classroom & Schedule</h2>
-                <p className="text-xs text-slate-400 mt-0.5">{selectedBatch.name}</p>
+                <h2 className="text-lg font-black text-slate-900">Live Classroom & Schedule</h2>
+                <p className="text-xs text-slate-500 mt-0.5">{selectedBatch.name}</p>
               </div>
               <button
                 onClick={() => setShowLinkModal(false)}
-                className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1172,45 +1201,45 @@ export default function TrainerDashboard() {
 
             <form onSubmit={handleSaveMeetingLink} className="space-y-4 pt-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-medium text-slate-700 mb-1">
                   Online Class Meeting URL (Zoom / Google Meet)
                 </label>
                 <div className="relative">
-                  <Video className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Video className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="url"
                     value={meetingForm.meetingLink}
                     onChange={(e) => setMeetingForm({ ...meetingForm, meetingLink: e.target.value })}
                     placeholder="https://meet.google.com/xyz-abc-def or Zoom link"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Class Timings</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Class Timings</label>
                 <div className="relative">
-                  <Clock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Clock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={meetingForm.timing}
                     onChange={(e) => setMeetingForm({ ...meetingForm, timing: e.target.value })}
                     placeholder="e.g. 10:00 AM - 12:00 PM"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Weekly Schedule Days</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Weekly Schedule Days</label>
                 <div className="relative">
-                  <Calendar className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={meetingForm.schedule}
                     onChange={(e) => setMeetingForm({ ...meetingForm, schedule: e.target.value })}
                     placeholder="e.g. Mon, Wed, Fri"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                   />
                 </div>
               </div>
@@ -1219,14 +1248,14 @@ export default function TrainerDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowLinkModal(false)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={savingLink}
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-md shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50"
                 >
                   {savingLink ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : 'Save Class Details'}
                 </button>
@@ -1237,81 +1266,114 @@ export default function TrainerDashboard() {
       )}
 
       {/* ==================================================== */}
-      {/* MODAL 4: CHANGE TRAINER PASSWORD MODAL */}
+      {/* MODAL 4: PROFILE & SECURITY (CHANGE PASSWORD) */}
       {/* ==================================================== */}
-      {showPasswordModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl relative">
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-800">
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 w-full max-w-md rounded-3xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-200">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
-                  <Key className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
+                  <User className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-white">Change Password</h2>
-                  <p className="text-xs text-slate-400">Update your login password</p>
+                  <h2 className="text-base font-bold text-slate-900">Trainer Profile & Security</h2>
+                  <p className="text-xs text-slate-500">{user?.email}</p>
                 </div>
               </div>
               <button
-                onClick={() => setShowPasswordModal(false)}
-                className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                onClick={() => setShowProfileModal(false)}
+                className="p-1.5 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleChangePasswordSubmit} className="space-y-4 pt-4">
+            {/* Profile Info Form */}
+            <form onSubmit={handleSaveProfile} className="space-y-3 pt-4 border-b border-slate-200 pb-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Faculty Details</h3>
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Current Password
-                </label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  value={profileForm.phone}
+                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={profileLoading}
+                className="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {profileLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : 'Save Profile'}
+              </button>
+            </form>
+
+            {/* Password Form */}
+            <form onSubmit={handleChangePasswordSubmit} className="space-y-3 pt-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-indigo-600" />
+                Change Password
+              </h3>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Current Password</label>
                 <input
                   type="password"
                   required
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  New Password (min 6 chars)
-                </label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">New Password (min 6 chars)</label>
                 <input
                   type="password"
                   required
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
-                  Confirm New Password
-                </label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Confirm New Password</label>
                 <input
                   type="password"
                   required
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
                 />
               </div>
 
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowPasswordModal(false)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
+                  onClick={() => setShowProfileModal(false)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={passwordLoading}
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
                 >
                   {passwordLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : 'Update Password'}
                 </button>
