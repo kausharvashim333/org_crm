@@ -15,10 +15,10 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
-  Users,
   Video,
-  BookOpen,
+  Users,
   Calendar,
+  BookOpen,
 } from 'lucide-react';
 
 export default function TrainerLogin() {
@@ -30,28 +30,24 @@ export default function TrainerLogin() {
   const { login: authLogin } = useAuth();
   const { showSuccess, showError } = useToast();
   const [orgSettings, setOrgSettings] = useState(null);
-  const [currentFeature, setCurrentFeature] = useState(0);
+  const [currentStat, setCurrentStat] = useState(0);
 
-  const features = [
+  const stats = [
     {
-      icon: Calendar,
-      title: 'Course-wise Batches',
-      desc: 'Stay on top of your live running batches and upcoming scheduled training sessions.',
+      title: 'Course-wise Allotted Batches',
+      desc: 'Access your running live classes and upcoming scheduled training sessions mapped to website courses.',
     },
     {
-      icon: Users,
-      title: 'Enrolled Student Roster',
-      desc: 'Access complete student details, contact information, and attendance in real time.',
+      title: 'Enrolled Students Roster',
+      desc: 'View comprehensive student profiles, roll numbers, and contact info across all your allotted batches.',
     },
     {
-      icon: Video,
-      title: 'Classroom & Live Links',
-      desc: 'Publish and launch Google Meet or Zoom class links directly for enrolled students.',
+      title: 'Live Classroom Links',
+      desc: 'Launch, configure, and share Google Meet or Zoom class links directly with enrolled students.',
     },
     {
-      icon: BookOpen,
-      title: 'Curriculum & Syllabus',
-      desc: 'Track completed modules and update course milestones with one-click progress checkmarks.',
+      title: 'Curriculum & Syllabus Tracking',
+      desc: 'Track completed course modules and update training milestones with interactive checklists.',
     },
   ];
 
@@ -63,12 +59,12 @@ export default function TrainerLogin() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentFeature((prev) => (prev + 1) % features.length);
-    }, 4500);
+      setCurrentStat((prev) => (prev + 1) % stats.length);
+    }, 4000);
     return () => clearInterval(interval);
-  }, [features.length]);
+  }, [stats.length]);
 
-  // Password reset modal state
+  // Reset Password State
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetStep, setResetStep] = useState(1);
   const [resetEmail, setResetEmail] = useState('');
@@ -76,12 +72,14 @@ export default function TrainerLogin() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  const [generatedCodeMessage, setGeneratedCodeMessage] = useState('');
 
   const handleOpenResetModal = () => {
     setResetEmail(email || '');
     setResetCode('');
     setNewPassword('');
     setConfirmPassword('');
+    setGeneratedCodeMessage('');
     setResetStep(1);
     setShowResetModal(true);
   };
@@ -96,6 +94,7 @@ export default function TrainerLogin() {
     try {
       const res = await forgotPassword({ email: resetEmail, role: 'trainer' });
       showSuccess(res.data.message || `Verification code sent to ${resetEmail}`);
+      setGeneratedCodeMessage(`Verification code sent to registered email: ${resetEmail}`);
       setResetCode('');
       setResetStep(2);
     } catch (err) {
@@ -136,16 +135,15 @@ export default function TrainerLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      showError('Please provide both email and password');
+      showError('Please enter your email and password');
       return;
     }
-
     setLoading(true);
     try {
       const res = await login({ email: email.trim().toLowerCase(), password });
       if (res.data.success) {
-        const userRole = res.data.user?.role;
-        if (!['trainer', 'super_admin'].includes(userRole)) {
+        const role = res.data.user?.role;
+        if (!['trainer', 'super_admin'].includes(role)) {
           showError('Access Denied: This portal is exclusively for Course Trainers');
           setLoading(false);
           return;
@@ -155,296 +153,288 @@ export default function TrainerLogin() {
         showSuccess(`Welcome back, ${res.data.user?.name || 'Trainer'}!`);
         navigate('/trainer/dashboard');
       }
-    } catch (err) {
-      showError(err.response?.data?.message || 'Login failed. Invalid credentials.');
+    } catch (error) {
+      showError(error.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  const ActiveIcon = features[currentFeature].icon;
+  const orgName = orgSettings?.orgName || 'Lili Organization';
+  const logo = orgSettings?.logo;
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-sans">
-      {/* Background Decorative Gradients */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-blue-600/5 rounded-full blur-[140px] pointer-events-none" />
+    <div className="min-h-screen flex bg-white font-inter">
+      {/* Left Panel: Branding & Illustrated Carousel */}
+      <div className="hidden md:flex md:w-1/2 lg:w-3/5 bg-slate-950 flex-col justify-between p-12 text-white relative overflow-hidden select-none">
+        {/* Background Grid Pattern & Glowing Blur Blobs */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-35"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse"></div>
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-screen filter blur-[120px] opacity-15 animate-pulse"
+          style={{ animationDelay: '2s' }}
+        ></div>
 
-      {/* Main Container */}
-      <div className="w-full max-w-4xl bg-slate-900/90 border border-slate-800/80 backdrop-blur-2xl rounded-3xl shadow-2xl shadow-black/80 overflow-hidden grid grid-cols-1 lg:grid-cols-12 relative z-10">
-        
-        {/* Left Col: Features Showcase */}
-        <div className="lg:col-span-5 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 p-8 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-800 relative">
-          <div>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors mb-8 group"
-            >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Website
-            </Link>
+        {/* Branding Logo Block */}
+        <div className="flex items-center gap-3 z-10">
+          <div className="w-12 h-12 bg-primary-600/25 border border-primary-500/40 rounded-xl flex items-center justify-center backdrop-blur-md overflow-hidden">
+            {logo && typeof logo === 'string' && logo.trim() !== '' && logo !== 'undefined' ? (
+              <img
+                src={logo}
+                alt="logo"
+                className="w-full h-full object-cover rounded-xl"
+                onError={(e) => {
+                  const img = e.target;
+                  if (!img.dataset.retried && logo.includes('/uploads/')) {
+                    img.dataset.retried = 'true';
+                    const path = logo.substring(logo.indexOf('/uploads/'));
+                    img.src = `/api${path}`;
+                  } else {
+                    img.style.display = 'none';
+                  }
+                }}
+              />
+            ) : (
+              <GraduationCap className="w-6 h-6 text-primary-400" />
+            )}
+          </div>
+          <span className="font-extrabold text-xl tracking-wider text-slate-100 uppercase">
+            {orgName}
+          </span>
+        </div>
 
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 text-white font-bold text-xl">
-                <GraduationCap className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
-                  Trainer Portal
-                  <span className="text-[10px] uppercase font-bold tracking-widest bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
-                    LMS
-                  </span>
-                </h1>
-                <p className="text-xs text-slate-400">
-                  {orgSettings?.orgName || 'Skill Development Institute'}
-                </p>
-              </div>
-            </div>
-
-            <p className="text-sm text-slate-300 leading-relaxed mb-6">
-              Empowering faculty and trainers with unified course-wise batch allotment, student rosters, and live class management.
+        {/* Center Carousel */}
+        <div className="z-10 max-w-lg my-auto pr-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/10 border border-primary-500/30 rounded-full text-primary-400 text-xs font-bold mb-4">
+            <Sparkles className="w-3.5 h-3.5" /> Trainer & Faculty Portal
+          </div>
+          <h2 className="text-4xl lg:text-5xl font-black leading-tight text-white mb-6">
+            Empower learners with <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-blue-300">live excellence</span>
+          </h2>
+          <div className="min-h-[120px] transition-all duration-500 transform translate-y-0">
+            <h3 className="text-xl font-bold text-slate-200 mb-2 transition-all duration-300">
+              {stats[currentStat].title}
+            </h3>
+            <p className="text-slate-400 leading-relaxed text-sm lg:text-base">
+              {stats[currentStat].desc}
             </p>
           </div>
 
-          {/* Dynamic Feature Slider */}
-          <div className="my-6 bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 relative overflow-hidden">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-indigo-600/30 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-                <ActiveIcon className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">
-                {features[currentFeature].title}
-              </h3>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed min-h-[44px]">
-              {features[currentFeature].desc}
-            </p>
-            <div className="flex gap-1.5 mt-4">
-              {features.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentFeature(i)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    currentFeature === i ? 'w-6 bg-indigo-500' : 'w-2 bg-slate-700'
-                  }`}
-                  aria-label={`Slide ${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Footer Badge */}
-          <div className="flex items-center justify-between text-[11px] text-slate-400 pt-4 border-t border-slate-800/60">
-            <span className="flex items-center gap-1 text-emerald-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Secure Faculty Cloud
-            </span>
-            <span>v2.4 Active</span>
+          {/* Dots Indicator */}
+          <div className="flex gap-2.5 mt-8">
+            {stats.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setCurrentStat(i)}
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                  currentStat === i ? 'w-8 bg-primary-500' : 'w-2 bg-slate-700 hover:bg-slate-500'
+                }`}
+                aria-label={`Slide ${i + 1}`}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Right Col: Login Form */}
-        <div className="lg:col-span-7 p-8 lg:p-10 flex flex-col justify-center bg-slate-900/60">
-          <div className="max-w-md mx-auto w-full">
-            <div className="mb-8">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-3">
-                <Sparkles className="w-3.5 h-3.5" />
-                Faculty & Master Trainers
-              </span>
-              <h2 className="text-2xl font-black text-white tracking-tight">
-                Sign in to your account
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Enter your registered credentials to view your assigned batches
-              </p>
-            </div>
+        {/* Bottom Metadata */}
+        <p className="text-xs text-slate-500 z-10 font-semibold tracking-wide">
+          © {new Date().getFullYear()} {orgName} · Trainer Portal
+        </p>
+      </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Trainer Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="trainer@organization.com"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-800/80 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:border-indigo-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-medium text-slate-300">
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleOpenResetModal}
-                    className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full pl-10 pr-11 py-3 bg-slate-800/80 border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 focus:border-indigo-500 transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Signing In...
-                  </>
-                ) : (
-                  <>
-                    <GraduationCap className="w-4 h-4" />
-                    Access Trainer Portal
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Support / Direct Help */}
-            <div className="mt-8 pt-6 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-              <span>Need trainer login access?</span>
-              <span className="text-slate-300 font-medium">Contact Head Admin</span>
-            </div>
+      {/* Right Panel: Focused Form Canvas */}
+      <div className="w-full md:w-1/2 lg:w-2/5 min-h-screen bg-slate-50 flex items-center justify-center p-8 relative">
+        {/* Mobile Logo & Organization Name (Hidden on Desktop) */}
+        <div className="absolute top-8 left-8 md:hidden flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center overflow-hidden">
+            {logo && typeof logo === 'string' && logo.trim() !== '' && logo !== 'undefined' ? (
+              <img
+                src={logo}
+                alt="logo"
+                className="w-full h-full object-cover rounded-lg"
+                onError={(e) => {
+                  const img = e.target;
+                  if (!img.dataset.retried && logo.includes('/uploads/')) {
+                    img.dataset.retried = 'true';
+                    const path = logo.substring(logo.indexOf('/uploads/'));
+                    img.src = `/api${path}`;
+                  } else {
+                    img.style.display = 'none';
+                  }
+                }}
+              />
+            ) : (
+              <GraduationCap className="w-4 h-4 text-white" />
+            )}
           </div>
+          <span className="font-extrabold text-sm text-slate-800 uppercase tracking-wide">
+            {orgName}
+          </span>
+        </div>
+
+        {/* Back Link */}
+        <Link
+          to="/"
+          className="absolute top-8 right-8 text-xs font-bold text-slate-400 hover:text-slate-700 flex items-center gap-1.5 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Website
+        </Link>
+
+        {/* Form Container Card */}
+        <div className="bg-white rounded-3xl shadow-xl border border-slate-100/80 p-8 w-full max-w-md transition-all duration-300 hover:shadow-2xl">
+          <div className="mb-8">
+            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Trainer Portal</h1>
+            <p className="text-slate-450 text-xs font-bold mt-1.5 uppercase tracking-wider">
+              Course Training & Live Batches
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Trainer Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 pl-10 border border-slate-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 transition-all text-sm bg-slate-50 hover:bg-slate-100/50 focus:bg-white text-slate-850"
+                  placeholder="trainer@example.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={handleOpenResetModal}
+                  className="text-xs font-bold text-primary-600 hover:underline cursor-pointer"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 pl-10 pr-10 border border-slate-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 transition-all text-sm bg-slate-50 hover:bg-slate-100/50 focus:bg-white text-slate-850"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-primary py-3.5 rounded-xl text-white font-bold transition-all shadow-md shadow-primary-600/10 flex items-center justify-center gap-2 hover:scale-[1.01] hover:shadow-lg active:scale-99 hover:shadow-primary-600/20 cursor-pointer"
+            >
+              {loading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                'Access Trainer Portal'
+              )}
+            </button>
+          </form>
         </div>
       </div>
 
-      {/* Password Reset Modal */}
+      {/* Reset Password Modal */}
       {showResetModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-2xl border border-slate-100">
             <button
+              type="button"
               onClick={() => setShowResetModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
-                <KeyRound className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white">Reset Trainer Password</h3>
-                <p className="text-xs text-slate-400">Step {resetStep} of 2</p>
-              </div>
+            <div className="flex items-center gap-2 mb-4">
+              <KeyRound className="w-5 h-5 text-primary-600" />
+              <h3 className="font-black text-slate-800">Reset Trainer Password</h3>
             </div>
-
             {resetStep === 1 ? (
-              <form onSubmit={handleRequestResetCode} className="space-y-4">
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Enter your registered trainer email to receive a password reset code.
+              <form onSubmit={handleRequestResetCode} className="space-y-3">
+                <p className="text-xs text-slate-500">
+                  Enter the registered email address used for your trainer login.
                 </p>
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Registered Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="trainer@organization.com"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
+                <input
+                  required
+                  type="email"
+                  className="input-field"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="trainer@example.com"
+                />
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                  className="btn-primary w-full text-sm py-2.5 rounded-xl cursor-pointer"
                 >
-                  {resetLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Send Verification Code'}
+                  {resetLoading ? 'Sending...' : 'Send Verification Code'}
                 </button>
               </form>
             ) : (
-              <form onSubmit={handlePerformPasswordReset} className="space-y-4">
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>Code dispatched! Please check your email or enter OTP below.</span>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Verification Code (OTP)
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={resetCode}
-                    onChange={(e) => setResetCode(e.target.value)}
-                    placeholder="Enter 6-digit code"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="At least 6 characters"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter password"
-                    className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="flex gap-2">
+              <form onSubmit={handlePerformPasswordReset} className="space-y-3">
+                {generatedCodeMessage && (
+                  <p className="text-xs text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> {generatedCodeMessage}
+                  </p>
+                )}
+                <input
+                  required
+                  className="input-field"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value)}
+                  placeholder="Verification code"
+                />
+                <input
+                  required
+                  type="password"
+                  className="input-field"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="New password (min 6 chars)"
+                />
+                <input
+                  required
+                  type="password"
+                  className="input-field"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                />
+                <div className="flex gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setResetStep(1)}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium rounded-xl"
+                    className="btn-secondary flex-1 text-sm py-2 rounded-xl flex items-center justify-center gap-1 cursor-pointer"
                   >
-                    Back
+                    <RefreshCw className="w-3.5 h-3.5" /> Back
                   </button>
                   <button
                     type="submit"
                     disabled={resetLoading}
-                    className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                    className="btn-primary flex-1 text-sm py-2 rounded-xl cursor-pointer"
                   >
-                    {resetLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Set New Password'}
+                    {resetLoading ? 'Saving...' : 'Update Password'}
                   </button>
                 </div>
               </form>
