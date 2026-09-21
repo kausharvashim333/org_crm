@@ -15,6 +15,7 @@ const {
   sendWaitlistOfferEmail,
   sendRecordingEmail,
   sendJoinLinkEmail,
+  sendGroupSessionScheduleEmail,
 } = require('../utils/counsellingEmail');
 
 const router = express.Router();
@@ -165,11 +166,17 @@ router.get('/public', async (req, res) => {
     }).sort({ startAt: 1 }).lean();
     const openSlots = slots.filter((sl) => sl.status === 'open' || (sl.heldUntil && new Date(sl.heldUntil) < now));
 
+    const publicServices = services.map((s) => {
+      const obj = s.toObject();
+      delete obj.groupSessionMeetingLink;
+      return obj;
+    });
+
     res.json({
       success: true,
       visible: true,
       settings,
-      services,
+      services: publicServices,
       sessions,
       slots: openSlots.map((sl) => ({
         _id: sl._id,
@@ -388,13 +395,24 @@ router.post('/services/generate-tagline', protect, superAdminOnly, async (req, r
 router.get('/services', protect, superAdminOnly, async (req, res) => {
   try {
     const services = await CounsellingService.find().populate('counsellorId', 'name email').sort({ displayOrder: 1, createdAt: 1 });
-    for (const s of services) {
-      if (!s.tagline || !s.tagline.trim()) {
-        s.tagline = generateServiceTagline(s.name, s.mode, s.duration);
-        await s.save();
-      }
-    }
-    res.json({ success: true, count: services.length, services });
+    const servicesWithCounts = await Promise.all(
+      services.map(async (s) => {
+        if (!s.tagline || !s.tagline.trim()) {
+          s.tagline = generateServiceTagline(s.name, s.mode, s.duration);
+          await s.save();
+        }
+        const bookedGroupCount = await CounsellingBooking.countDocuments({
+          serviceId: s._id,
+          type: 'group',
+          paymentStatus: 'paid',
+          status: { $nin: ['cancelled', 'refunded'] },
+        });
+        const obj = s.toObject();
+        obj.bookedGroupCount = bookedGroupCount;
+        return obj;
+      })
+    );
+    res.json({ success: true, count: servicesWithCounts.length, services: servicesWithCounts });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -407,6 +425,10 @@ router.post('/services', protect, superAdminOnly, async (req, res) => {
       ? req.body.tagline.trim()
       : generateServiceTagline(req.body.name, req.body.mode, req.body.duration);
 
+    const hasGroup = req.body.enableGroupSession !== undefined
+      ? Boolean(req.body.enableGroupSession)
+      : (req.body.groupPrice !== '' && req.body.groupPrice !== null && req.body.groupPrice !== undefined);
+
     const service = await CounsellingService.create({
       ...req.body,
       tagline,
@@ -416,8 +438,14 @@ router.post('/services', protect, superAdminOnly, async (req, res) => {
         : String(req.body.includes || '').split(',').map((s) => s.trim()).filter(Boolean),
       price: Number(req.body.price) || 0,
       originalPrice: Number(req.body.originalPrice) || 0,
-      groupPrice: Number(req.body.groupPrice) || 0,
+      enableGroupSession: hasGroup,
+      groupPrice: hasGroup ? (Number(req.body.groupPrice) || 0) : undefined,
       originalGroupPrice: Number(req.body.originalGroupPrice) || 0,
+      groupSessionDate: req.body.groupSessionDate ? new Date(req.body.groupSessionDate) : undefined,
+      groupSessionStartTime: req.body.groupSessionStartTime || '11:00',
+      groupSessionEndTime: req.body.groupSessionEndTime || '12:30',
+      groupSessionDuration: req.body.groupSessionDuration || '60 min',
+      groupSessionMeetingLink: req.body.groupSessionMeetingLink || '',
     });
     res.status(201).json({ success: true, service });
   } catch (error) {
@@ -433,14 +461,78 @@ router.put('/services/:id', protect, superAdminOnly, async (req, res) => {
     }
     if (payload.price !== undefined) payload.price = Number(payload.price) || 0;
     if (payload.originalPrice !== undefined) payload.originalPrice = Number(payload.originalPrice) || 0;
-    if (payload.groupPrice !== undefined) payload.groupPrice = Number(payload.groupPrice) || 0;
+    if (payload.enableGroupSession !== undefined) {
+      payload.enableGroupSession = Boolean(payload.enableGroupSession);
+      if (!payload.enableGroupSession) payload.groupPrice = undefined;
+    }
+    if (payload.groupPrice !== undefined && payload.groupPrice !== '') {
+      payload.groupPrice = Number(payload.groupPrice) || 0;
+    }
     if (payload.originalGroupPrice !== undefined) payload.originalGroupPrice = Number(payload.originalGroupPrice) || 0;
+    if (payload.groupSessionDate !== undefined) {
+      payload.groupSessionDate = payload.groupSessionDate ? new Date(payload.groupSessionDate) : null;
+    }
     if (payload.name && (!payload.tagline || !String(payload.tagline).trim())) {
       payload.tagline = generateServiceTagline(payload.name, payload.mode, payload.duration);
     }
     const service = await CounsellingService.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true });
     if (!service) return res.status(404).json({ success: false, message: 'Service not found' });
     res.json({ success: true, service });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/services/:id/schedule', protect, superAdminOnly, async (req, res) => {
+  try {
+    const {
+      groupSessionDate,
+      groupSessionStartTime,
+      groupSessionEndTime,
+      groupSessionDuration,
+      groupSessionMeetingLink,
+      notifyCandidates,
+    } = req.body;
+
+    const service = await CounsellingService.findById(req.params.id);
+    if (!service) return res.status(404).json({ success: false, message: 'Service not found' });
+
+    if (groupSessionDate !== undefined) {
+      service.groupSessionDate = groupSessionDate ? new Date(groupSessionDate) : null;
+    }
+    if (groupSessionStartTime !== undefined) service.groupSessionStartTime = groupSessionStartTime;
+    if (groupSessionEndTime !== undefined) service.groupSessionEndTime = groupSessionEndTime;
+    if (groupSessionDuration !== undefined) service.groupSessionDuration = groupSessionDuration;
+    if (groupSessionMeetingLink !== undefined) service.groupSessionMeetingLink = groupSessionMeetingLink;
+    if (notifyCandidates) service.groupSessionNotifiedAt = new Date();
+
+    await service.save();
+
+    let notifiedCount = 0;
+    if (notifyCandidates && service.groupSessionDate) {
+      const bookings = await CounsellingBooking.find({
+        serviceId: service._id,
+        type: 'group',
+        paymentStatus: 'paid',
+        status: { $nin: ['cancelled', 'refunded'] },
+      });
+
+      for (const booking of bookings) {
+        if (booking.email) {
+          await sendGroupSessionScheduleEmail({
+            booking,
+            service,
+            date: service.groupSessionDate,
+            startTime: service.groupSessionStartTime,
+            endTime: service.groupSessionEndTime,
+            meetingLink: service.groupSessionMeetingLink,
+          });
+          notifiedCount++;
+        }
+      }
+    }
+
+    res.json({ success: true, service, notifiedCount });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

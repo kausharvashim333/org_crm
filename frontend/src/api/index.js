@@ -289,6 +289,7 @@ export const getCounsellingServices = () => API.get('/counselling/services');
 export const createCounsellingService = (data) => API.post('/counselling/services', data);
 export const updateCounsellingService = (id, data) => API.put(`/counselling/services/${id}`, data);
 export const deleteCounsellingService = (id) => API.delete(`/counselling/services/${id}`);
+export const scheduleCounsellingGroupSession = (id, data) => API.put(`/counselling/services/${id}/schedule`, data);
 export const getCounsellingSessions = () => API.get('/counselling/sessions');
 export const createCounsellingSession = (data) => API.post('/counselling/sessions', data);
 export const updateCounsellingSession = (id, data) => API.put(`/counselling/sessions/${id}`, data);

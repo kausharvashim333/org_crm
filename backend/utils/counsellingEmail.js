@@ -173,6 +173,48 @@ exports.sendJoinLinkEmail = async (booking, session) => {
   }
 };
 
+exports.sendGroupSessionScheduleEmail = async ({ booking, service, date, startTime, endTime, meetingLink }) => {
+  try {
+    const receiptUrl = `${clientBase()}/counselling/receipt/${booking.bookingCode}`;
+    const dateStr = date ? new Date(date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    const timeStr = startTime && endTime ? `${startTime} – ${endTime}` : (startTime || '');
+    const scheduleStr = [dateStr, timeStr].filter(Boolean).join(' · ');
+    const subject = `Date & Time Confirmed: ${service.name} Group Session (${booking.bookingCode})`;
+
+    const text = [
+      `Hi ${booking.name},`,
+      `The organization has scheduled your group session: ${service.name}.`,
+      scheduleStr ? `Date & Time: ${scheduleStr}` : '',
+      meetingLink ? `Meeting Link: ${meetingLink}` : 'Meeting link will be shared shortly before the session.',
+      `Booking Code: ${booking.bookingCode}`,
+      `Receipt: ${receiptUrl}`,
+    ].filter(Boolean).join('\n');
+
+    const html = wrapHtml('Group Session Schedule Confirmed', `
+      <p>Hi <strong>${booking.name}</strong>,</p>
+      <p>The organization has fixed and confirmed the schedule for your group session:</p>
+      <div style="background:#f1f5f9;border-left:4px solid #4f46e5;padding:12px 16px;border-radius:8px;margin:16px 0;">
+        <h3 style="margin:0 0 8px 0;color:#1e1b4b;font-size:16px;">${service.name}</h3>
+        ${scheduleStr ? `<p style="margin:4px 0;color:#334155;font-size:14px;"><strong>📅 Date & Time:</strong> ${scheduleStr}</p>` : ''}
+        ${service.groupSessionDuration ? `<p style="margin:4px 0;color:#334155;font-size:13px;"><strong>⏱ Duration:</strong> ${service.groupSessionDuration}</p>` : ''}
+      </div>
+      ${meetingLink ? `
+        <div style="margin:20px 0;">
+          <a href="${meetingLink}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:bold;font-size:13px;">Join Group Session</a>
+          <p style="margin-top:8px;font-size:12px;color:#64748b;">Or direct link: <a href="${meetingLink}">${meetingLink}</a></p>
+        </div>
+      ` : '<p style="color:#64748b;font-size:13px;">The meeting join link will be emailed and messaged to you prior to the session.</p>'}
+      <p style="font-size:12px;color:#64748b;margin-top:16px;">
+        Booking Reference: <strong>${booking.bookingCode}</strong> · <a href="${receiptUrl}">View Receipt</a>
+      </p>
+    `);
+
+    await sendEmail({ email: booking.email, subject, message: text, html });
+  } catch (err) {
+    console.error('[Group session schedule email error]:', err.message);
+  }
+};
+
 exports.runCounsellingReminders = async () => {
   const now = Date.now();
   const bookings = await CounsellingBooking.find({
