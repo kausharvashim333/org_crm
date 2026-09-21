@@ -14,7 +14,8 @@ import { Plus, Edit, Trash2, Save, Users, Video, Calendar, Upload, ClipboardList
 
 const emptyService = {
   name: '', tagline: '', description: '', duration: '30 min', mode: 'video',
-  price: 499, originalPrice: '', includes: '', badge: '', image: '', isActive: true, counsellorId: '',
+  price: 499, originalPrice: '', groupPrice: 199, originalGroupPrice: '',
+  includes: '', badge: '', image: '', isActive: true, counsellorId: '',
 };
 
 const emptySession = {
@@ -171,6 +172,7 @@ export default function AdminCounselling() {
       name: s.name || '', tagline: s.tagline || '', description: s.description || '',
       duration: s.duration || '30 min', mode: s.mode || 'video',
       price: s.price ?? 0, originalPrice: s.originalPrice || '',
+      groupPrice: s.groupPrice ?? 0, originalGroupPrice: s.originalGroupPrice || '',
       includes: (s.includes || []).join(', '), badge: s.badge || '',
       image: s.image || '', isActive: s.isActive !== false, counsellorId: s.counsellorId?._id || s.counsellorId || '',
     });
@@ -187,6 +189,8 @@ export default function AdminCounselling() {
         tagline: '',
         price: Number(serviceForm.price) || 0,
         originalPrice: Number(serviceForm.originalPrice) || 0,
+        groupPrice: Number(serviceForm.groupPrice) || 0,
+        originalGroupPrice: Number(serviceForm.originalGroupPrice) || 0,
         includes: String(serviceForm.includes || '').split(',').map((x) => x.trim()).filter(Boolean),
         counsellorId: serviceForm.counsellorId || null,
       };
@@ -439,7 +443,7 @@ export default function AdminCounselling() {
                 </div>
                 <p className="text-xs text-slate-500 line-clamp-2">{s.description}</p>
                 <div className="flex items-center justify-between text-xs pt-2 border-t">
-                  <span className="font-bold text-indigo-700">₹{s.price} · {s.duration} · Video • Phone • WhatsApp</span>
+                  <span className="font-bold text-indigo-700">1-on-1: ₹{s.price} · Group: ₹{s.groupPrice ?? 0} · {s.duration}</span>
                   {s.isActive ? <span className="badge badge-success text-[10px]">Live</span> : <span className="badge badge-warning text-[10px]">Hidden</span>}
                 </div>
               </div>
@@ -699,14 +703,52 @@ export default function AdminCounselling() {
             <option value="one_on_one">1-on-1 service</option>
           </select>
           {manualForm.type === 'group' ? (
-            <select required className="input-field" value={manualForm.sessionId} onChange={(e) => setManualForm({ ...manualForm, sessionId: e.target.value })}>
-              <option value="">Select session</option>
-              {sessions.map((s) => <option key={s._id} value={s._id}>{s.title}</option>)}
+            <select
+              required
+              className="input-field"
+              value={manualForm.sessionId || (manualForm.serviceId ? `svc_${manualForm.serviceId}` : '')}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val.startsWith('svc_')) {
+                  const sId = val.replace('svc_', '');
+                  const svc = services.find((x) => x._id === sId);
+                  setManualForm({
+                    ...manualForm,
+                    serviceId: sId,
+                    sessionId: '',
+                    amount: manualForm.amount === '' ? (svc?.groupPrice ?? 0) : manualForm.amount,
+                  });
+                } else {
+                  const ses = sessions.find((x) => x._id === val);
+                  setManualForm({
+                    ...manualForm,
+                    sessionId: val,
+                    serviceId: '',
+                    amount: manualForm.amount === '' ? (ses?.fee ?? '') : manualForm.amount,
+                  });
+                }
+              }}
+            >
+              <option value="">Select session or service...</option>
+              {sessions.length > 0 && (
+                <optgroup label="Scheduled Sessions">
+                  {sessions.map((s) => (
+                    <option key={s._id} value={s._id}>{s.title} (Fee: ₹{s.fee})</option>
+                  ))}
+                </optgroup>
+              )}
+              {services.length > 0 && (
+                <optgroup label="1-on-1 Services (as Group Batch)">
+                  {services.map((s) => (
+                    <option key={s._id} value={`svc_${s._id}`}>{s.name} (Group Fee: ₹{s.groupPrice ?? 0}) - Org fixes date/time</option>
+                  ))}
+                </optgroup>
+              )}
             </select>
           ) : (
             <select required className="input-field" value={manualForm.serviceId} onChange={(e) => setManualForm({ ...manualForm, serviceId: e.target.value })}>
               <option value="">Select service</option>
-              {services.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
+              {services.map((s) => <option key={s._id} value={s._id}>{s.name} (₹{s.price})</option>)}
             </select>
           )}
           <input required className="input-field" placeholder="Name" value={manualForm.name} onChange={(e) => setManualForm({ ...manualForm, name: e.target.value })} />
@@ -761,8 +803,21 @@ export default function AdminCounselling() {
             </div>
             <div><label className="block text-xs font-medium mb-1">Duration</label><input className="input-field" value={serviceForm.duration} onChange={(e) => setServiceForm({ ...serviceForm, duration: e.target.value })} /></div>
             <div><label className="block text-xs font-medium mb-1">Badge</label><input className="input-field" placeholder="Popular / New" value={serviceForm.badge} onChange={(e) => setServiceForm({ ...serviceForm, badge: e.target.value })} /></div>
-            <div><label className="block text-xs font-medium mb-1">Price (₹)</label><input type="number" min="0" className="input-field" value={serviceForm.price} onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })} /></div>
-            <div><label className="block text-xs font-medium mb-1">Original price (optional)</label><input type="number" min="0" className="input-field" value={serviceForm.originalPrice} onChange={(e) => setServiceForm({ ...serviceForm, originalPrice: e.target.value })} /></div>
+            
+            <div className="sm:col-span-2 pt-2 border-t border-slate-100">
+              <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">1-on-1 Consultation Pricing</span>
+            </div>
+            <div><label className="block text-xs font-medium mb-1">1-on-1 Price (₹) *</label><input type="number" min="0" className="input-field" value={serviceForm.price} onChange={(e) => setServiceForm({ ...serviceForm, price: e.target.value })} /></div>
+            <div><label className="block text-xs font-medium mb-1">1-on-1 Original price (optional)</label><input type="number" min="0" className="input-field" value={serviceForm.originalPrice} onChange={(e) => setServiceForm({ ...serviceForm, originalPrice: e.target.value })} /></div>
+
+            <div className="sm:col-span-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-indigo-700 uppercase tracking-wide">Group Session Pricing</span>
+                <span className="text-[11px] text-slate-400">Set 0 for FREE group session</span>
+              </div>
+            </div>
+            <div><label className="block text-xs font-medium mb-1">Group Session Price (₹)</label><input type="number" min="0" className="input-field" placeholder="E.g. 199 or 0" value={serviceForm.groupPrice} onChange={(e) => setServiceForm({ ...serviceForm, groupPrice: e.target.value })} /></div>
+            <div><label className="block text-xs font-medium mb-1">Group Original price (optional)</label><input type="number" min="0" className="input-field" placeholder="E.g. 499" value={serviceForm.originalGroupPrice} onChange={(e) => setServiceForm({ ...serviceForm, originalGroupPrice: e.target.value })} /></div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium mb-1">Image</label>
               <div className="flex gap-2">

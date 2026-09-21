@@ -12,6 +12,8 @@ const counsellingServiceSchema = new mongoose.Schema({
   },
   price: { type: Number, default: 0 },
   originalPrice: { type: Number, default: 0 },
+  groupPrice: { type: Number, default: 0 },
+  originalGroupPrice: { type: Number, default: 0 },
   includes: [{ type: String }],
   badge: { type: String, default: '' },
   image: { type: String, default: '' },

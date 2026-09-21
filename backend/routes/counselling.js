@@ -416,6 +416,8 @@ router.post('/services', protect, superAdminOnly, async (req, res) => {
         : String(req.body.includes || '').split(',').map((s) => s.trim()).filter(Boolean),
       price: Number(req.body.price) || 0,
       originalPrice: Number(req.body.originalPrice) || 0,
+      groupPrice: Number(req.body.groupPrice) || 0,
+      originalGroupPrice: Number(req.body.originalGroupPrice) || 0,
     });
     res.status(201).json({ success: true, service });
   } catch (error) {
@@ -431,6 +433,8 @@ router.put('/services/:id', protect, superAdminOnly, async (req, res) => {
     }
     if (payload.price !== undefined) payload.price = Number(payload.price) || 0;
     if (payload.originalPrice !== undefined) payload.originalPrice = Number(payload.originalPrice) || 0;
+    if (payload.groupPrice !== undefined) payload.groupPrice = Number(payload.groupPrice) || 0;
+    if (payload.originalGroupPrice !== undefined) payload.originalGroupPrice = Number(payload.originalGroupPrice) || 0;
     if (payload.name && (!payload.tagline || !String(payload.tagline).trim())) {
       payload.tagline = generateServiceTagline(payload.name, payload.mode, payload.duration);
     }
@@ -532,28 +536,39 @@ router.post('/public/create-order', async (req, res) => {
     await releaseExpiredSlotHolds();
 
     if (type === 'group') {
-      session = await CounsellingSession.findById(sessionId);
-      if (!session || session.status !== 'published' || session.showOnWebsite === false) {
-        return res.status(404).json({ success: false, message: 'Session not available' });
+      if (sessionId) {
+        session = await CounsellingSession.findById(sessionId);
+        if (!session || session.status !== 'published' || session.showOnWebsite === false) {
+          return res.status(404).json({ success: false, message: 'Session not available' });
+        }
+        if (!isUpcomingSession(session)) {
+          return res.status(400).json({ success: false, message: 'This session is closed for booking' });
+        }
+        const existingPaid = await CounsellingBooking.findOne({
+          sessionId: session._id,
+          phone: phoneNorm,
+          paymentStatus: 'paid',
+          status: { $nin: ['cancelled', 'refunded'] },
+        });
+        if (existingPaid) {
+          return res.status(400).json({ success: false, message: 'This number already has a confirmed seat for this session' });
+        }
+        const occupied = await countOccupiedSeats(session._id);
+        if (occupied >= (session.seats || 0)) {
+          return res.status(400).json({ success: false, message: 'Seats are full for this session' });
+        }
+        itemTitle = session.title;
+        amount = Number(session.fee) || 0;
+      } else if (serviceId) {
+        service = await CounsellingService.findById(serviceId);
+        if (!service || service.isActive === false) {
+          return res.status(404).json({ success: false, message: 'Counselling service not available' });
+        }
+        itemTitle = `${service.name} (Group Session)`;
+        amount = Number(service.groupPrice !== undefined && service.groupPrice !== null ? service.groupPrice : service.price) || 0;
+      } else {
+        return res.status(400).json({ success: false, message: 'Session or service is required for group booking' });
       }
-      if (!isUpcomingSession(session)) {
-        return res.status(400).json({ success: false, message: 'This session is closed for booking' });
-      }
-      const existingPaid = await CounsellingBooking.findOne({
-        sessionId: session._id,
-        phone: phoneNorm,
-        paymentStatus: 'paid',
-        status: { $nin: ['cancelled', 'refunded'] },
-      });
-      if (existingPaid) {
-        return res.status(400).json({ success: false, message: 'This number already has a confirmed seat for this session' });
-      }
-      const occupied = await countOccupiedSeats(session._id);
-      if (occupied >= (session.seats || 0)) {
-        return res.status(400).json({ success: false, message: 'Seats are full for this session' });
-      }
-      itemTitle = session.title;
-      amount = Number(session.fee) || 0;
     } else {
       service = await CounsellingService.findById(serviceId);
       if (!service || service.isActive === false) {
@@ -761,13 +776,22 @@ router.post('/bookings/manual', protect, superAdminOnly, async (req, res) => {
     let itemTitle = '';
     let amt = Number(amount);
     if (type === 'group') {
-      const session = await CounsellingSession.findById(sessionId);
-      if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
-      itemTitle = session.title;
-      if (Number.isNaN(amt)) amt = Number(session.fee) || 0;
-      const occupied = await countOccupiedSeats(session._id);
-      if (occupied >= (session.seats || 0)) {
-        return res.status(400).json({ success: false, message: 'Seats are full' });
+      if (sessionId) {
+        const session = await CounsellingSession.findById(sessionId);
+        if (!session) return res.status(404).json({ success: false, message: 'Session not found' });
+        itemTitle = session.title;
+        if (Number.isNaN(amt)) amt = Number(session.fee) || 0;
+        const occupied = await countOccupiedSeats(session._id);
+        if (occupied >= (session.seats || 0)) {
+          return res.status(400).json({ success: false, message: 'Seats are full' });
+        }
+      } else if (serviceId) {
+        const service = await CounsellingService.findById(serviceId);
+        if (!service) return res.status(404).json({ success: false, message: 'Service not found' });
+        itemTitle = `${service.name} (Group Session)`;
+        if (Number.isNaN(amt)) amt = Number(service.groupPrice !== undefined && service.groupPrice !== null ? service.groupPrice : service.price) || 0;
+      } else {
+        return res.status(400).json({ success: false, message: 'Session or service required' });
       }
     } else {
       const service = await CounsellingService.findById(serviceId);
@@ -779,8 +803,8 @@ router.post('/bookings/manual', protect, superAdminOnly, async (req, res) => {
     const booking = await CounsellingBooking.create({
       bookingCode: await generateBookingCode(type === 'group' ? 'GC' : 'CS'),
       type: type === 'group' ? 'group' : 'one_on_one',
-      serviceId: type === 'group' ? undefined : serviceId,
-      sessionId: type === 'group' ? sessionId : undefined,
+      serviceId: serviceId || undefined,
+      sessionId: sessionId || undefined,
       itemTitle,
       name: name.trim(),
       phone: phoneNorm,

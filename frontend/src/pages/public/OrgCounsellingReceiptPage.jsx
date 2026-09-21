@@ -63,10 +63,15 @@ export default function OrgCounsellingReceiptPage() {
             <p className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-slate-400" /> {booking.phone}</p>
             {booking.email && <p className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-slate-400" /> {booking.email}</p>}
             <p><span className="text-slate-500">Session:</span> <strong>{booking.itemTitle}</strong></p>
-            {session?.date && (
+            {session?.date ? (
               <p className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
                 {new Date(session.date).toLocaleDateString('en-IN')} {session.startTime}–{session.endTime}
+              </p>
+            ) : (
+              <p className="flex items-center gap-1 text-indigo-700 bg-indigo-50 border border-indigo-100/80 px-2.5 py-1.5 rounded-lg text-xs font-semibold">
+                <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                Date & Time: Organization dwara fix ki jayegi (Details will be shared on WhatsApp / Email)
               </p>
             )}
             <p><span className="text-slate-500">Paid:</span> <strong>₹{booking.amount}</strong> ({booking.paymentMode})</p>
