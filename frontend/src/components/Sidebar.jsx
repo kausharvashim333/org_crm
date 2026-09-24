@@ -103,6 +103,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       icon: Globe,
       links: [
         { to: '/admin/homepage', icon: Globe, label: 'Website CMS & Editor' },
+        { to: '/admin/homepage?section=disclaimer', icon: ShieldCheck, label: 'Legal Disclaimer' },
       ],
     },
   ];

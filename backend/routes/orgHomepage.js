@@ -6,6 +6,51 @@ const upload = require('../middleware/upload');
 
 const router = express.Router();
 
+const DEFAULT_DISCLAIMER = {
+  show: true,
+  title: 'Disclaimer & Legal Notice',
+  subtitle: 'Important disclosures regarding our educational guidance, allied health consultations, and financial training modules.',
+  lastUpdated: 'September 2026',
+  stockMarket: {
+    title: 'Disclaimer for Stock Market Training',
+    badge: 'SEBI & Investment Risk Notice',
+    content: 'Disclaimer: The content shared here is strictly for educational, informational, and analytical purposes only and does not constitute financial advice, an endorsement, or a recommendation to buy or sell any securities. Investments in securities markets are subject to market risks; read all related documents carefully before investing. We are not a SEBI-registered Investment Adviser (IA) or Research Analyst (RA). Viewers must consult a certified financial professional before making any investment decisions.',
+  },
+  educationalConsultant: {
+    title: 'Educational Consultant Disclaimer for Lili Organisation',
+    badge: 'Educational & Healthcare Consulting Notice',
+    organizationName: 'Lili Organisation',
+    sections: [
+      {
+        number: '1',
+        title: 'General Information Only',
+        content: 'The information, guidance, and recommendations provided by Lili Organisation regarding allied health courses, institutions, and career paths are for educational and informational purposes only. While we strive to keep all details accurate and up to date, academic programs, admission requirements, and course availability can change frequently and without notice.',
+      },
+      {
+        number: '2',
+        title: 'No Guarantee of Admission or Outcomes',
+        content: 'Enlisting the consulting services of Lili Organisation does not guarantee admission into any specific college, university, or allied health program. Final admission decisions rest entirely with the respective educational institutions. Furthermore, we do not guarantee employment, salary levels, or specific career outcomes upon graduation.',
+      },
+      {
+        number: '3',
+        title: 'Licensing, Accreditation, and Certification Standards',
+        content: 'Allied health professions are heavily regulated. Lili Organisation provides general advice regarding common industry pathways. However, it is the sole responsibility of the student to independently verify that their chosen program maintains the proper institutional accreditation and meets the specific state, national, or regional licensing and certification requirements for their intended place of practice.',
+      },
+      {
+        number: '4',
+        title: 'External Links and Third-Party Entities',
+        content: 'Our services, materials, or website may reference third-party universities, clinical sites, or professional testing bodies. Lili Organisation does not endorse, control, or assume liability for the policies, tuition rates, curriculum changes, or actions of these independent institutions.',
+      },
+      {
+        number: '5',
+        title: 'Limitation of Liability',
+        content: 'By using our consulting services, you agree that Lili Organisation is not legally or financially liable for any academic, professional, or financial decisions you make based on our advice. Students are strongly encouraged to verify all tuition costs, clinical placement requirements, and prerequisite courses directly with the institution\'s official admissions office before enrolling.',
+      },
+    ],
+  },
+  footerNotice: 'Please ensure you thoroughly review all institution guidelines, government accreditation records, and fee structures before confirming admissions or investments.',
+};
+
 const createDefaultIfMissing = async (lean = false) => {
   let homepage = lean ? await OrgHomepage.findOne().lean() : await OrgHomepage.findOne();
   if (!homepage) {
@@ -400,6 +445,30 @@ const createDefaultIfMissing = async (lean = false) => {
     }
   }
 
+  // Ensure default disclaimer is present if empty
+  if (homepage) {
+    if (!homepage.disclaimer || !homepage.disclaimer.stockMarket || !homepage.disclaimer.stockMarket.content) {
+      const existing = homepage.disclaimer
+        ? (homepage.disclaimer.toObject ? homepage.disclaimer.toObject() : homepage.disclaimer)
+        : {};
+      homepage.disclaimer = {
+        ...DEFAULT_DISCLAIMER,
+        ...existing,
+        stockMarket: {
+          ...DEFAULT_DISCLAIMER.stockMarket,
+          ...(existing.stockMarket || {}),
+        },
+        educationalConsultant: {
+          ...DEFAULT_DISCLAIMER.educationalConsultant,
+          ...(existing.educationalConsultant || {}),
+          sections: (existing.educationalConsultant?.sections && existing.educationalConsultant.sections.length > 0)
+            ? existing.educationalConsultant.sections
+            : DEFAULT_DISCLAIMER.educationalConsultant.sections,
+        },
+      };
+    }
+  }
+
   return homepage;
 };
 
@@ -444,7 +513,7 @@ router.put('/', protect, superAdminOnly, async (req, res) => {
 router.put('/section/:section', protect, superAdminOnly, async (req, res) => {
   try {
     const { section } = req.params;
-    const allowedSections = ['hero', 'verticals', 'about', 'stats', 'courses', 'franchise', 'certifications', 'cta', 'gallery', 'testimonials', 'notices', 'contact', 'settings', 'layoutOrder', 'services', 'announcement', 'enquiryConfig', 'codeSeriesConfig', 'verifyWidget', 'categories', 'certificateTemplate'];
+    const allowedSections = ['hero', 'verticals', 'about', 'stats', 'courses', 'franchise', 'certifications', 'cta', 'gallery', 'testimonials', 'notices', 'contact', 'settings', 'layoutOrder', 'services', 'announcement', 'enquiryConfig', 'codeSeriesConfig', 'verifyWidget', 'categories', 'certificateTemplate', 'disclaimer'];
     if (!allowedSections.includes(section)) {
       return res.status(400).json({ success: false, message: 'Invalid section' });
     }

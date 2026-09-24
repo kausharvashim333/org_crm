@@ -38,6 +38,7 @@ const PartnerCoursesPage = lazy(() => import('./pages/public/PartnerCoursesPage'
 const PartnerFacultyPage = lazy(() => import('./pages/public/PartnerFacultyPage'));
 const PartnerGalleryPage = lazy(() => import('./pages/public/PartnerGalleryPage'));
 const PartnerNoticesPage = lazy(() => import('./pages/public/PartnerNoticesPage'));
+const DisclaimerPage = lazy(() => import('./pages/public/DisclaimerPage'));
 
 // SuperAdmin Pages (Lazy)
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/Login'));
@@ -157,6 +158,7 @@ export default function App() {
         <Route path="/verify-franchise/:franchiseId" element={<FranchiseVerificationPage />} />
         <Route path="/franchises" element={<FranchisesList />} />
         <Route path="/verify-certificate" element={<CertificateVerify />} />
+        <Route path="/disclaimer" element={<DisclaimerPage />} />
         <Route path="/notices" element={<OrgNoticesPage />} />
         <Route path="/gallery" element={<OrgGalleryPage />} />
         <Route path="/admission" element={<UniversalAdmissionPage />} />

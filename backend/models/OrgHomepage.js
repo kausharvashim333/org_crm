@@ -304,6 +304,35 @@ const orgHomepageSchema = new mongoose.Schema({
       linkText: { type: String, default: 'Learn More' },
     }],
   }],
+
+  disclaimer: {
+    show: { type: Boolean, default: true },
+    title: { type: String, default: 'Disclaimer & Legal Notice' },
+    subtitle: { type: String, default: 'Important disclosures regarding our educational guidance, allied health consultations, and financial training modules.' },
+    lastUpdated: { type: String, default: 'September 2026' },
+    stockMarket: {
+      title: { type: String, default: 'Disclaimer for Stock Market Training' },
+      badge: { type: String, default: 'SEBI & Investment Risk Notice' },
+      content: {
+        type: String,
+        default: 'Disclaimer: The content shared here is strictly for educational, informational, and analytical purposes only and does not constitute financial advice, an endorsement, or a recommendation to buy or sell any securities. Investments in securities markets are subject to market risks; read all related documents carefully before investing. We are not a SEBI-registered Investment Adviser (IA) or Research Analyst (RA). Viewers must consult a certified financial professional before making any investment decisions.'
+      },
+    },
+    educationalConsultant: {
+      title: { type: String, default: 'Educational Consultant Disclaimer for Lili Organisation' },
+      badge: { type: String, default: 'Educational & Healthcare Consulting Notice' },
+      organizationName: { type: String, default: 'Lili Organisation' },
+      sections: [{
+        number: { type: String },
+        title: { type: String },
+        content: { type: String },
+      }],
+    },
+    footerNotice: {
+      type: String,
+      default: 'Please ensure you thoroughly review all institution guidelines, government accreditation records, and fee structures before confirming admissions or investments.'
+    }
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('OrgHomepage', orgHomepageSchema);

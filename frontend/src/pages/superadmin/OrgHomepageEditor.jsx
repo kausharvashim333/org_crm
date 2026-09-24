@@ -23,7 +23,7 @@ import {
   NoticesEditor, CtaEditor, ContactEditor, SettingsEditor,
   ServicesEditor, AnnouncementEditor, EnquiryConfigEditor,
   CodeSeriesEditor, VerticalsEditor, CustomSectionsEditor, CentersStripEditor,
-  LayoutOrderEditor, VerifyWidgetEditor, CategoriesEditor,
+  LayoutOrderEditor, VerifyWidgetEditor, CategoriesEditor, DisclaimerEditor,
 } from './websiteEditors';
 
 const tabs = [
@@ -36,6 +36,7 @@ const tabs = [
   { key: 'certs', label: 'Certificates & Affiliations' },
   { key: 'media', label: 'Media' },
   { key: 'layout', label: 'Section Order' },
+  { key: 'disclaimer', label: '⚖️ Disclaimer' },
   { key: 'settings', label: 'Settings' },
 ];
 
@@ -51,6 +52,7 @@ const sectionToTab = {
   announcement: 'settings', enquiryConfig: 'settings', contact: 'settings', settings: 'settings',
   verifyWidget: 'custom', categories: 'custom', layoutOrder: 'layout',
   certifications: 'certs', certificateTemplate: 'certs',
+  disclaimer: 'disclaimer',
 };
 
 export default function OrgHomepageEditor() {
@@ -188,6 +190,10 @@ export default function OrgHomepageEditor() {
 
         {activeTab === 'layout' && <>
           <LayoutOrderEditor homepage={homepage} onSave={(d) => save('layoutOrder', d)} />
+        </>}
+
+        {activeTab === 'disclaimer' && <>
+          <DisclaimerEditor homepage={homepage} onSave={(d) => save('disclaimer', d)} />
         </>}
 
         {activeTab === 'settings' && <>

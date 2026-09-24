@@ -86,6 +86,7 @@ export default function Footer({ homepageData }) {
               <Link to="/notices" className="block text-sm text-slate-400 hover:text-white transition-colors">Notices</Link>
               <Link to="/gallery" className="block text-sm text-slate-400 hover:text-white transition-colors">Gallery</Link>
               <Link to="/verify-certificate" className="block text-sm text-slate-400 hover:text-white transition-colors">Verify Certificate</Link>
+              <Link to="/disclaimer" className="block text-sm text-amber-400 hover:text-amber-300 font-semibold transition-colors">Disclaimer & Legal</Link>
             </div>
           </div>
           <div>
@@ -96,7 +97,6 @@ export default function Footer({ homepageData }) {
               ))}
               {(!hp.verticals?.items || hp.verticals.items.length === 0) && (
                 <>
-                  <p className="text-sm text-slate-400">Paramedical</p>
                   <p className="text-sm text-slate-400">Computer Training</p>
                   <p className="text-sm text-slate-400">Skill Development</p>
                   <p className="text-sm text-slate-400">Stock Market Training</p>
@@ -107,7 +107,12 @@ export default function Footer({ homepageData }) {
         </div>
         <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-500">© {new Date().getFullYear()} {orgName}. All rights reserved.</p>
-          <p className="text-xs text-slate-500">Paramedical | Computer Training | Skill Development | Stock Market Training</p>
+          <div className="flex items-center gap-6">
+            <Link to="/disclaimer" className="text-xs text-slate-400 hover:text-white underline transition-colors">
+              Disclaimer & Legal Policies
+            </Link>
+            <p className="text-xs text-slate-500 hidden sm:block">Computer Training | Skill Development | Stock Market Training</p>
+          </div>
         </div>
       </div>
     </footer>

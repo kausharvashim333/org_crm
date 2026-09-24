@@ -2668,3 +2668,324 @@ export function CertificateTemplateEditor({ homepage, onSave }) {
     </div>
   );
 }
+
+export function DisclaimerEditor({ homepage, onSave }) {
+  const [data, setData] = useState(() => {
+    const d = homepage?.disclaimer || {};
+    return {
+      show: d.show !== false,
+      title: d.title || 'Disclaimer & Legal Notice',
+      subtitle: d.subtitle || 'Important disclosures regarding our educational guidance, allied health consultations, and financial training modules.',
+      lastUpdated: d.lastUpdated || 'September 2026',
+      stockMarket: {
+        title: d.stockMarket?.title || 'Disclaimer for Stock Market Training',
+        badge: d.stockMarket?.badge || 'SEBI & Investment Risk Notice',
+        content: d.stockMarket?.content || 'Disclaimer: The content shared here is strictly for educational, informational, and analytical purposes only and does not constitute financial advice, an endorsement, or a recommendation to buy or sell any securities. Investments in securities markets are subject to market risks; read all related documents carefully before investing. We are not a SEBI-registered Investment Adviser (IA) or Research Analyst (RA). Viewers must consult a certified financial professional before making any investment decisions.',
+      },
+      educationalConsultant: {
+        title: d.educationalConsultant?.title || 'Educational Consultant Disclaimer for Lili Organisation',
+        badge: d.educationalConsultant?.badge || 'Educational & Healthcare Consulting Notice',
+        organizationName: d.educationalConsultant?.organizationName || 'Lili Organisation',
+        sections: (d.educationalConsultant?.sections && d.educationalConsultant.sections.length > 0)
+          ? d.educationalConsultant.sections
+          : [
+            {
+              number: '1',
+              title: 'General Information Only',
+              content: 'The information, guidance, and recommendations provided by Lili Organisation regarding allied health courses, institutions, and career paths are for educational and informational purposes only. While we strive to keep all details accurate and up to date, academic programs, admission requirements, and course availability can change frequently and without notice.',
+            },
+            {
+              number: '2',
+              title: 'No Guarantee of Admission or Outcomes',
+              content: 'Enlisting the consulting services of Lili Organisation does not guarantee admission into any specific college, university, or allied health program. Final admission decisions rest entirely with the respective educational institutions. Furthermore, we do not guarantee employment, salary levels, or specific career outcomes upon graduation.',
+            },
+            {
+              number: '3',
+              title: 'Licensing, Accreditation, and Certification Standards',
+              content: 'Allied health professions are heavily regulated. Lili Organisation provides general advice regarding common industry pathways. However, it is the sole responsibility of the student to independently verify that their chosen program maintains the proper institutional accreditation and meets the specific state, national, or regional licensing and certification requirements for their intended place of practice.',
+            },
+            {
+              number: '4',
+              title: 'External Links and Third-Party Entities',
+              content: 'Our services, materials, or website may reference third-party universities, clinical sites, or professional testing bodies. Lili Organisation does not endorse, control, or assume liability for the policies, tuition rates, curriculum changes, or actions of these independent institutions.',
+            },
+            {
+              number: '5',
+              title: 'Limitation of Liability',
+              content: 'By using our consulting services, you agree that Lili Organisation is not legally or financially liable for any academic, professional, or financial decisions you make based on our advice. Students are strongly encouraged to verify all tuition costs, clinical placement requirements, and prerequisite courses directly with the institution\'s official admissions office before enrolling.',
+            },
+          ],
+      },
+      footerNotice: d.footerNotice || 'Please ensure you thoroughly review all institution guidelines, government accreditation records, and fee structures before confirming admissions or investments.',
+    };
+  });
+
+  const handleSectionChange = (idx, field, value) => {
+    const updated = [...(data.educationalConsultant.sections || [])];
+    updated[idx] = { ...updated[idx], [field]: value };
+    setData({
+      ...data,
+      educationalConsultant: {
+        ...data.educationalConsultant,
+        sections: updated,
+      },
+    });
+  };
+
+  const handleAddSection = () => {
+    const updated = [...(data.educationalConsultant.sections || [])];
+    const nextNum = updated.length + 1;
+    updated.push({
+      number: String(nextNum),
+      title: 'New Section Title',
+      content: 'Enter section disclaimer details here...',
+    });
+    setData({
+      ...data,
+      educationalConsultant: {
+        ...data.educationalConsultant,
+        sections: updated,
+      },
+    });
+  };
+
+  const handleRemoveSection = (idx) => {
+    const updated = [...(data.educationalConsultant.sections || [])];
+    updated.splice(idx, 1);
+    setData({
+      ...data,
+      educationalConsultant: {
+        ...data.educationalConsultant,
+        sections: updated,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Top Header Controls */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h3 className="text-base font-bold text-slate-800">Page Header & Information</h3>
+            <p className="text-xs text-slate-500">Configure page title, headline and last updated date displayed on the /disclaimer page.</p>
+          </div>
+          <a
+            href="/disclaimer"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-semibold text-primary-600 hover:text-primary-700 underline"
+          >
+            Preview Live Page ↗
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="Page Main Heading">
+            <input
+              type="text"
+              value={data.title}
+              onChange={(e) => setData({ ...data, title: e.target.value })}
+              className="input-field"
+              placeholder="Disclaimer & Legal Notice"
+            />
+          </Field>
+          <Field label="Last Updated Label">
+            <input
+              type="text"
+              value={data.lastUpdated}
+              onChange={(e) => setData({ ...data, lastUpdated: e.target.value })}
+              className="input-field"
+              placeholder="e.g. September 2026"
+            />
+          </Field>
+        </div>
+
+        <Field label="Subtitle / Intro Text">
+          <textarea
+            rows="2"
+            value={data.subtitle}
+            onChange={(e) => setData({ ...data, subtitle: e.target.value })}
+            className="input-field"
+            placeholder="Introduction description..."
+          />
+        </Field>
+      </div>
+
+      {/* Stock Market Training Disclaimer */}
+      <div className="bg-white rounded-2xl p-6 border border-amber-200/80 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-amber-100">
+          <div>
+            <div className="inline-block px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-bold uppercase tracking-wider mb-1">
+              Financial & Trading Disclaimers
+            </div>
+            <h3 className="text-base font-bold text-slate-800">1. Stock Market Training Disclaimer</h3>
+            <p className="text-xs text-slate-500">SEBI non-registration disclosure and financial market risk statement.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="Section Title">
+            <input
+              type="text"
+              value={data.stockMarket.title}
+              onChange={(e) => setData({
+                ...data,
+                stockMarket: { ...data.stockMarket, title: e.target.value }
+              })}
+              className="input-field"
+            />
+          </Field>
+          <Field label="Badge / Category Tag">
+            <input
+              type="text"
+              value={data.stockMarket.badge}
+              onChange={(e) => setData({
+                ...data,
+                stockMarket: { ...data.stockMarket, badge: e.target.value }
+              })}
+              className="input-field"
+            />
+          </Field>
+        </div>
+
+        <Field label="Disclaimer Statement">
+          <textarea
+            rows="5"
+            value={data.stockMarket.content}
+            onChange={(e) => setData({
+              ...data,
+              stockMarket: { ...data.stockMarket, content: e.target.value }
+            })}
+            className="input-field font-sans text-sm leading-relaxed"
+            placeholder="Enter the complete stock market disclaimer text..."
+          />
+        </Field>
+      </div>
+
+      {/* Educational Consultant Disclaimer */}
+      <div className="bg-white rounded-2xl p-6 border border-indigo-200/80 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-indigo-100">
+          <div>
+            <div className="inline-block px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold uppercase tracking-wider mb-1">
+              Consulting & Academic Disclaimers
+            </div>
+            <h3 className="text-base font-bold text-slate-800">2. Educational Consultant Disclaimer (Lili Organisation)</h3>
+            <p className="text-xs text-slate-500">Allied health guidance, admission guarantees, accreditation and liabilities.</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddSection}
+            className="btn-secondary text-xs flex items-center gap-1.5 self-start sm:self-auto"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add New Point
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="Section Title">
+            <input
+              type="text"
+              value={data.educationalConsultant.title}
+              onChange={(e) => setData({
+                ...data,
+                educationalConsultant: { ...data.educationalConsultant, title: e.target.value }
+              })}
+              className="input-field"
+            />
+          </Field>
+          <Field label="Organization / Consultant Entity Name">
+            <input
+              type="text"
+              value={data.educationalConsultant.organizationName}
+              onChange={(e) => setData({
+                ...data,
+                educationalConsultant: { ...data.educationalConsultant, organizationName: e.target.value }
+              })}
+              className="input-field"
+            />
+          </Field>
+        </div>
+
+        {/* Structured Points */}
+        <div className="space-y-4 pt-2">
+          {data.educationalConsultant.sections?.map((sec, idx) => (
+            <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black text-indigo-650 uppercase tracking-wider">
+                  Point #{idx + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSection(idx)}
+                  className="text-xs text-rose-500 hover:text-rose-700 flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Remove
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="md:col-span-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Number / Index</label>
+                  <input
+                    type="text"
+                    value={sec.number || `${idx + 1}`}
+                    onChange={(e) => handleSectionChange(idx, 'number', e.target.value)}
+                    className="input-field text-sm"
+                    placeholder="e.g. 1"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Point Heading</label>
+                  <input
+                    type="text"
+                    value={sec.title}
+                    onChange={(e) => handleSectionChange(idx, 'title', e.target.value)}
+                    className="input-field text-sm font-semibold"
+                    placeholder="e.g. General Information Only"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Point Body / Details</label>
+                <textarea
+                  rows="3"
+                  value={sec.content}
+                  onChange={(e) => handleSectionChange(idx, 'content', e.target.value)}
+                  className="input-field text-sm leading-relaxed"
+                  placeholder="Enter details for this disclaimer section..."
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Summary Notice */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+        <h3 className="text-base font-bold text-slate-800">Footer Legal Advisory Note</h3>
+        <Field label="Advisory Callout Text">
+          <textarea
+            rows="2"
+            value={data.footerNotice}
+            onChange={(e) => setData({ ...data, footerNotice: e.target.value })}
+            className="input-field text-sm"
+            placeholder="Important reminder notice for candidates..."
+          />
+        </Field>
+      </div>
+
+      {/* Save Action */}
+      <div className="sticky bottom-4 z-20">
+        <button
+          type="button"
+          onClick={() => onSave(data)}
+          className="btn-primary flex items-center justify-center gap-2 w-full py-3.5 text-base font-bold shadow-lg"
+        >
+          <Save className="w-5 h-5" /> Save Disclaimer Changes
+        </button>
+      </div>
+    </div>
+  );
+}
