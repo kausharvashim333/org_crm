@@ -194,7 +194,7 @@ export default function PartnerApplyPage() {
     if (!formData.interestedVerticals || formData.interestedVerticals.length === 0) return false;
 
     // Validate organizationName if institutional type
-    if (['Skill Development Projects', 'Paramedical Training'].includes(formData.institutionType)) {
+    if (formData.institutionType === 'Skill Development Projects') {
       if (!formData.organizationName.trim()) return false;
     }
 
@@ -202,8 +202,6 @@ export default function PartnerApplyPage() {
     switch (formData.institutionType) {
       case 'Academy':
         return formData.classroomCount.trim() && formData.preferredCourses.trim();
-      case 'Paramedical Training':
-        return formData.labEquipments.trim() && formData.hospitalTieUp.trim() && formData.medicalStaffCount.trim();
       case 'Computer & IT Training':
         return formData.computers.trim() && formData.itInstructor.trim();
       case 'Health & Yoga Training':
@@ -516,7 +514,7 @@ export default function PartnerApplyPage() {
                           value={formData.name}
                           onChange={handleInputChange}
                           placeholder={
-                            ['Skill Development Projects', 'Paramedical Training'].includes(formData.institutionType)
+                            formData.institutionType === 'Skill Development Projects'
                               ? 'e.g. Rahul Kumar (Director / Center Head)'
                               : 'e.g. Rahul Kumar'
                           }
@@ -564,7 +562,7 @@ export default function PartnerApplyPage() {
                     </div>
 
                     <div>
-                      {['Skill Development Projects', 'Paramedical Training'].includes(formData.institutionType) ? (
+                      {formData.institutionType === 'Skill Development Projects' ? (
                         <>
                           <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Organization / Trust / Society Name *</label>
                           <input
@@ -600,7 +598,7 @@ export default function PartnerApplyPage() {
                         value={formData.qualification}
                         onChange={handleInputChange}
                         placeholder={
-                          ['Skill Development Projects', 'Paramedical Training'].includes(formData.institutionType)
+                          formData.institutionType === 'Skill Development Projects'
                             ? 'e.g. MCA, MBA, PhD (of Center Head)'
                             : 'e.g. MCA, B.Tech, M.A.'
                         }
@@ -710,7 +708,7 @@ export default function PartnerApplyPage() {
                     <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                       <Laptop className="w-5 h-5" style={{ color: themeColor }} />
                       <h4 className="font-bold text-slate-800 text-base">
-                        {['Computer & IT Training', 'Paramedical Training'].includes(formData.institutionType) && '3. Lab Infrastructure & Utilities'}
+                        {formData.institutionType === 'Computer & IT Training' && '3. Lab Infrastructure & Utilities'}
                         {formData.institutionType === 'Health & Yoga Training' && '3. Yoga Center Setup & Utilities'}
                         {['CGPSC & CGVYAPAM Preparation', 'Stock Market & Finance'].includes(formData.institutionType) && '3. Coaching & Classroom Setup'}
                         {['Academy', 'Skill Development Projects'].includes(formData.institutionType) && '3. Academic & Training Setup'}
@@ -727,7 +725,6 @@ export default function PartnerApplyPage() {
                           className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all text-slate-850 font-bold"
                         >
                           <option value="Academy">Academy</option>
-                          <option value="Paramedical Training">Paramedical Training</option>
                           <option value="Computer & IT Training">Computer & IT Training</option>
                           <option value="Health & Yoga Training">Health & Yoga Training</option>
                           <option value="Stock Market & Finance">Stock Market & Finance</option>
@@ -797,48 +794,7 @@ export default function PartnerApplyPage() {
                               name="preferredCourses"
                               value={formData.preferredCourses}
                               onChange={handleInputChange}
-                              placeholder="e.g. DCA, Paramedical Diploma, Spoken English, Academy programs"
-                              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-850"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {formData.institutionType === 'Paramedical Training' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Instructors / Medical Staff Count *</label>
-                            <input
-                              type="number"
-                              required
-                              name="medicalStaffCount"
-                              value={formData.medicalStaffCount}
-                              onChange={handleInputChange}
-                              placeholder="e.g. 3"
-                              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-850"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hospital Tie-up Details *</label>
-                            <input
-                              type="text"
-                              required
-                              name="hospitalTieUp"
-                              value={formData.hospitalTieUp}
-                              onChange={handleInputChange}
-                              placeholder="e.g. Govt District Hospital / Jeevan Hospital Raipur"
-                              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-850"
-                            />
-                          </div>
-                          <div className="md:col-span-2">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Available Lab Equipments *</label>
-                            <textarea
-                              rows="2"
-                              required
-                              name="labEquipments"
-                              value={formData.labEquipments}
-                              onChange={handleInputChange}
-                              placeholder="e.g. Microscopes, Autoclave, BP Monitors, First Aid kits"
+                              placeholder="e.g. DCA, Spoken English, Academy programs"
                               className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-850"
                             />
                           </div>
@@ -1101,7 +1057,6 @@ export default function PartnerApplyPage() {
                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Interested Training Verticals (Select all that apply) *</label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200/60">
                         {[
-                          'Paramedical Training',
                           'Computer Education',
                           'Government Skill Projects',
                           'Stock Market & Trading'
