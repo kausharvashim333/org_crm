@@ -152,7 +152,7 @@ export default function DisclaimerPage() {
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-700 block">Section 1</span>
                 <h3 className="font-bold text-slate-800 text-base group-hover:text-amber-700 transition-colors">
-                  Stock Market Training Disclaimer
+                  {disclaimer.stockMarket?.title || 'Stock Market Training Disclaimer'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
                   SEBI compliance, educational scope & financial risk disclosure.
@@ -170,7 +170,7 @@ export default function DisclaimerPage() {
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-700 block">Section 2</span>
                 <h3 className="font-bold text-slate-800 text-base group-hover:text-indigo-700 transition-colors">
-                  Educational Consultant Disclaimer
+                  {disclaimer.educationalConsultant?.title || 'Educational Consultant Disclaimer'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
                   Admission terms, accreditation standards & liability limitations.

@@ -2730,6 +2730,7 @@ export function DisclaimerEditor({ homepage, onSave }) {
     return {
       show: d.show !== false,
       title: d.title || 'Disclaimer & Legal Notice',
+      linkTitle: d.linkTitle || 'Disclaimer & Legal',
       subtitle: d.subtitle || 'Important disclosures regarding our educational guidance, allied health consultations, and financial training modules.',
       lastUpdated: d.lastUpdated || 'September 2026',
       stockMarket: {
@@ -2822,8 +2823,8 @@ export function DisclaimerEditor({ homepage, onSave }) {
       <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
-            <h3 className="text-base font-bold text-slate-800">Page Header & Information</h3>
-            <p className="text-xs text-slate-500">Configure page title, headline and last updated date displayed on the /disclaimer page.</p>
+            <h3 className="text-base font-bold text-slate-800">Page Header & Navigation Headings</h3>
+            <p className="text-xs text-slate-500">Edit the main page title (H1), footer link label, and introductory descriptions.</p>
           </div>
           <a
             href="/disclaimer"
@@ -2835,15 +2836,26 @@ export function DisclaimerEditor({ homepage, onSave }) {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Page Main Heading">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Field label="Disclaimer Page Main Heading (H1)">
             <input
               type="text"
               value={data.title}
               onChange={(e) => setData({ ...data, title: e.target.value })}
-              className="input-field"
-              placeholder="Disclaimer & Legal Notice"
+              className="input-field font-bold text-slate-800"
+              placeholder="e.g. Disclaimer & Legal Notice"
             />
+            <span className="text-[11px] text-slate-400 mt-1 block">Displayed as main banner heading on /disclaimer</span>
+          </Field>
+          <Field label="Footer Link Text (Heading)">
+            <input
+              type="text"
+              value={data.linkTitle || ''}
+              onChange={(e) => setData({ ...data, linkTitle: e.target.value })}
+              className="input-field font-medium"
+              placeholder="e.g. Disclaimer & Legal"
+            />
+            <span className="text-[11px] text-slate-400 mt-1 block">Text displayed in website footer Quick Links</span>
           </Field>
           <Field label="Last Updated Label">
             <input
@@ -2853,6 +2865,7 @@ export function DisclaimerEditor({ homepage, onSave }) {
               className="input-field"
               placeholder="e.g. September 2026"
             />
+            <span className="text-[11px] text-slate-400 mt-1 block">Notice date badge displayed below the heading</span>
           </Field>
         </div>
 
@@ -2880,7 +2893,7 @@ export function DisclaimerEditor({ homepage, onSave }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Section Title">
+          <Field label="Stock Market Disclaimer Heading">
             <input
               type="text"
               value={data.stockMarket.title}
@@ -2888,8 +2901,10 @@ export function DisclaimerEditor({ homepage, onSave }) {
                 ...data,
                 stockMarket: { ...data.stockMarket, title: e.target.value }
               })}
-              className="input-field"
+              className="input-field font-bold text-slate-800"
+              placeholder="e.g. Disclaimer for Stock Market Training"
             />
+            <span className="text-[11px] text-slate-400 mt-1 block">Title heading for this disclaimer section</span>
           </Field>
           <Field label="Badge / Category Tag">
             <input
@@ -2938,7 +2953,7 @@ export function DisclaimerEditor({ homepage, onSave }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field label="Section Title">
+          <Field label="Educational Consultant Disclaimer Heading">
             <input
               type="text"
               value={data.educationalConsultant.title}
@@ -2946,8 +2961,10 @@ export function DisclaimerEditor({ homepage, onSave }) {
                 ...data,
                 educationalConsultant: { ...data.educationalConsultant, title: e.target.value }
               })}
-              className="input-field"
+              className="input-field font-bold text-slate-800"
+              placeholder="e.g. Educational Consultant Disclaimer for Lili Organisation"
             />
+            <span className="text-[11px] text-slate-400 mt-1 block">Title heading for this disclaimer section</span>
           </Field>
           <Field label="Organization / Consultant Entity Name">
             <input

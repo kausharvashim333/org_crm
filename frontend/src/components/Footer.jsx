@@ -86,7 +86,9 @@ export default function Footer({ homepageData }) {
               <Link to="/notices" className="block text-sm text-slate-400 hover:text-white transition-colors">Notices</Link>
               <Link to="/gallery" className="block text-sm text-slate-400 hover:text-white transition-colors">Gallery</Link>
               <Link to="/verify-certificate" className="block text-sm text-slate-400 hover:text-white transition-colors">Verify Certificate</Link>
-              <Link to="/disclaimer" className="block text-sm text-amber-400 hover:text-amber-300 font-semibold transition-colors">Disclaimer & Legal</Link>
+              <Link to="/disclaimer" className="block text-sm text-amber-400 hover:text-amber-300 font-semibold transition-colors">
+                {hp?.disclaimer?.linkTitle || 'Disclaimer & Legal'}
+              </Link>
             </div>
           </div>
           <div>
@@ -109,7 +111,7 @@ export default function Footer({ homepageData }) {
           <p className="text-xs text-slate-500">© {new Date().getFullYear()} {orgName}. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link to="/disclaimer" className="text-xs text-slate-400 hover:text-white underline transition-colors">
-              Disclaimer & Legal Policies
+              {hp?.disclaimer?.title || 'Disclaimer & Legal Policies'}
             </Link>
             <p className="text-xs text-slate-500 hidden sm:block">Computer Training | Skill Development | Stock Market Training</p>
           </div>

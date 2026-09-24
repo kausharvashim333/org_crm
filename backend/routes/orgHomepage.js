@@ -9,6 +9,7 @@ const router = express.Router();
 const DEFAULT_DISCLAIMER = {
   show: true,
   title: 'Disclaimer & Legal Notice',
+  linkTitle: 'Disclaimer & Legal',
   subtitle: 'Important disclosures regarding our educational guidance, allied health consultations, and financial training modules.',
   lastUpdated: 'September 2026',
   stockMarket: {
@@ -519,6 +520,7 @@ router.put('/section/:section', protect, superAdminOnly, async (req, res) => {
     }
     const homepage = await createDefaultIfMissing();
     homepage[section] = req.body[section];
+    homepage.markModified(section);
     await homepage.save();
     res.json({ success: true, homepage });
   } catch (error) {

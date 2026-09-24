@@ -313,6 +313,7 @@ const orgHomepageSchema = new mongoose.Schema({
   disclaimer: {
     show: { type: Boolean, default: true },
     title: { type: String, default: 'Disclaimer & Legal Notice' },
+    linkTitle: { type: String, default: 'Disclaimer & Legal' },
     subtitle: { type: String, default: 'Important disclosures regarding our educational guidance, allied health consultations, and financial training modules.' },
     lastUpdated: { type: String, default: 'September 2026' },
     stockMarket: {
