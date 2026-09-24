@@ -589,31 +589,38 @@ export default function OrgHomepage() {
                   </Reveal>
 
                   {/* Auto-sliding Trending Courses with glow */}
-                  <Reveal delay={350} className="w-full max-w-md">
-                    <div className="flex items-center gap-1.5 text-[11px] overflow-hidden whitespace-nowrap">
-                      <span className="font-semibold text-slate-400 flex items-center gap-0.5 shrink-0">
-                        <Sparkles className="w-2.5 h-2.5" style={{ color: themeColor }} />
-                        Trending
-                      </span>
-                      <div className="overflow-hidden flex-1">
-                        <div className="flex items-center gap-1.5 animate-marquee-chips">
-                          {[...['ADCA Pro', 'Tally Prime GST', 'Web Dev', 'Python AI', 'DMLT'], ...['ADCA Pro', 'Tally Prime GST', 'Web Dev', 'Python AI', 'DMLT']].map((term, idx) => (
-                            <button
-                              key={idx}
-                              type="button"
-                              onClick={() => {
-                                setHeroSearch(term);
-                                navigate(`/courses?search=${encodeURIComponent(term)}`);
-                              }}
-                              className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-indigo-300 text-slate-500 hover:text-indigo-700 font-medium transition-all shrink-0 hover:shadow-sm"
-                            >
-                              {term}
-                            </button>
-                          ))}
+                  {hp.hero?.showTrendingCourses !== false && (() => {
+                    const trendingList = (hp.hero?.trendingCourses && hp.hero.trendingCourses.length > 0)
+                      ? hp.hero.trendingCourses
+                      : ['ADCA Pro', 'Tally Prime GST', 'Web Dev', 'Python AI', 'Financial Accounting'];
+                    return (
+                      <Reveal delay={350} className="w-full max-w-md">
+                        <div className="flex items-center gap-1.5 text-[11px] overflow-hidden whitespace-nowrap">
+                          <span className="font-semibold text-slate-400 flex items-center gap-0.5 shrink-0">
+                            <Sparkles className="w-2.5 h-2.5" style={{ color: themeColor }} />
+                            Trending
+                          </span>
+                          <div className="overflow-hidden flex-1">
+                            <div className="flex items-center gap-1.5 animate-marquee-chips">
+                              {[...trendingList, ...trendingList].map((term, idx) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => {
+                                    setHeroSearch(term);
+                                    navigate(`/courses?search=${encodeURIComponent(term)}`);
+                                  }}
+                                  className="px-2.5 py-0.5 rounded-full bg-white/60 hover:bg-white border border-slate-200/60 hover:border-indigo-300 text-slate-500 hover:text-indigo-700 font-medium transition-all shrink-0 hover:shadow-sm"
+                                >
+                                  {term}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </Reveal>
+                      </Reveal>
+                    );
+                  })()}
 
                   {/* Action CTA Buttons with shimmer + arrow bounce */}
                   <Reveal delay={400}>

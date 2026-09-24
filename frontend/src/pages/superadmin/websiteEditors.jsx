@@ -19,7 +19,11 @@ export function HeroEditor({ homepage, onSave }) {
     return { 
       ...hero, 
       sliderImages: hero.sliderImages || [],
-      points: points.slice(0, 4)
+      points: points.slice(0, 4),
+      trendingCourses: (hero.trendingCourses && hero.trendingCourses.length > 0)
+        ? hero.trendingCourses
+        : ['ADCA Pro', 'Tally Prime GST', 'Full Stack Web Dev', 'Python AI', 'Financial Accounting'],
+      showTrendingCourses: hero.showTrendingCourses !== false,
     };
   });
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -179,12 +183,63 @@ export function HeroEditor({ homepage, onSave }) {
         </div>
       </div>
 
-      <button onClick={() => onSave({
-        ...data,
-        headingFontSize: typeof data.headingFontSize === 'number' ? data.headingFontSize : 48,
-        subheadingFontSize: typeof data.subheadingFontSize === 'number' ? data.subheadingFontSize : 14,
-        descriptionFontSize: typeof data.descriptionFontSize === 'number' ? data.descriptionFontSize : 16,
-      })} className="btn-primary flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2"><Save className="w-4 h-4" /> Save</button>
+      {/* Trending Courses Section */}
+      <div className="border border-slate-200 p-4 rounded-xl space-y-4 bg-slate-50/50">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h4 className="font-semibold text-sm text-slate-700">Trending Courses (Hero Marquee Chips)</h4>
+            <p className="text-xs text-slate-500">
+              Customize the animated trending course chips shown directly below the hero description.
+            </p>
+          </div>
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs w-fit">
+            <input
+              type="checkbox"
+              checked={data.showTrendingCourses !== false}
+              onChange={(e) => setData({ ...data, showTrendingCourses: e.target.checked })}
+            />
+            Show Trending Chips
+          </label>
+        </div>
+
+        <Field label="Trending Courses (Comma-separated list)">
+          <input
+            type="text"
+            value={data._trendingRaw !== undefined ? data._trendingRaw : (Array.isArray(data.trendingCourses) ? data.trendingCourses.join(', ') : '')}
+            onChange={(e) => {
+              const str = e.target.value;
+              const list = str.split(',').map(s => s.trim()).filter(Boolean);
+              setData({ ...data, trendingCourses: list, _trendingRaw: str });
+            }}
+            className="input-field text-sm font-medium"
+            placeholder="e.g. ADCA Pro, Tally Prime GST, Full Stack Web Dev, Python AI, Graphic Design"
+          />
+          <p className="text-[11px] text-slate-400 mt-1">
+            Separate course names with commas (,). Clicking any chip on the homepage searches for that course automatically.
+          </p>
+        </Field>
+
+        {Array.isArray(data.trendingCourses) && data.trendingCourses.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            <span className="text-xs text-slate-400 font-semibold self-center mr-1">Preview:</span>
+            {data.trendingCourses.map((c, i) => (
+              <span key={i} className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700 text-xs font-semibold shadow-2xs">
+                {c}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button onClick={() => {
+        const { _trendingRaw, ...cleanData } = data;
+        onSave({
+          ...cleanData,
+          headingFontSize: typeof cleanData.headingFontSize === 'number' ? cleanData.headingFontSize : 48,
+          subheadingFontSize: typeof cleanData.subheadingFontSize === 'number' ? cleanData.subheadingFontSize : 14,
+          descriptionFontSize: typeof cleanData.descriptionFontSize === 'number' ? cleanData.descriptionFontSize : 16,
+        });
+      }} className="btn-primary flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2"><Save className="w-4 h-4" /> Save</button>
     </div>
   );
 }

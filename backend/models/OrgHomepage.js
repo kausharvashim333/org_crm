@@ -19,6 +19,11 @@ const orgHomepageSchema = new mongoose.Schema({
     ctaButtonLink: { type: String, default: '/#verticals' },
     cta2ButtonText: { type: String, default: 'Become a Franchise' },
     cta2ButtonLink: { type: String, default: '/#franchise' },
+    trendingCourses: {
+      type: [String],
+      default: ['ADCA Pro', 'Tally Prime GST', 'Full Stack Web Dev', 'Python & AI', 'Financial Accounting']
+    },
+    showTrendingCourses: { type: Boolean, default: true },
   },
 
   verticals: {
