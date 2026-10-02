@@ -14,6 +14,9 @@ export const getReferrerPartner = (id) => API.get(`/partners/public/referrer/${i
 export const applyPartner = (data) => API.post('/partners/public/apply', data);
 export const checkPartnerEmail = (email) => API.get('/partners/public/check-email', { params: { email } });
 export const createFranchiseOrder = (data) => API.post('/partners/public/create-franchise-order', data);
+export const getPartnerMembershipConfig = () => API.get('/partners/membership/config');
+export const createPartnerContributionOrder = () => API.post('/partners/membership/create-order');
+export const verifyPartnerContribution = (data) => API.post('/partners/membership/verify', data);
 export const getFranchiseReceipt = (franchiseId) => API.get(`/partners/public/receipt/${franchiseId}`);
 export const getPartner = (id) => API.get(`/partners/${id}`);
 export const getPartnerBySlug = (slug) => API.get(`/partners/slug/${slug}`);

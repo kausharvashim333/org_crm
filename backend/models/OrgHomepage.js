@@ -24,6 +24,9 @@ const orgHomepageSchema = new mongoose.Schema({
       default: ['ADCA Pro', 'Tally Prime GST', 'Full Stack Web Dev', 'Python & AI', 'Financial Accounting']
     },
     showTrendingCourses: { type: Boolean, default: true },
+    showNoticeBoard: { type: Boolean, default: true },
+    noticeBoardTitle: { type: String, default: 'Live notifications & circulars' },
+    noticeBoardBadge: { type: String, default: 'Live Updates' },
   },
 
   verticals: {
@@ -259,6 +262,8 @@ const orgHomepageSchema = new mongoose.Schema({
     shortName: { type: String, default: '' },
     tagline: { type: String, default: 'Govt. Recognized & ISO 9001:2015 Certified Educational Network' },
     browserTitle: { type: String, default: 'Skill India - Training Institute Management' },
+    partnerContributionFee: { type: Number, default: 0 },
+    partnerContributionLabel: { type: String, default: 'Organization Contribution' },
   },
 
   centersStrip: {

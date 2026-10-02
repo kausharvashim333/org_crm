@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { changePassword, updateProfile, updatePartner, uploadPartnerLogo, uploadPartnerPaymentQr } from '../../api';
+import { changePassword, updateProfile, updatePartner, uploadPartnerLogo, uploadPartnerPaymentQr, getPartnerMembershipConfig, createPartnerContributionOrder, verifyPartnerContribution, getMe } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { Building2, Upload, User, Lock, Globe, Camera, Check, QrCode, CreditCard } from 'lucide-react';
 
@@ -30,6 +30,12 @@ export default function PartnerSettings() {
   const [qrFile, setQrFile] = useState(null);
   const [qrPreview, setQrPreview] = useState(user?.partner?.paymentQrImage || '');
   const [uploadingQr, setUploadingQr] = useState(false);
+  const [membershipConfig, setMembershipConfig] = useState(null);
+  const [upgrading, setUpgrading] = useState(false);
+
+  useEffect(() => {
+    getPartnerMembershipConfig().then((res) => setMembershipConfig(res.data)).catch(() => {});
+  }, []);
 
   const handleProfile = async (e) => {
     e.preventDefault();
@@ -93,6 +99,40 @@ export default function PartnerSettings() {
     }
   };
 
+  const handleUpgrade = async () => {
+    if (!membershipConfig?.fee) return showError('Contribution fee has not been configured yet');
+    if (!window.Razorpay) return showError('Payment service is loading. Please try again.');
+    setUpgrading(true);
+    try {
+      const orderRes = await createPartnerContributionOrder();
+      const order = orderRes.data;
+      const rzp = new window.Razorpay({
+        key: order.razorpayKeyId,
+        amount: Math.round(order.fee * 100),
+        currency: 'INR',
+        name: user?.partner?.instituteName || 'Organization Membership',
+        description: order.label || 'Organization Contribution',
+        order_id: order.razorpayOrderId,
+        prefill: { name: user?.name, email: user?.email, contact: user?.phone },
+        theme: { color: user?.partner?.themeColor || '#2563eb' },
+        handler: async (response) => {
+          try {
+            await verifyPartnerContribution(response);
+            const me = await getMe();
+            setUser(me.data.user);
+            showSuccess('Institute upgraded successfully');
+          } catch (err) { showError(err.response?.data?.message || 'Payment verification failed'); }
+          finally { setUpgrading(false); }
+        },
+        modal: { ondismiss: () => setUpgrading(false) },
+      });
+      rzp.open();
+    } catch (err) {
+      showError(err.response?.data?.message || 'Could not start contribution payment');
+      setUpgrading(false);
+    }
+  };
+
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -139,6 +179,24 @@ export default function PartnerSettings() {
         <h1 className="text-2xl font-bold text-slate-800">Institute Settings</h1>
         <p className="text-sm text-slate-500">Manage your institute profile, logo, password & website details</p>
       </div>
+
+      {user?.partner?.organizationMembership?.type !== 'contributor' ? (
+        <div className="card p-6 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1"><CreditCard className="w-5 h-5 text-indigo-600" /><h3 className="font-bold text-slate-800">Upgrade Organization Membership</h3></div>
+            <p className="text-sm text-slate-600">You joined as a free institute member. Upgrade with a one-time {membershipConfig?.label || 'organization contribution'} to unlock contributor membership.</p>
+            {user?.partner?.status !== 'active' && <p className="text-xs text-amber-700 mt-2">Your institute must be approved by the organization before upgrading.</p>}
+            {membershipConfig?.fee > 0 && <p className="text-lg font-black text-indigo-700 mt-2">₹{Number(membershipConfig.fee).toLocaleString('en-IN')}</p>}
+          </div>
+          <button type="button" onClick={handleUpgrade} disabled={upgrading || !membershipConfig?.fee || user?.partner?.status !== 'active'} className="btn-primary whitespace-nowrap disabled:opacity-50">
+            {upgrading ? 'Opening payment...' : 'Upgrade now'}
+          </button>
+        </div>
+      ) : (
+        <div className="card p-5 rounded-2xl border border-emerald-200 bg-emerald-50 flex items-center gap-3">
+          <Check className="w-6 h-6 text-emerald-600" /><div><h3 className="font-bold text-emerald-900">Contributor membership active</h3><p className="text-xs text-emerald-700">Your institute has upgraded organization membership.</p></div>
+        </div>
+      )}
 
       {/* Top Grid: Logo Upload & My Profile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

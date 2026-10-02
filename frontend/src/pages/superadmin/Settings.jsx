@@ -15,7 +15,7 @@ export default function AdminSettings() {
   const [orgData, setOrgData] = useState(null);
   const [orgLoading, setOrgLoading] = useState(true);
   const [savingOrg, setSavingOrg] = useState(false);
-  const [orgForm, setOrgForm] = useState({ orgName: '', shortName: '', tagline: '', browserTitle: '', themeColor: '#2563eb', fontChoice: 'inter' });
+  const [orgForm, setOrgForm] = useState({ orgName: '', shortName: '', tagline: '', browserTitle: '', themeColor: '#2563eb', fontChoice: 'inter', partnerContributionFee: 0, partnerContributionLabel: 'Organization Contribution' });
   const [logoFile, setLogoFile] = useState(null);
   const [faviconFile, setFaviconFile] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -32,6 +32,8 @@ export default function AdminSettings() {
         browserTitle: s.browserTitle || '',
         themeColor: s.themeColor || '#2563eb',
         fontChoice: s.fontChoice || 'inter',
+        partnerContributionFee: s.partnerContributionFee || 0,
+        partnerContributionLabel: s.partnerContributionLabel || 'Organization Contribution',
       });
       setOrgLoading(false);
     }).catch(() => setOrgLoading(false));
@@ -167,6 +169,15 @@ export default function AdminSettings() {
                     <option value="poppins">Poppins</option>
                     <option value="roboto">Roboto</option>
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Contribution Fee for Institute Upgrade (₹)</label>
+                  <input type="number" min="0" value={orgForm.partnerContributionFee} onChange={(e) => setOrgForm({ ...orgForm, partnerContributionFee: e.target.value })} className="input-field" placeholder="e.g. 5000" />
+                  <p className="text-xs text-slate-500 mt-1">Free member institutes pay this one-time fee to upgrade their organization membership.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Contribution Label</label>
+                  <input type="text" value={orgForm.partnerContributionLabel} onChange={(e) => setOrgForm({ ...orgForm, partnerContributionLabel: e.target.value })} className="input-field" placeholder="Organization Contribution" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Theme Color</label>

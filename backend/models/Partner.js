@@ -63,6 +63,16 @@ const partnerSchema = new mongoose.Schema({
   showInAdmissionForm: { type: Boolean, default: true },
   upiId: { type: String, default: '' },
   paymentQrImage: { type: String, default: '' },
+  organizationMembership: {
+    type: { type: String, enum: ['free_member', 'contributor'], default: 'free_member' },
+    joinedAt: { type: Date, default: Date.now },
+    upgradedAt: { type: Date },
+    contributionFee: { type: Number, default: 0 },
+    paymentStatus: { type: String, enum: ['not_applicable', 'pending', 'paid', 'failed'], default: 'not_applicable' },
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
+    razorpaySignature: { type: String },
+  },
   referredByPartnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Partner' },
   proposalDetails: { type: mongoose.Schema.Types.Mixed },
   paymentInfo: {

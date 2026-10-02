@@ -25,6 +25,7 @@ export default function PartnerApplyPage() {
   const [emailError, setEmailError] = useState('');
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [paymentMode, setPaymentMode] = useState('online_razorpay'); // 'online_razorpay' | 'offline_pay_later'
+  const [membershipType, setMembershipType] = useState('free_member');
   const [submittedData, setSubmittedData] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -111,7 +112,7 @@ export default function PartnerApplyPage() {
     || (queryPlan ? availablePlans.find(p => p.name.toLowerCase().includes(queryPlan.toLowerCase()) || queryPlan.toLowerCase().includes(p.name.toLowerCase())) : null)
     || availablePlans[0];
 
-  const planFee = selectedPlanObj?.fee !== undefined ? selectedPlanObj.fee : 15000;
+  const planFee = membershipType === 'free_member' ? 0 : (selectedPlanObj?.fee !== undefined ? selectedPlanObj.fee : 15000);
 
   useEffect(() => {
     getOrgHomepagePublic()
@@ -224,7 +225,8 @@ export default function PartnerApplyPage() {
       const mode = paymentData.paymentMode || paymentMode;
       const payload = {
         ...formData,
-        partnershipPlan: selectedPlanObj?.name || formData.partnershipPlan || 'Authorized Partner Plan',
+        membershipType,
+        partnershipPlan: membershipType === 'free_member' ? 'Free Organization Member' : (selectedPlanObj?.name || formData.partnershipPlan || 'Authorized Partner Plan'),
         paymentMode: mode,
         paidAmount: paymentData.paidAmount !== undefined ? paymentData.paidAmount : (mode === 'online_razorpay' ? planFee : 0),
         razorpayOrderId: paymentData.razorpayOrderId,
@@ -241,7 +243,7 @@ export default function PartnerApplyPage() {
         paymentStatus: res.data.paymentStatus,
         paidAmount: res.data.paidAmount,
         razorpayPaymentId: paymentData.razorpayPaymentId,
-        planName: selectedPlanObj?.name || formData.partnershipPlan,
+        planName: membershipType === 'free_member' ? 'Free Organization Member' : (selectedPlanObj?.name || formData.partnershipPlan),
         planFee: planFee,
       });
     } catch (err) {
@@ -310,7 +312,7 @@ export default function PartnerApplyPage() {
         setSubmitting(false);
       }
     } else {
-      await performApplicationSubmit({ paymentMode: 'offline_pay_later' });
+      await performApplicationSubmit({ paymentMode: membershipType === 'free_member' ? 'offline_pay_later' : 'offline_pay_later' });
     }
   };
 
@@ -434,8 +436,19 @@ export default function PartnerApplyPage() {
                     </div>
                   )}
 
-                  {/* Section 0: Select Partnership Plan */}
-                  {availablePlans.length > 0 && (
+                  {/* Section 0: Choose free membership or paid partnership */}
+                  <div className="p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-100 space-y-3">
+                    <div className="flex items-center gap-2"><Building2 className="w-4 h-4 text-emerald-600" /><h4 className="font-bold text-slate-900 text-sm">Join the Organization</h4></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button type="button" onClick={() => setMembershipType('free_member')} className={`text-left p-4 rounded-xl border-2 ${membershipType === 'free_member' ? 'border-emerald-600 bg-white' : 'border-slate-200 bg-white/70'}`}>
+                        <p className="font-bold text-slate-900">Free Institute Membership</p><p className="text-xs text-slate-600 mt-1">Join the organization free. After approval, upgrade from your profile whenever you are ready.</p><p className="font-black text-emerald-700 mt-2">₹0</p>
+                      </button>
+                      <button type="button" onClick={() => setMembershipType('contributor')} className={`text-left p-4 rounded-xl border-2 ${membershipType === 'contributor' ? 'border-indigo-600 bg-white' : 'border-slate-200 bg-white/70'}`}>
+                        <p className="font-bold text-slate-900">Partner Plan</p><p className="text-xs text-slate-600 mt-1">Choose a paid partnership plan and submit its application fee now.</p><p className="font-black text-indigo-700 mt-2">Choose a plan below</p>
+                      </button>
+                    </div>
+                  </div>
+                  {membershipType === 'contributor' && availablePlans.length > 0 && (
                     <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-50/80 via-blue-50/60 to-slate-50 border-2 border-indigo-100 space-y-3">
                       <div className="flex items-center justify-between border-b border-indigo-100 pb-2">
                         <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
@@ -1081,6 +1094,7 @@ export default function PartnerApplyPage() {
 
 
                   {/* Section 5: Affiliation Fee & Payment Selection */}
+                  {membershipType === 'contributor' && (
                   <div className="p-6 rounded-3xl bg-gradient-to-r from-indigo-50/90 via-blue-50/70 to-slate-50 border-2 border-indigo-100/90 space-y-4 shadow-sm">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-indigo-100 pb-4">
                       <div className="flex items-center gap-3">
@@ -1159,6 +1173,7 @@ export default function PartnerApplyPage() {
                       </label>
                     </div>
                   </div>
+                  )}
 
                   {/* Submit Action */}
                   <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1175,6 +1190,10 @@ export default function PartnerApplyPage() {
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                           Processing Application...
+                        </>
+                      ) : membershipType === 'free_member' ? (
+                        <>
+                          <CheckCircle2 className="w-5 h-5" /> Join Organization Free
                         </>
                       ) : paymentMode === 'online_razorpay' ? (
                         <>

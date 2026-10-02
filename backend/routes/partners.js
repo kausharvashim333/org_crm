@@ -59,6 +59,14 @@ const generateFranchiseId = async () => {
   return `${prefix}${String(num).padStart(padLen, '0')}`;
 };
 
+const getContributionConfig = async () => {
+  const org = await OrgHomepage.findOne().select('settings.partnerContributionFee settings.partnerContributionLabel');
+  return {
+    fee: Math.max(0, Number(org?.settings?.partnerContributionFee) || 0),
+    label: org?.settings?.partnerContributionLabel || 'Organization Contribution',
+  };
+};
+
 const createDefaultHomepage = async (partnerId, themeColor) => {
   const defaultLayout = ['hero', 'about', 'courses', 'faculty', 'gallery', 'testimonials', 'facilities', 'notices', 'contact'];
   const homepage = await Homepage.create({
@@ -611,6 +619,75 @@ router.post('/public/create-franchise-order', async (req, res) => {
   }
 });
 
+router.get('/membership/config', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'partner') return res.status(403).json({ success: false, message: 'Partner access required' });
+    const config = await getContributionConfig();
+    res.json({ success: true, ...config });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/membership/create-order', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'partner' || !req.user.partnerId) return res.status(403).json({ success: false, message: 'Partner access required' });
+    const partner = await Partner.findById(req.user.partnerId);
+    if (!partner) return res.status(404).json({ success: false, message: 'Institute not found' });
+    if (partner.status !== 'active') return res.status(400).json({ success: false, message: 'Your institute must be approved before upgrading' });
+    if (partner.organizationMembership?.type === 'contributor' && partner.organizationMembership?.paymentStatus === 'paid') {
+      return res.status(400).json({ success: false, message: 'Your institute is already upgraded' });
+    }
+    const config = await getContributionConfig();
+    if (!config.fee) return res.status(400).json({ success: false, message: 'Contribution fee has not been configured by the organization' });
+    if (!razorpayClient) return res.status(503).json({ success: false, message: 'Online payment gateway is temporarily unavailable' });
+    const order = await razorpayClient.orders.create({
+      amount: Math.round(config.fee * 100),
+      currency: 'INR',
+      receipt: `RCP-CN-${Date.now().toString().slice(-8)}`,
+      notes: { type: 'organization_contribution', partnerId: String(partner._id), instituteName: partner.instituteName },
+    });
+    partner.organizationMembership = {
+      ...(partner.organizationMembership?.toObject?.() || partner.organizationMembership || {}),
+      type: 'free_member',
+      paymentStatus: 'pending',
+      contributionFee: config.fee,
+      razorpayOrderId: order.id,
+    };
+    await partner.save();
+    res.json({ success: true, fee: config.fee, label: config.label, razorpayOrderId: order.id, razorpayKeyId: razorpayKeyId });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to create contribution order' });
+  }
+});
+
+router.post('/membership/verify', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'partner' || !req.user.partnerId) return res.status(403).json({ success: false, message: 'Partner access required' });
+    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+    const partner = await Partner.findById(req.user.partnerId);
+    if (!partner) return res.status(404).json({ success: false, message: 'Institute not found' });
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature || partner.organizationMembership?.razorpayOrderId !== razorpayOrderId) {
+      return res.status(400).json({ success: false, message: 'Invalid contribution payment details' });
+    }
+    const signature = crypto.createHmac('sha256', razorpayKeySecret).update(`${razorpayOrderId}|${razorpayPaymentId}`).digest('hex');
+    if (signature !== razorpaySignature) return res.status(400).json({ success: false, message: 'Payment signature verification failed' });
+    partner.organizationMembership = {
+      ...(partner.organizationMembership?.toObject?.() || partner.organizationMembership || {}),
+      type: 'contributor',
+      upgradedAt: new Date(),
+      paymentStatus: 'paid',
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+    };
+    await partner.save();
+    res.json({ success: true, message: 'Institute upgraded successfully', organizationMembership: partner.organizationMembership });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to verify contribution payment' });
+  }
+});
+
 router.post('/public/apply', async (req, res) => {
   try {
     const {
@@ -627,7 +704,7 @@ router.post('/public/apply', async (req, res) => {
       govtRegNo, pastPlacementDetails, biometricSystem,
       partnershipType, partnershipPlan, interestedVerticals, currentBusinessType, experienceInEducation, hearAboutUs,
       paymentMode, paidAmount, razorpayOrderId, razorpayPaymentId, razorpaySignature,
-      referredByPartnerId
+      membershipType, referredByPartnerId
     } = req.body;
 
     if (!instituteName || !name || !email || !phone || !address || !city || !state) {
@@ -639,8 +716,9 @@ router.post('/public/apply', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    // Payment verification if online payment
-    const mode = paymentMode || 'offline_pay_later';
+    // Free organization membership never accepts client-supplied payment details.
+    const isFreeMembership = membershipType === 'free_member';
+    const mode = isFreeMembership ? 'offline_pay_later' : (paymentMode || 'offline_pay_later');
     let isPaymentVerified = false;
 
     if (mode === 'online_razorpay') {
@@ -692,8 +770,8 @@ router.post('/public/apply', async (req, res) => {
     const paymentInfo = {
       paymentMode: mode,
       paidAmount: Number(paidAmount) || 0,
-      planName: partnershipPlan || 'Authorized Partner Plan',
-      paymentStatus: isPaymentVerified ? 'paid' : 'pending',
+      planName: isFreeMembership ? 'Free Organization Member' : (partnershipPlan || 'Authorized Partner Plan'),
+      paymentStatus: isFreeMembership ? 'paid' : (isPaymentVerified ? 'paid' : 'pending'),
       razorpayOrderId: razorpayOrderId || undefined,
       razorpayPaymentId: razorpayPaymentId || undefined,
       razorpaySignature: razorpaySignature || undefined,
@@ -722,6 +800,9 @@ router.post('/public/apply', async (req, res) => {
       referredByPartnerId: referredByPartnerId || undefined,
       proposalDetails,
       paymentInfo,
+      organizationMembership: isFreeMembership
+        ? { type: 'free_member', joinedAt: new Date(), paymentStatus: 'not_applicable' }
+        : { type: 'contributor', joinedAt: new Date(), upgradedAt: new Date(), contributionFee: Number(paidAmount) || 0, paymentStatus: isPaymentVerified ? 'paid' : 'pending' },
     });
 
     await User.create({
