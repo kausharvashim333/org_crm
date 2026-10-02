@@ -704,7 +704,7 @@ router.post('/public/apply', async (req, res) => {
       govtRegNo, pastPlacementDetails, biometricSystem,
       partnershipType, partnershipPlan, interestedVerticals, currentBusinessType, experienceInEducation, hearAboutUs,
       paymentMode, paidAmount, razorpayOrderId, razorpayPaymentId, razorpaySignature,
-      membershipType, referredByPartnerId
+      referredByPartnerId
     } = req.body;
 
     if (!instituteName || !name || !email || !phone || !address || !city || !state) {
@@ -717,7 +717,7 @@ router.post('/public/apply', async (req, res) => {
     }
 
     // Free organization membership never accepts client-supplied payment details.
-    const isFreeMembership = membershipType === 'free_member';
+    const isFreeMembership = true;
     const mode = isFreeMembership ? 'offline_pay_later' : (paymentMode || 'offline_pay_later');
     let isPaymentVerified = false;
 
