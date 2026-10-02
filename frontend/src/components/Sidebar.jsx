@@ -152,6 +152,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
         { to: '/partner/inquiries', icon: Bell, label: 'Inquiries' },
         { to: '/partner/homepage', icon: Globe, label: 'Edit Homepage' },
         { to: '/partner/addons', icon: Package, label: 'Add-on Store' },
+        { to: '/partner/settings#membership-upgrade', icon: Award, label: 'Upgrade Membership' },
         { to: '/partner/settings', icon: Settings, label: 'Settings' },
       ],
     },

@@ -181,7 +181,7 @@ export default function PartnerSettings() {
       </div>
 
       {user?.partner?.organizationMembership?.type !== 'contributor' ? (
-        <div className="card p-6 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <div id="membership-upgrade" className="card p-6 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-white flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1"><CreditCard className="w-5 h-5 text-indigo-600" /><h3 className="font-bold text-slate-800">Upgrade Organization Membership</h3></div>
             <p className="text-sm text-slate-600">You joined as a free institute member. Upgrade with a one-time {membershipConfig?.label || 'organization contribution'} to unlock contributor membership.</p>
@@ -193,7 +193,7 @@ export default function PartnerSettings() {
           </button>
         </div>
       ) : (
-        <div className="card p-5 rounded-2xl border border-emerald-200 bg-emerald-50 flex items-center gap-3">
+        <div id="membership-upgrade" className="card p-5 rounded-2xl border border-emerald-200 bg-emerald-50 flex items-center gap-3">
           <Check className="w-6 h-6 text-emerald-600" /><div><h3 className="font-bold text-emerald-900">Contributor membership active</h3><p className="text-xs text-emerald-700">Your institute has upgraded organization membership.</p></div>
         </div>
       )}
