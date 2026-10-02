@@ -85,6 +85,7 @@ const PartnerCertificates = lazy(() => import('./pages/partner/Certificates'));
 const PartnerInquiries = lazy(() => import('./pages/partner/Inquiries'));
 const PartnerHomepage = lazy(() => import('./pages/partner/HomepageEditor'));
 const PartnerSettings = lazy(() => import('./pages/partner/Settings'));
+const PartnerMembershipUpgrade = lazy(() => import('./pages/partner/MembershipUpgrade'));
 const PartnerAdmissionPage = lazy(() => import('./pages/partner/PartnerAdmissionPage'));
 const PartnerPendingApprovals = lazy(() => import('./pages/partner/PendingApprovals'));
 const PartnerAddons = lazy(() => import('./pages/partner/Addons'));
@@ -232,6 +233,7 @@ export default function App() {
                 <Route path="inquiries" element={<PartnerInquiries />} />
                 <Route path="homepage" element={<PartnerHomepage />} />
                 <Route path="settings" element={<PartnerSettings />} />
+                <Route path="membership-upgrade" element={<PartnerMembershipUpgrade />} />
                 <Route path="pending-approvals" element={<PartnerPendingApprovals />} />
                 <Route path="addons" element={<PartnerAddons />} />
                 <Route path="earnings" element={<MyEarnings />} />
