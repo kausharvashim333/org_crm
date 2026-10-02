@@ -170,13 +170,13 @@ export default function AdminSettings() {
                     <option value="roboto">Roboto</option>
                   </select>
                 </div>
-                <div>
+                <div id="partner-contribution" className="sm:col-span-2 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50">
+                  <h4 className="font-bold text-indigo-950 mb-1">Institute Membership Upgrade</h4>
+                  <p className="text-xs text-slate-600 mb-3">Set the one-time contribution collected when an approved free-member institute upgrades from its partner portal.</p>
                   <label className="block text-sm font-medium mb-1">Contribution Fee for Institute Upgrade (₹)</label>
                   <input type="number" min="0" value={orgForm.partnerContributionFee} onChange={(e) => setOrgForm({ ...orgForm, partnerContributionFee: e.target.value })} className="input-field" placeholder="e.g. 5000" />
                   <p className="text-xs text-slate-500 mt-1">Free member institutes pay this one-time fee to upgrade their organization membership.</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Contribution Label</label>
+                  <label className="block text-sm font-medium mb-1 mt-3">Contribution Label</label>
                   <input type="text" value={orgForm.partnerContributionLabel} onChange={(e) => setOrgForm({ ...orgForm, partnerContributionLabel: e.target.value })} className="input-field" placeholder="Organization Contribution" />
                 </div>
                 <div>

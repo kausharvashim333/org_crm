@@ -599,8 +599,8 @@ export function FranchiseEditor({ homepage, onSave }) {
     <div className="card space-y-6">
       <div className="flex items-center justify-between border-b pb-3">
         <div>
-          <h3 className="font-bold text-lg text-slate-800">Franchise & Partner Page Configuration</h3>
-          <p className="text-xs text-slate-500">Configure page headers, partnership plans, benefits & process</p>
+          <h3 className="font-bold text-lg text-slate-800">Institute Joining Page Configuration</h3>
+          <p className="text-xs text-slate-500">Configure the free organization joining page, benefits and approval process</p>
         </div>
         <button onClick={() => onSave(data)} className="btn-primary flex items-center gap-1.5 py-2 px-5 text-xs font-bold">
           <Save className="w-4 h-4" /> Save All Changes
@@ -627,7 +627,7 @@ export function FranchiseEditor({ homepage, onSave }) {
         </label>
       </div>
 
-      {/* 1. MANAGE PARTNERSHIP PLANS (MULTI-TIER FRANCHISE PACKAGES) */}
+      {false && (
       <div className="border-t pt-5 space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -932,6 +932,7 @@ export function FranchiseEditor({ homepage, onSave }) {
           )}
         </div>
       </div>
+      )}
 
       {/* 2. PARTNER BENEFITS */}
       <div className="border-t pt-5">

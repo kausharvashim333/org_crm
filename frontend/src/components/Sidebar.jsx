@@ -62,7 +62,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       icon: Building2,
       links: [
         { to: '/admin/franchises', icon: Building2, label: 'Partner Centers' },
-        { to: '/admin/homepage?section=franchise', icon: Award, label: 'Partnership Plans' },
+        { to: '/admin/settings#partner-contribution', icon: Wallet, label: 'Upgrade Contribution Fee' },
         { to: '/admin/royalty', icon: IndianRupee, label: 'Royalty Tracker' },
         { to: '/admin/settlements', icon: Wallet, label: 'Partner Settlements' },
       ],

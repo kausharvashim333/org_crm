@@ -30,7 +30,7 @@ const tabs = [
   { key: 'hero', label: 'Hero & CTA' },
   { key: 'content', label: 'About & Stats' },
   { key: 'verticals', label: 'Verticals' },
-  { key: 'franchise', label: '⭐ Franchise & Partnership Plans' },
+  { key: 'franchise', label: '⭐ Institute Joining Page' },
   { key: 'services', label: 'Services' },
   { key: 'custom', label: 'Custom Sections' },
   { key: 'certs', label: 'Certificates & Affiliations' },
