@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { getCachedSettings, applySettings } from './hooks/useOrgSettings';
 
 import { SuperAdminRoute, PartnerRoute, CounsellorRoute, TrainerRoute } from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
@@ -113,6 +114,12 @@ function PageLoader() {
 }
 
 export default function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    applySettings(getCachedSettings());
+  }, [location.pathname]);
+
   useEffect(() => {
     let ticking = false;
     const handleGlobalMouseMove = (e) => {

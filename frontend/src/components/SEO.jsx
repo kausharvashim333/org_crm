@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
+import { getCachedSettings, applySettings } from '../hooks/useOrgSettings';
 
 export default function SEO({ title, description, image, url, type = 'website', keywords = '' }) {
   useEffect(() => {
     if (title) document.title = title;
+    applySettings(getCachedSettings());
 
     const setMeta = (attr, key, content) => {
       if (!content) return;
