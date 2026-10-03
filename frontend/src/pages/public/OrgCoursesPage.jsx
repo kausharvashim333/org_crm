@@ -697,6 +697,26 @@ export default function OrgCoursesPage() {
                         </span>
                       </div>
 
+                      {/* Required Course Class Availability Note on Card */}
+                      <div className={`p-2.5 rounded-2xl text-[11px] leading-snug flex items-start gap-2 border ${
+                        isViewFree
+                          ? 'bg-amber-50/95 border-amber-200/90 text-amber-950 shadow-xs'
+                          : 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950 shadow-xs'
+                      }`}>
+                        <span className={`px-1.5 py-0.5 rounded font-black text-[9px] uppercase tracking-wider shrink-0 mt-0.5 ${
+                          isViewFree ? 'bg-amber-200 text-amber-950' : 'bg-emerald-200 text-emerald-950'
+                        }`}>
+                          नोट
+                        </span>
+                        <p className="font-semibold">
+                          {isViewFree ? (
+                            <>Free courses की क्लासेज तब ही चलाई जाएँगी जब किसी <strong className="text-amber-900 font-black">CSR या Govt. द्वारा फंडिंग</strong> उपलब्ध होगी।</>
+                          ) : (
+                            <>Training expert faculty द्वारा <strong className="text-emerald-900 font-black">हमेशा उपलब्ध रहती है</strong> (Immediate Start & Regular Practical Batches)।</>
+                          )}
+                        </p>
+                      </div>
+
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-2 pt-2">
                         <button
@@ -771,6 +791,12 @@ export default function OrgCoursesPage() {
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600" />
                 <span>Official Free Enrollment Receipt issued in profile</span>
+              </div>
+              <div className="flex items-start gap-2 pt-2 border-t border-slate-200/80 text-amber-900 text-[11px] font-semibold">
+                <span className="px-1.5 py-0.2 rounded bg-amber-200 text-amber-950 font-black text-[9px] uppercase tracking-wider shrink-0 mt-0.5">
+                  नोट
+                </span>
+                <span>Free courses की क्लासेज तब ही चलाई जाएँगी जब किसी CSR या Govt. द्वारा फंडिंग उपलब्ध होगी।</span>
               </div>
             </div>
 
@@ -1170,6 +1196,26 @@ export default function OrgCoursesPage() {
                   {previewSyllabusCourse.isViewFree
                     ? (previewSyllabusCourse.freeDescription || previewSyllabusCourse.description)
                     : (previewSyllabusCourse.paidDescription || previewSyllabusCourse.description)}
+                </p>
+              </div>
+
+              {/* Official Availability Note */}
+              <div className={`p-3 rounded-2xl text-xs flex items-start gap-2.5 border ${
+                previewSyllabusCourse.isViewFree
+                  ? 'bg-amber-50/95 border-amber-200 text-amber-950 shadow-xs'
+                  : 'bg-emerald-50/90 border-emerald-200 text-emerald-950 shadow-xs'
+              }`}>
+                <span className={`px-2 py-0.5 rounded-md font-black text-[10px] uppercase tracking-wider shrink-0 mt-0.5 ${
+                  previewSyllabusCourse.isViewFree ? 'bg-amber-200 text-amber-950' : 'bg-emerald-200 text-emerald-950'
+                }`}>
+                  नोट
+                </span>
+                <p className="font-semibold leading-relaxed">
+                  {previewSyllabusCourse.isViewFree ? (
+                    <>Free courses की क्लासेज तब ही चलाई जाएँगी जब किसी <strong className="text-amber-900 font-black">CSR या Govt. द्वारा फंडिंग</strong> उपलब्ध होगी।</>
+                  ) : (
+                    <>Training expert faculty द्वारा <strong className="text-emerald-900 font-black">हमेशा उपलब्ध रहती है</strong> (Immediate Start & Regular Practical Batches)।</>
+                  )}
                 </p>
               </div>
 

@@ -340,6 +340,10 @@ export default function CourseCheckoutPage() {
                 <p className="text-emerald-100 text-xs mt-0.5">
                   Complete the quick admission form below to instantly unlock your student account & LMS portal.
                 </p>
+                <div className="mt-2 text-[11px] font-semibold text-amber-200 bg-emerald-950/40 border border-amber-300/40 rounded-xl px-2.5 py-1 inline-flex items-center gap-1.5">
+                  <span className="px-1 py-0.2 rounded bg-amber-400 text-amber-950 font-black text-[9px]">नोट</span>
+                  <span>Free courses की क्लासेज तब ही चलाई जाएँगी जब किसी CSR या Govt. द्वारा फंडिंग उपलब्ध होगी।</span>
+                </div>
               </div>
             </div>
             <div className="px-4 py-2 bg-white text-emerald-800 rounded-2xl text-xs font-black shadow-sm">
@@ -363,6 +367,10 @@ export default function CourseCheckoutPage() {
                 <p className="text-slate-300 text-xs mt-0.5">
                   Includes QR-verified hardcopy certificate, 50+ partner computer lab practicals & placement support.
                 </p>
+                <div className="mt-2 text-[11px] font-semibold text-emerald-300 bg-slate-950/60 border border-emerald-400/40 rounded-xl px-2.5 py-1 inline-flex items-center gap-1.5">
+                  <span className="px-1 py-0.2 rounded bg-emerald-400 text-emerald-950 font-black text-[9px]">नोट</span>
+                  <span>Training expert faculty द्वारा हमेशा उपलब्ध रहती है (Regular Batches & Immediate Practical Start)।</span>
+                </div>
               </div>
             </div>
             <div className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 rounded-2xl text-xs font-black shadow-sm flex items-center gap-1.5">
