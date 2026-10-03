@@ -657,7 +657,8 @@ router.post('/public/create-order', async (req, res) => {
           return res.status(404).json({ success: false, message: 'Counselling service not available' });
         }
         itemTitle = `${service.name} (Group Session)`;
-        amount = Number(service.groupPrice !== undefined && service.groupPrice !== null ? service.groupPrice : service.price) || 0;
+        const isFreeGroup = req.body.track === 'free' || req.body.isFreeTrack === true || service.isFree;
+        amount = isFreeGroup ? 0 : (Number(service.groupPrice !== undefined && service.groupPrice !== null ? service.groupPrice : service.price) || 0);
       } else {
         return res.status(400).json({ success: false, message: 'Session or service is required for group booking' });
       }
@@ -667,7 +668,8 @@ router.post('/public/create-order', async (req, res) => {
         return res.status(404).json({ success: false, message: 'Counselling service not available' });
       }
       itemTitle = service.name;
-      amount = Number(service.price) || 0;
+      const isFreeService = req.body.track === 'free' || req.body.isFreeTrack === true || service.isFree;
+      amount = isFreeService ? 0 : (Number(service.price) || 0);
       if (slotId) {
         slot = await CounsellingSlot.findById(slotId);
         if (!slot || String(slot.serviceId) !== String(service._id)) {

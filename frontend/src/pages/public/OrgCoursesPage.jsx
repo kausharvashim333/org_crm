@@ -94,6 +94,11 @@ export default function OrgCoursesPage() {
 
     return matchesCat && matchesSearch;
   }).sort((a, b) => {
+    // Free courses are prioritized and shown first in All Courses list!
+    const aFree = isCourseFree(a) ? 1 : 0;
+    const bFree = isCourseFree(b) ? 1 : 0;
+    if (aFree !== bFree) return bFree - aFree;
+
     if (sortBy === 'popular') return (b.enrolledCount || 0) - (a.enrolledCount || 0);
     if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
     if (sortBy === 'newest') return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
@@ -329,12 +334,11 @@ export default function OrgCoursesPage() {
           /* Redesigned Course Cards Grid: Same courses in Free vs Paid with distinct descriptions & Premium Icon */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses.map((c, i) => {
-              // Determine if this card is currently showing Free or Paid version
               const isViewFree = courseSegment === 'free'
                 ? true
                 : (courseSegment === 'paid'
                     ? false
-                    : (cardTrackOverrides[c._id] ? cardTrackOverrides[c._id] === 'free' : false));
+                    : (cardTrackOverrides[c._id] ? cardTrackOverrides[c._id] === 'free' : isCourseFree(c)));
 
               const currentDescription = isViewFree
                 ? (c.freeDescription || c.description || 'Learn core concepts and practical lessons for free with lifetime LMS student portal access.')

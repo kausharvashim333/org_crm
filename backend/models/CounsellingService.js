@@ -4,6 +4,9 @@ const counsellingServiceSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   tagline: { type: String, default: '' },
   description: { type: String, default: '' },
+  freeDescription: { type: String, default: '' },
+  paidDescription: { type: String, default: '' },
+  isFree: { type: Boolean, default: false },
   duration: { type: String, default: '30 min' },
   mode: {
     type: String,
