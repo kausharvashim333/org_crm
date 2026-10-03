@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { getStoreCourse, validateCoupon, createOrder, verifyOrder, getPublicPartners, getOrgHomepagePublic } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
@@ -8,7 +8,8 @@ import Footer from '../../components/Footer';
 import {
   ShieldCheck, Lock, CheckCircle2, Tag, ArrowRight, BookOpen,
   CreditCard, QrCode, Building, Award, Clock, ArrowLeft, Sparkles, X,
-  Check, HelpCircle, PhoneCall, Headphones, FileText, UserCheck, MapPin
+  Check, HelpCircle, PhoneCall, Headphones, FileText, UserCheck, MapPin,
+  Crown, Gift
 } from 'lucide-react';
 
 export default function CourseCheckoutPage() {
@@ -68,9 +69,16 @@ export default function CourseCheckoutPage() {
       });
   }, [courseId]);
 
-  const isFreeCourse = Boolean(course?.isFree) || 
-    (Number(course?.salePrice || 0) === 0 && Number(course?.fee || 0) === 0 && Number(course?.studentFee || 0) === 0) ||
-    course?.feeDisplayType === 'free';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const trackParam = searchParams.get('track') || searchParams.get('mode');
+  const [selectedTrack, setSelectedTrack] = useState(trackParam === 'free' ? 'free' : (trackParam === 'paid' ? 'paid' : (course?.isFree ? 'free' : 'paid')));
+
+  useEffect(() => {
+    if (trackParam === 'free') setSelectedTrack('free');
+    else if (trackParam === 'paid') setSelectedTrack('paid');
+  }, [trackParam]);
+
+  const isFreeCourse = selectedTrack === 'free';
 
   const basePrice = course ? (isFreeCourse ? 0 : (course.salePrice > 0 ? course.salePrice : (course.fee > 0 ? course.fee : 1999))) : 0;
   const originalPrice = course ? (isFreeCourse ? 0 : (course.originalPrice > 0 ? course.originalPrice : (course.fee > 0 ? course.fee : 2999))) : 0;
@@ -287,6 +295,36 @@ export default function CourseCheckoutPage() {
       {/* Main Checkout Container */}
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 w-full flex-1">
         
+        {/* Track Switcher: Free vs Paid */}
+        <div className="mb-6 p-3 bg-white rounded-3xl border border-slate-200/80 shadow-sm flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider pl-2">Select Program Track:</span>
+            <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => { setSelectedTrack('free'); setSearchParams({ track: 'free' }); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isFreeCourse ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Gift className="w-3.5 h-3.5" /> 100% Free Track (₹0)
+              </button>
+              <button
+                type="button"
+                onClick={() => { setSelectedTrack('paid'); setSearchParams({ track: 'paid' }); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  !isFreeCourse ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 font-black shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Crown className="w-3.5 h-3.5 fill-amber-950 text-amber-950" /> 👑 Premium Certified Track
+              </button>
+            </div>
+          </div>
+          <span className="text-xs text-slate-500 pr-2 hidden md:inline">
+            {isFreeCourse ? 'Free LMS video access & assessments' : 'Includes ISO certificate + physical lab access'}
+          </span>
+        </div>
+
         {/* Banner if Free Course */}
         {isFreeCourse && (
           <div className="mb-8 p-5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-3xl shadow-lg flex items-center justify-between flex-wrap gap-4">
@@ -306,6 +344,29 @@ export default function CourseCheckoutPage() {
             </div>
             <div className="px-4 py-2 bg-white text-emerald-800 rounded-2xl text-xs font-black shadow-sm">
               FREE ADMISSION
+            </div>
+          </div>
+        )}
+
+        {/* Banner if Paid Pro Certified Course */}
+        {!isFreeCourse && (
+          <div className="mb-8 p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-amber-950 text-white rounded-3xl shadow-lg border border-amber-400/30 flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0">
+                <Crown className="w-6 h-6 text-amber-300 fill-amber-300" />
+              </div>
+              <div>
+                <span className="px-2.5 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-[10px] font-black uppercase tracking-wider">
+                  👑 Premium Professional Track
+                </span>
+                <h3 className="text-xl font-black mt-0.5">Government Recognized & ISO 9001:2015 Certification</h3>
+                <p className="text-slate-300 text-xs mt-0.5">
+                  Includes QR-verified hardcopy certificate, 50+ partner computer lab practicals & placement support.
+                </p>
+              </div>
+            </div>
+            <div className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 rounded-2xl text-xs font-black shadow-sm flex items-center gap-1.5">
+              <Crown className="w-3.5 h-3.5 fill-amber-950" /> PRO CERTIFIED
             </div>
           </div>
         )}
@@ -606,9 +667,10 @@ export default function CourseCheckoutPage() {
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider inline-block mb-1 ${
-                    isFreeCourse ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800'
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 mb-1 ${
+                    isFreeCourse ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900 border border-amber-300'
                   }`}>
+                    {!isFreeCourse && <Crown className="w-3 h-3 fill-amber-900" />}
                     {isFreeCourse ? 'Free Track' : 'Pro Certification'}
                   </span>
                   <h4 className="font-bold text-sm text-slate-900 truncate">{course.name}</h4>

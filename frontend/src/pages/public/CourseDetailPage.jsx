@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { getStoreCourse, getPublicPartners, getOrgHomepagePublic } from '../../api';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -8,7 +8,7 @@ import {
   BookOpen, Star, Clock, Users, Award, ShieldCheck, CheckCircle2,
   PlayCircle, ChevronDown, ChevronUp, Lock, Share2, Tag, ArrowRight,
   FileText, Sparkles, AlertCircle, HelpCircle, MapPin, Globe, Check,
-  X, ExternalLink, MessageSquare
+  X, ExternalLink, MessageSquare, Crown, Gift
 } from 'lucide-react';
 
 export default function CourseDetailPage() {
@@ -78,7 +78,11 @@ export default function CourseDetailPage() {
     );
   }
 
-  const isFreeCourse = Boolean(course.isFree) || (Number(course.salePrice || 0) === 0 && Number(course.fee || 0) === 0 && Number(course.studentFee || 0) === 0) || course.feeDisplayType === 'free';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const trackParam = searchParams.get('track') || searchParams.get('mode');
+  const [selectedTrack, setSelectedTrack] = useState(trackParam === 'free' ? 'free' : 'paid');
+
+  const isFreeCourse = selectedTrack === 'free';
   const original = course.originalPrice || course.fee || 0;
   const sale = course.salePrice || course.fee || 0;
   const monthlyFee = course.monthlyFee || 0;
@@ -127,7 +131,7 @@ export default function CourseDetailPage() {
             <div className="p-4 bg-slate-800 text-slate-300 text-xs flex items-center justify-between">
               <span>Enjoy this free sample lesson. Full course includes all masterclass videos.</span>
               <Link
-                to={`/checkout/${course._id}`}
+                to={`/checkout/${course._id}?track=${isFreeCourse ? 'free' : 'paid'}`}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs"
               >
                 Unlock All Lessons
@@ -152,14 +156,45 @@ export default function CourseDetailPage() {
               <span className="text-slate-400 truncate max-w-xs">{course.code || course.name}</span>
             </div>
 
+            {/* Track Switcher: Free vs Paid */}
+            <div className="inline-flex p-1.5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+              <button
+                type="button"
+                onClick={() => { setSelectedTrack('free'); setSearchParams({ track: 'free' }); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isFreeCourse
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <Gift className="w-3.5 h-3.5" /> 100% Free Learning Track
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setSelectedTrack('paid'); setSearchParams({ track: 'paid' }); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  !isFreeCourse
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 shadow-md shadow-amber-500/30 font-black'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <Crown className="w-3.5 h-3.5 fill-amber-950 text-amber-950" /> 👑 Premium Certified Track
+              </button>
+            </div>
+
             {/* Badges */}
             <div className="flex items-center gap-3 flex-wrap">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+              <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1.5 ${
                 isFreeCourse
                   ? 'bg-emerald-400 text-emerald-950'
-                  : 'bg-amber-400 text-amber-950'
+                  : 'bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 border border-amber-300'
               }`}>
-                {isFreeCourse ? '🎁 100% Free Learning Track' : `★ ${course.badge || 'Govt Certified Pro Track'}`}
+                {isFreeCourse ? (
+                  <>🎁 100% Free Learning Track</>
+                ) : (
+                  <><Crown className="w-3.5 h-3.5 fill-amber-950" /> ★ Premium Certified Pro Track</>
+                )}
               </span>
               <span className="px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-medium border border-white/15">
                 ISO 9001:2015 Recognized
@@ -176,31 +211,19 @@ export default function CourseDetailPage() {
 
             {/* Description - Distinguish Free vs Paid */}
             <div className="space-y-3">
-              {isFreeCourse && course.freeDescription ? (
-                <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 text-emerald-100 text-base md:text-lg leading-relaxed whitespace-pre-line">
-                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
+              {isFreeCourse ? (
+                <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-5 text-emerald-100 text-base md:text-lg leading-relaxed whitespace-pre-line shadow-inner">
+                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1.5 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5" /> Free Course Description & Highlights
                   </div>
-                  {course.freeDescription}
-                </div>
-              ) : !isFreeCourse && course.paidDescription ? (
-                <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4 text-indigo-100 text-base md:text-lg leading-relaxed whitespace-pre-line">
-                  <div className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-1 flex items-center gap-1.5">
-                    <Award className="w-3.5 h-3.5" /> Certified Pro Curriculum & Highlights
-                  </div>
-                  {course.paidDescription}
+                  {course.freeDescription || course.description}
                 </div>
               ) : (
-                <p className="text-slate-300 text-base md:text-lg leading-relaxed max-w-3xl whitespace-pre-line">
-                  {course.description}
-                </p>
-              )}
-
-              {/* If both descriptions exist, show a secondary card */}
-              {isFreeCourse && course.paidDescription && (
-                <div className="text-xs text-indigo-300 bg-white/5 border border-white/10 rounded-xl p-3">
-                  <span className="font-bold text-amber-400">Want Professional Certification? </span>
-                  {course.paidDescription.slice(0, 140)}...
+                <div className="bg-gradient-to-r from-indigo-950/60 to-amber-950/40 border border-amber-400/40 rounded-2xl p-5 text-amber-100 text-base md:text-lg leading-relaxed whitespace-pre-line shadow-inner">
+                  <div className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-1.5 flex items-center gap-1.5">
+                    <Crown className="w-4 h-4 text-amber-400 fill-amber-400" /> Premium Pro Curriculum & Highlights
+                  </div>
+                  {course.paidDescription || course.description}
                 </div>
               )}
             </div>
@@ -336,14 +359,15 @@ export default function CourseDetailPage() {
               {/* CTAs */}
               <div className="space-y-2.5 mb-6">
                 <Link
-                  to={`/checkout/${course._id}`}
+                  to={`/checkout/${course._id}?track=${isFreeCourse ? 'free' : 'paid'}`}
                   className={`w-full py-3.5 px-4 text-white text-center font-black rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 group cursor-pointer ${
                     isFreeCourse
                       ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25'
-                      : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/25'
+                      : 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:opacity-95 shadow-amber-500/25'
                   }`}
                 >
-                  <span>{isFreeCourse ? 'Enroll for Free Now (निःशुल्क शुरू करें)' : 'Enroll Now & Get Instant Access'}</span>
+                  {!isFreeCourse && <Crown className="w-4 h-4 fill-white" />}
+                  <span>{isFreeCourse ? 'Enroll for Free Now (निःशुल्क शुरू करें)' : 'Get Certified & Enroll Pro'}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
 
