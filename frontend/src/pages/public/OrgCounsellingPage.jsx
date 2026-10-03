@@ -433,7 +433,7 @@ export default function OrgCounsellingPage() {
               <p className="font-bold text-slate-700">No counselling services available</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredServices.map((s, i) => {
                 // Determine whether this card shows Free or Paid track
                 const isItemFreeByDefault = s.isFree || Number(s.price || 0) === 0;
@@ -525,6 +525,24 @@ export default function OrgCounsellingPage() {
                         >
                           View More <ChevronRight className="w-3 h-3" />
                         </button>
+                      </div>
+
+                      {/* Note */}
+                      <div className={`px-2.5 py-2 rounded-xl text-[10px] leading-snug flex items-start gap-2 border ${
+                        isViewFree
+                          ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950'
+                          : 'bg-amber-50/95 border-amber-200/90 text-amber-950'
+                      }`}>
+                        <span className={`px-1.5 py-0.5 rounded font-black text-[8px] uppercase tracking-wider shrink-0 ${
+                          isViewFree ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-200 text-amber-950'
+                        }`}>
+                          नोट
+                        </span>
+                        <p className="font-semibold text-slate-800">
+                          काउंसलिंग <strong className={isViewFree ? 'text-emerald-900' : 'text-amber-900'}>
+                            {isViewFree ? 'अनुभवी काउंसलर (Experienced Counsellor)' : 'अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)'}
+                          </strong> द्वारा कराई जाएगी।
+                        </p>
                       </div>
 
                       {/* Bottom Action */}
