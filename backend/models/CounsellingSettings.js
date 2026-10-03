@@ -8,7 +8,7 @@ const counsellingSettingsSchema = new mongoose.Schema({
   whatsappNumber: { type: String, default: '' },
   noticeText: {
     type: String,
-    default: 'Counselling fee is non-refundable and not adjustable against course or admission fees.',
+    default: '',
   },
 }, { timestamps: true });
 

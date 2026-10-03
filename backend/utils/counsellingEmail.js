@@ -24,9 +24,6 @@ const wrapHtml = (title, body) => `
   <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#0f172a">
     <h2 style="color:#1e3a8a">${title}</h2>
     ${body}
-    <p style="font-size:12px;color:#64748b;margin-top:24px">
-      Counselling fee is non-refundable and not adjustable against course or admission fees.
-    </p>
   </div>
 `;
 

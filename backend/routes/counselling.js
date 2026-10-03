@@ -115,7 +115,12 @@ const publicBookingPayload = (booking, extra = {}) => ({
 
 const getOrCreateSettings = async () => {
   let settings = await CounsellingSettings.findOne();
-  if (!settings) settings = await CounsellingSettings.create({});
+  if (!settings) {
+    settings = await CounsellingSettings.create({ noticeText: '' });
+  } else if (settings.noticeText && settings.noticeText.toLowerCase().includes('non-refundable')) {
+    settings.noticeText = '';
+    await settings.save();
+  }
   return settings;
 };
 
@@ -837,7 +842,7 @@ router.get('/public/receipt/:code', async (req, res) => {
         ...publicBookingPayload(booking),
         service: booking.serviceId,
         session,
-        notice: 'Counselling fee is non-refundable and not adjustable against course or admission fees.',
+        notice: '',
       },
     });
   } catch (error) {

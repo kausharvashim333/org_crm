@@ -90,8 +90,9 @@ export default function OrgCounsellingPage() {
   const orgName = hp?.settings?.orgName || 'Lili Organization';
   const settings = data?.settings || {};
   const notice =
-    settings.noticeText ||
-    'Counselling fee is non-refundable and not adjustable against course admission fees.';
+    settings.noticeText && !settings.noticeText.toLowerCase().includes('non-refundable')
+      ? settings.noticeText
+      : '';
   const whatsapp = (settings.whatsappNumber || '').replace(/\D/g, '');
 
   const openBook = (type, item, isFree = false) => {

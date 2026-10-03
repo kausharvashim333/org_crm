@@ -133,7 +133,11 @@ export default function AdminCounselling() {
         getCounsellingWaitlist().catch(() => ({ data: { waitlist: [] } })),
         getCounsellingSlots().catch(() => ({ data: { slots: [] } })),
       ]);
-      setSettings(sRes.data.settings || settings);
+      const loadedSettings = sRes.data.settings || settings;
+      if (loadedSettings.noticeText && loadedSettings.noticeText.toLowerCase().includes('non-refundable')) {
+        loadedSettings.noticeText = '';
+      }
+      setSettings(loadedSettings);
       setServices(svcRes.data.services || []);
       setSessions(sesRes.data.sessions || []);
       setBookings(bRes.data.bookings || []);

@@ -74,8 +74,9 @@ export default function OrgCounsellingReceiptPage() {
                 Date & Time: Organization dwara fix ki jayegi (Details will be shared on WhatsApp / Email)
               </p>
             )}
-            <p><span className="text-slate-500">Paid:</span> <strong>₹{booking.amount}</strong> ({booking.paymentMode})</p>
-            <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2 mt-3">{booking.notice}</p>
+            {booking.notice && !booking.notice.toLowerCase().includes('non-refundable') && (
+              <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2 mt-3">{booking.notice}</p>
+            )}
           </div>
           <div className="flex gap-2 mt-6">
             <button type="button" onClick={() => window.print()} className="flex-1 btn-secondary text-xs flex items-center justify-center gap-1 py-2.5">
