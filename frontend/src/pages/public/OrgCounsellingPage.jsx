@@ -554,6 +554,33 @@ export default function OrgCounsellingPage() {
                         ))}
                       </div>
 
+                      {/* Bilingual Note on Counselling Card (Free vs Premium) */}
+                      <div className={`p-2.5 rounded-2xl text-[11px] leading-snug flex items-start gap-2 border ${
+                        isViewFree
+                          ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950 shadow-xs'
+                          : 'bg-amber-50/95 border-amber-200/90 text-amber-950 shadow-xs'
+                      }`}>
+                        <span className={`px-1.5 py-0.5 rounded font-black text-[9px] uppercase tracking-wider shrink-0 mt-0.5 ${
+                          isViewFree ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-200 text-amber-950'
+                        }`}>
+                          नोट / Note
+                        </span>
+                        <div className="space-y-0.5">
+                          <p className="font-semibold text-slate-800">
+                            {isViewFree ? (
+                              <>काउंसलिंग <strong className="text-emerald-900 font-bold">अनुभवी काउंसलर (Experienced Counsellor)</strong> द्वारा कराई जाएगी।</>
+                            ) : (
+                              <>काउंसलिंग <strong className="text-amber-900 font-bold">अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)</strong> द्वारा कराई जाएगी।</>
+                            )}
+                          </p>
+                          <p className="text-[10px] text-slate-500 font-medium">
+                            {isViewFree
+                              ? 'Counselling will be conducted by experienced counsellors.'
+                              : 'Counselling will be conducted by experienced working professionals.'}
+                          </p>
+                        </div>
+                      </div>
+
                       {/* Bottom Callout & Action (NO CLUTTERED AMOUNT SHOWN) */}
                       <div className="pt-2 border-t border-slate-100 space-y-3">
                         <div className="flex items-center justify-between text-xs">
@@ -733,6 +760,35 @@ export default function OrgCounsellingPage() {
                   ? 'Zero fee required • Instant confirmation receipt'
                   : `₹${bookFor.item.price || 499} • Video / Phone / WhatsApp`}
               </p>
+            </div>
+
+            {/* Bilingual Note in Booking Modal */}
+            <div className="px-6 pt-4 pb-0">
+              <div className={`p-3 rounded-2xl text-xs flex items-start gap-2.5 border ${
+                bookFor.isFree
+                  ? 'bg-emerald-50/90 border-emerald-200 text-emerald-950 shadow-xs'
+                  : 'bg-amber-50/95 border-amber-200 text-amber-950 shadow-xs'
+              }`}>
+                <span className={`px-2 py-0.5 rounded-md font-black text-[10px] uppercase tracking-wider shrink-0 mt-0.5 ${
+                  bookFor.isFree ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-200 text-amber-950'
+                }`}>
+                  नोट / Note
+                </span>
+                <div className="space-y-0.5">
+                  <p className="font-semibold text-slate-800 text-xs">
+                    {bookFor.isFree ? (
+                      <>काउंसलिंग <strong className="text-emerald-900 font-bold">अनुभवी काउंसलर (Experienced Counsellor)</strong> द्वारा कराई जाएगी।</>
+                    ) : (
+                      <>काउंसलिंग <strong className="text-amber-900 font-bold">अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)</strong> द्वारा कराई जाएगी।</>
+                    )}
+                  </p>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    {bookFor.isFree
+                      ? 'Counselling will be conducted by experienced counsellors.'
+                      : 'Counselling will be conducted by experienced working professionals.'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handlePay} className="p-6 space-y-4 text-xs">
