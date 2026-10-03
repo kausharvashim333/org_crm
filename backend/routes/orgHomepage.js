@@ -525,8 +525,17 @@ router.put('/', protect, superAdminOnly, async (req, res) => {
         // Preserve logo if not supplied or empty
         if (!incoming.logo && existing.logo) {
           merged.logo = existing.logo;
-        } else if (!merged.logo) {
-          merged.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+        } else if (!merged.logo || (typeof merged.logo === 'string' && merged.logo.includes('logo-1783236511925'))) {
+          merged.logo = '/logo.png';
+        }
+        // Preserve favicon if not explicitly supplied
+        if (incoming.favicon !== undefined) {
+          merged.favicon = incoming.favicon;
+        } else if (existing.favicon) {
+          merged.favicon = existing.favicon;
+        }
+        if (merged.favicon && typeof merged.favicon === 'string' && merged.favicon.includes('logo-1783236511925')) {
+          merged.favicon = '';
         }
         // Preserve orgName if empty
         if (!merged.orgName || !merged.orgName.trim()) {
@@ -557,7 +566,17 @@ router.put('/section/:section', protect, superAdminOnly, async (req, res) => {
       const incoming = req.body.settings;
       const merged = { ...existing, ...incoming };
       if (!incoming.logo && existing.logo) merged.logo = existing.logo;
-      else if (!merged.logo) merged.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+      else if (!merged.logo || (typeof merged.logo === 'string' && merged.logo.includes('logo-1783236511925'))) merged.logo = '/logo.png';
+      
+      if (incoming.favicon !== undefined) {
+        merged.favicon = incoming.favicon;
+      } else if (existing.favicon) {
+        merged.favicon = existing.favicon;
+      }
+      if (merged.favicon && typeof merged.favicon === 'string' && merged.favicon.includes('logo-1783236511925')) {
+        merged.favicon = '';
+      }
+
       if (!merged.orgName || !merged.orgName.trim()) {
         merged.orgName = (existing.orgName && existing.orgName.trim()) ? existing.orgName : 'Lili Organization';
       }

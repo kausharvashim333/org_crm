@@ -16,10 +16,13 @@ let listeners = [];
 
 function normalize(s) {
   if (!s) return null;
+  const isLogoBroken = !s.logo || (typeof s.logo === 'string' && s.logo.includes('logo-1783236511925'));
+  const isFaviconBroken = !s.favicon || (typeof s.favicon === 'string' && s.favicon.includes('logo-1783236511925'));
   return {
     ...s,
     orgName: (s.orgName && typeof s.orgName === 'string' && s.orgName.trim() !== '') ? s.orgName : 'Lili Organization',
-    logo: (s.logo && typeof s.logo === 'string' && s.logo.trim() !== '') ? s.logo : '/logo.png',
+    logo: !isLogoBroken ? s.logo : '/logo.png',
+    favicon: !isFaviconBroken ? s.favicon : '',
   };
 }
 
@@ -71,21 +74,35 @@ function applySettings(settings) {
     document.title = orgName;
   }
 
-  if (settings.favicon) {
+  // Determine favicon URL: priority settings.favicon -> settings.logo -> '/logo.png'
+  let fav = (settings.favicon && typeof settings.favicon === 'string' && settings.favicon.trim() && !settings.favicon.includes('logo-1783236511925'))
+    ? settings.favicon.trim()
+    : ((settings.logo && typeof settings.logo === 'string' && settings.logo.trim() && !settings.logo.includes('logo-1783236511925')) ? settings.logo.trim() : '/logo.png');
+
+  if (fav) {
+    if (!fav.startsWith('http://') && !fav.startsWith('https://') && !fav.startsWith('/')) {
+      fav = '/' + fav;
+    }
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
       link = document.createElement('link');
       link.rel = 'icon';
       document.head.appendChild(link);
     }
-    link.href = settings.favicon;
+    const cleanUrl = fav.split('?')[0].toLowerCase();
+    if (cleanUrl.endsWith('.ico')) link.type = 'image/x-icon';
+    else if (cleanUrl.endsWith('.png')) link.type = 'image/png';
+    else if (cleanUrl.endsWith('.svg')) link.type = 'image/svg+xml';
+    else if (cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg')) link.type = 'image/jpeg';
+    else if (cleanUrl.endsWith('.webp')) link.type = 'image/webp';
+    link.href = fav;
   }
 }
 
 export function refreshOrgSettings() {
   cachedSettings = null;
   return getOrgHomepagePublic().then(res => {
-    const s = res.data.homepage?.settings || {};
+    const s = normalize(res.data.homepage?.settings || {});
     cachedSettings = s;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(s));

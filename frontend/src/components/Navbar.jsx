@@ -46,7 +46,7 @@ export default function Navbar({ activePage }) {
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
   const orgName = (hp?.settings?.orgName && hp.settings.orgName.trim()) || 'Lili Organization';
-  const logo = (hp?.settings?.logo && typeof hp.settings.logo === 'string' && hp.settings.logo.trim() !== '') ? hp.settings.logo : '/uploads/logo-1783236511925-286536357.jpeg';
+  const logo = (hp?.settings?.logo && typeof hp.settings.logo === 'string' && hp.settings.logo.trim() !== '' && !hp.settings.logo.includes('logo-1783236511925')) ? hp.settings.logo : '/logo.png';
 
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [enquiryForm, setEnquiryForm] = useState({

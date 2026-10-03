@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { changePassword, updateProfile, getOrgHomepage, updateOrgHomepage, uploadOrgLogo, uploadOrgFavicon } from '../../api';
+import { refreshOrgSettings } from '../../hooks/useOrgSettings';
 import { useToast } from '../../context/ToastContext';
 import { Building2, Palette, Globe, Lock, User, Save, Upload, Check } from 'lucide-react';
 
@@ -15,7 +16,7 @@ export default function AdminSettings() {
   const [orgData, setOrgData] = useState(null);
   const [orgLoading, setOrgLoading] = useState(true);
   const [savingOrg, setSavingOrg] = useState(false);
-  const [orgForm, setOrgForm] = useState({ orgName: '', shortName: '', tagline: '', browserTitle: '', themeColor: '#2563eb', fontChoice: 'inter', partnerContributionFee: 0, partnerContributionLabel: 'Organization Contribution' });
+  const [orgForm, setOrgForm] = useState({ orgName: '', shortName: '', tagline: '', browserTitle: '', themeColor: '#2563eb', fontChoice: 'inter', partnerContributionFee: 0, partnerContributionLabel: 'Organization Contribution', logo: '/logo.png', favicon: '' });
   const [logoFile, setLogoFile] = useState(null);
   const [faviconFile, setFaviconFile] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -36,7 +37,7 @@ export default function AdminSettings() {
         partnerContributionFee: s.partnerContributionFee || 0,
         partnerContributionLabel: s.partnerContributionLabel || 'Organization Contribution',
         logo: (s.logo && s.logo.trim() && !s.logo.includes('logo-1783236511925')) ? s.logo : '/logo.png',
-        favicon: s.favicon || '',
+        favicon: (s.favicon && s.favicon.trim() && !s.favicon.includes('logo-1783236511925')) ? s.favicon : '',
       });
       setOrgLoading(false);
     }).catch(() => setOrgLoading(false));
@@ -63,12 +64,14 @@ export default function AdminSettings() {
         settings: {
           ...existingSettings,
           ...orgForm,
-          logo: orgForm.logo || existingSettings.logo || '/uploads/logo-1783236511925-286536357.jpeg',
+          logo: (orgForm.logo && !orgForm.logo.includes('logo-1783236511925')) || (existingSettings.logo && !existingSettings.logo.includes('logo-1783236511925')) || '/logo.png',
+          favicon: (orgForm.favicon !== undefined && !orgForm.favicon.includes('logo-1783236511925')) ? orgForm.favicon : (existingSettings.favicon || ''),
         }
       };
       const res = await updateOrgHomepage(payload);
       const updatedHp = res.data?.homepage || res.data;
       setOrgData(updatedHp);
+      refreshOrgSettings();
       showSuccess('Organization branding updated successfully');
     } catch (error) {
       showError('Failed to update organization settings');
@@ -84,13 +87,15 @@ export default function AdminSettings() {
     try {
       const fd = new FormData();
       fd.append('logo', logoFile);
-      await uploadOrgLogo(fd);
+      const uploadRes = await uploadOrgLogo(fd);
       showSuccess('Logo uploaded successfully');
       setLogoFile(null);
+      const newLogoUrl = uploadRes.data?.logoUrl || uploadRes.data?.homepage?.settings?.logo;
       const res = await getOrgHomepage();
       const updatedHp = res.data?.homepage || res.data;
       setOrgData(updatedHp);
-      setOrgForm(prev => ({ ...prev, logo: updatedHp?.settings?.logo || '' }));
+      setOrgForm(prev => ({ ...prev, logo: newLogoUrl || updatedHp?.settings?.logo || '/logo.png' }));
+      refreshOrgSettings();
     } catch (error) {
       showError('Failed to upload logo');
     } finally {
@@ -105,15 +110,40 @@ export default function AdminSettings() {
     try {
       const fd = new FormData();
       fd.append('favicon', faviconFile);
-      await uploadOrgFavicon(fd);
+      const uploadRes = await uploadOrgFavicon(fd);
       showSuccess('Favicon uploaded successfully');
       setFaviconFile(null);
+      const newFaviconUrl = uploadRes.data?.faviconUrl || uploadRes.data?.homepage?.settings?.favicon;
       const res = await getOrgHomepage();
-      setOrgData(res.data);
+      const updatedHp = res.data?.homepage || res.data;
+      setOrgData(updatedHp);
+      setOrgForm(prev => ({ ...prev, favicon: newFaviconUrl || updatedHp?.settings?.favicon || '' }));
+      refreshOrgSettings();
     } catch (error) {
-      showError('Failed to upload favicon');
+      showError(error.response?.data?.message || 'Failed to upload favicon');
     } finally {
       setUploadingFavicon(false);
+    }
+  };
+
+  const handleRemoveFavicon = async () => {
+    try {
+      const existingSettings = orgData?.settings || {};
+      const payload = {
+        settings: {
+          ...existingSettings,
+          ...orgForm,
+          favicon: '',
+        }
+      };
+      const res = await updateOrgHomepage(payload);
+      const updatedHp = res.data?.homepage || res.data;
+      setOrgData(updatedHp);
+      setOrgForm(prev => ({ ...prev, favicon: '' }));
+      refreshOrgSettings();
+      showSuccess('Favicon removed');
+    } catch {
+      showError('Failed to remove favicon');
     }
   };
 
@@ -135,24 +165,77 @@ export default function AdminSettings() {
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <label className="block text-sm font-bold text-slate-700 mb-2">Organization Logo</label>
                 <div className="flex items-center gap-3">
-                  {orgData?.settings?.logo ? <img src={orgData.settings.logo} alt="Logo" className="w-14 h-14 rounded-xl object-cover border border-slate-200" /> : <div className="w-14 h-14 rounded-xl bg-slate-200 flex items-center justify-center text-slate-400"><Building2 className="w-6 h-6" /></div>}
+                  {(orgForm.logo || orgData?.settings?.logo) && !(orgForm.logo || orgData?.settings?.logo).includes('logo-1783236511925') ? (
+                    <img
+                      src={orgForm.logo || orgData?.settings?.logo}
+                      alt="Logo"
+                      className="w-14 h-14 rounded-xl object-cover border border-slate-200 bg-white"
+                      onError={(e) => { e.target.src = '/logo.png'; }}
+                    />
+                  ) : (
+                    <img
+                      src="/logo.png"
+                      alt="Logo"
+                      className="w-14 h-14 rounded-xl object-cover border border-slate-200 bg-white"
+                    />
+                  )}
                   <div className="flex-1">
-                    <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files[0])} className="text-xs mb-2 block w-full" />
-                    <button onClick={handleLogoUpload} disabled={!logoFile || uploadingLogo} className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setLogoFile(e.target.files[0])}
+                      className="text-xs mb-2 block w-full"
+                    />
+                    <button
+                      onClick={handleLogoUpload}
+                      disabled={!logoFile || uploadingLogo}
+                      className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50"
+                    >
                       <Upload className="w-3.5 h-3.5" /> {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
                     </button>
                   </div>
                 </div>
               </div>
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Favicon</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Favicon (Browser Tab Icon)</label>
                 <div className="flex items-center gap-3">
-                  {orgData?.settings?.favicon ? <img src={orgData.settings.favicon} alt="Favicon" className="w-10 h-10 rounded-lg object-cover border border-slate-200" /> : <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400"><Globe className="w-5 h-5" /></div>}
+                  {(orgForm.favicon || orgData?.settings?.favicon) && !(orgForm.favicon || orgData?.settings?.favicon).includes('logo-1783236511925') ? (
+                    <img
+                      src={orgForm.favicon || orgData.settings.favicon}
+                      alt="Favicon"
+                      className="w-10 h-10 rounded-lg object-contain p-1 border border-slate-200 bg-white"
+                      onError={(e) => { e.target.src = '/logo.png'; }}
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-400">
+                      <Globe className="w-5 h-5" />
+                    </div>
+                  )}
                   <div className="flex-1">
-                    <input type="file" accept="image/x-icon,image/png" onChange={(e) => setFaviconFile(e.target.files[0])} className="text-xs mb-2 block w-full" />
-                    <button onClick={handleFaviconUpload} disabled={!faviconFile || uploadingFavicon} className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50">
-                      <Upload className="w-3.5 h-3.5" /> {uploadingFavicon ? 'Uploading...' : 'Upload Favicon'}
-                    </button>
+                    <input
+                      type="file"
+                      accept="image/*,.ico,.png,.jpg,.jpeg,.svg,.webp"
+                      onChange={(e) => setFaviconFile(e.target.files[0])}
+                      className="text-xs mb-2 block w-full"
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleFaviconUpload}
+                        disabled={!faviconFile || uploadingFavicon}
+                        className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        <Upload className="w-3.5 h-3.5" /> {uploadingFavicon ? 'Uploading...' : 'Upload Favicon'}
+                      </button>
+                      {(orgForm.favicon || orgData?.settings?.favicon) && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveFavicon}
+                          className="text-xs text-red-600 hover:text-red-800 font-semibold cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

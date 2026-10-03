@@ -1630,7 +1630,8 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
     return {
       ...s,
       orgName: (s.orgName && typeof s.orgName === 'string' && s.orgName.trim()) ? s.orgName : 'Lili Organization',
-      logo: (s.logo && typeof s.logo === 'string' && s.logo.trim()) ? s.logo : '/uploads/logo-1783236511925-286536357.jpeg',
+      logo: (s.logo && typeof s.logo === 'string' && s.logo.trim() && !s.logo.includes('logo-1783236511925')) ? s.logo : '/logo.png',
+      favicon: (s.favicon && typeof s.favicon === 'string' && s.favicon.trim() && !s.favicon.includes('logo-1783236511925')) ? s.favicon : '',
     };
   });
   const { showSuccess, showError } = useToast();
@@ -1690,7 +1691,7 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
       <div className="border-t pt-4">
         <label className="block text-sm font-medium mb-2">Logo</label>
         <div className="flex items-center gap-4 mb-3">
-          {settings.logo ? <img src={settings.logo} alt="logo" className="w-16 h-16 rounded-lg object-cover border" onError={(e) => { const img = e.target; if (!img.dataset.retried && settings.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = settings.logo.substring(settings.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.style.display = 'none'; } }} /> : <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center"><Globe className="w-8 h-8 text-gray-400" /></div>}
+          {settings.logo && !settings.logo.includes('logo-1783236511925') ? <img src={settings.logo} alt="logo" className="w-16 h-16 rounded-lg object-cover border" onError={(e) => { const img = e.target; if (!img.dataset.retried && settings.logo.includes('/uploads/')) { img.dataset.retried = 'true'; const path = settings.logo.substring(settings.logo.indexOf('/uploads/')); img.src = `/api${path}`; } else { img.src = '/logo.png'; } }} /> : <img src="/logo.png" alt="logo" className="w-16 h-16 rounded-lg object-cover border" />}
           <div>
             <label className="btn-secondary flex items-center gap-2 cursor-pointer">
               <Upload className="w-4 h-4" /> {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
@@ -1704,11 +1705,11 @@ export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
       <div className="border-t pt-4">
         <label className="block text-sm font-medium mb-2">Favicon</label>
         <div className="flex items-center gap-4 mb-3">
-          {settings.favicon ? <img src={settings.favicon} alt="favicon" className="w-8 h-8 rounded object-cover border" /> : <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center"><Globe className="w-4 h-4 text-gray-400" /></div>}
+          {settings.favicon && !settings.favicon.includes('logo-1783236511925') ? <img src={settings.favicon} alt="favicon" className="w-8 h-8 rounded object-cover border" onError={(e) => { e.target.src = '/logo.png'; }} /> : <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center"><Globe className="w-4 h-4 text-gray-400" /></div>}
           <div>
             <label className="btn-secondary flex items-center gap-2 cursor-pointer">
               <Upload className="w-4 h-4" /> {uploadingFavicon ? 'Uploading...' : 'Upload Favicon'}
-              <input type="file" accept="image/*" className="hidden" onChange={handleFaviconUpload} disabled={uploadingFavicon} />
+              <input type="file" accept="image/*,.ico,.png,.jpg,.jpeg,.svg,.webp" className="hidden" onChange={handleFaviconUpload} disabled={uploadingFavicon} />
             </label>
             {settings.favicon && <button onClick={() => setSettings({ ...settings, favicon: '' })} className="text-red-600 text-sm ml-3">Remove</button>}
           </div>

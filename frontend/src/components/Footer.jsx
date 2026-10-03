@@ -16,7 +16,7 @@ export default function Footer({ homepageData }) {
 
   const themeColor = hp.settings?.themeColor || '#2563eb';
   const orgName = (hp.settings?.orgName && hp.settings.orgName.trim()) || 'Lili Organization';
-  const logo = (hp.settings?.logo && typeof hp.settings.logo === 'string' && hp.settings.logo.trim() !== '') ? hp.settings.logo : '/uploads/logo-1783236511925-286536357.jpeg';
+  const logo = (hp.settings?.logo && typeof hp.settings.logo === 'string' && hp.settings.logo.trim() !== '' && !hp.settings.logo.includes('logo-1783236511925')) ? hp.settings.logo : '/logo.png';
 
   return (
     <footer className="bg-slate-900 border-t border-slate-800 text-white pt-20 pb-10 px-6">
