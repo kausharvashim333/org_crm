@@ -483,11 +483,7 @@ export default function OrgCounsellingPage() {
                       <h3 className="font-black text-white text-base leading-snug group-hover:text-amber-200 transition-colors">
                         {s.name}
                       </h3>
-                      {s.tagline && (
-                        <p className="text-[11px] text-slate-300 mt-1 line-clamp-1 italic">
-                          "{s.tagline}"
-                        </p>
-                      )}
+
                     </div>
 
                     {/* Card Body */}
@@ -526,7 +522,7 @@ export default function OrgCounsellingPage() {
                             <><Crown className="w-3 h-3 text-amber-500 fill-amber-500" /> Premium Mentorship Blueprint</>
                           )}
                         </div>
-                        <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                        <p className="text-xs text-slate-600 leading-relaxed">
                           {currentDescription}
                         </p>
                       </div>

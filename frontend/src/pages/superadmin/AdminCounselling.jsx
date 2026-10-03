@@ -420,7 +420,7 @@ export default function AdminCounselling() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-bold text-sm text-slate-900">{s.name}</h3>
-                      {s.tagline && <p className="text-[11px] text-slate-500 italic mt-0.5 line-clamp-1">"{s.tagline}"</p>}
+
                     </div>
                     {s.isActive ? (
                       <span className="badge badge-success text-[10px] shrink-0">Live</span>
@@ -634,8 +634,13 @@ export default function AdminCounselling() {
                               patchBooking(b._id, { convertedToAdmission: true, convertedCourse: course }, 'Marked converted');
                             }}>Converted</button>
                             <button type="button" className="text-slate-700" onClick={async () => { try { await resendCounsellingJoin(b._id); showSuccess('Join email sent'); } catch (e) { showError(e.response?.data?.message || 'Failed'); } }}>Resend join</button>
-                            <button type="button" className="text-red-600" onClick={() => confirm('Cancel this booking?') && patchBooking(b._id, { status: 'cancelled' }, 'Cancelled')}>Cancel</button>
                           </>
+                        )}
+                        {b.status !== 'cancelled' && b.status !== 'refunded' && (
+                          <button type="button" className="text-red-600 font-semibold" onClick={() => confirm('Cancel this booking?') && patchBooking(b._id, { status: 'cancelled' }, 'Booking cancelled')}>Cancel</button>
+                        )}
+                        {b.status === 'cancelled' && (
+                          <span className="text-xs text-slate-400 italic">Cancelled</span>
                         )}
                       </td>
                     </tr>
