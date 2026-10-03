@@ -89,7 +89,8 @@ router.post('/create', async (req, res) => {
     }
 
     // Determine price
-    const basePrice = course.salePrice > 0 ? course.salePrice : (course.fee || 1999);
+    const isFree = Boolean(course.isFree) || (Number(course.salePrice) === 0 && (Number(course.fee) === 0 || !course.fee));
+    const basePrice = isFree ? 0 : (course.salePrice > 0 ? course.salePrice : (course.fee > 0 ? course.fee : 1999));
     let discountAmount = 0;
     let appliedCoupon = null;
 

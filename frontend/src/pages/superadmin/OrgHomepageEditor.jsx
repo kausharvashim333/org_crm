@@ -28,13 +28,14 @@ import {
 
 const tabs = [
   { key: 'hero', label: 'Hero & CTA' },
+  { key: 'notices', label: '📢 Notices & Circulars' },
   { key: 'content', label: 'About & Stats' },
   { key: 'verticals', label: 'Verticals' },
   { key: 'franchise', label: '⭐ Institute Joining Page' },
   { key: 'services', label: 'Services' },
   { key: 'custom', label: 'Custom Sections' },
   { key: 'certs', label: 'Certificates & Affiliations' },
-  { key: 'media', label: 'Media' },
+  { key: 'media', label: 'Media & Gallery' },
   { key: 'layout', label: 'Section Order' },
   { key: 'disclaimer', label: '⚖️ Disclaimer' },
   { key: 'settings', label: 'Settings' },
@@ -43,12 +44,13 @@ const tabs = [
 // Map sidebar deep-link section keys to our grouped tabs
 const sectionToTab = {
   hero: 'hero', cta: 'hero',
+  notices: 'notices',
   about: 'content', stats: 'content',
   verticals: 'verticals',
   franchise: 'franchise',
   services: 'services',
   custom: 'custom',
-  gallery: 'media', testimonials: 'media', notices: 'media',
+  gallery: 'media', testimonials: 'media',
   announcement: 'settings', enquiryConfig: 'settings', contact: 'settings', settings: 'settings',
   verifyWidget: 'custom', categories: 'custom', layoutOrder: 'layout',
   certifications: 'certs', certificateTemplate: 'certs',
@@ -130,9 +132,19 @@ export default function OrgHomepageEditor() {
 
       <div className="space-y-6">
         {activeTab === 'hero' && <>
-          <HeroEditor homepage={homepage} onSave={(d) => save('hero', d)} />
+          <HeroEditor homepage={homepage} onSave={(d) => save('hero', d)} onGoToNotices={() => setActiveTab('notices')} />
           <CtaEditor homepage={homepage} onSave={(d) => save('cta', d)} />
         </>}
+
+        {activeTab === 'notices' && (
+          <NoticesEditor
+            homepage={homepage}
+            onSave={(d) => save('notices', d)}
+            onAdd={(d) => add(addOrgNotice, d, 'Notice added')}
+            onDelete={(i) => del(deleteOrgNotice, i, 'Deleted')}
+            onUpdate={(i, d) => update(updateOrgNotice, i, d, 'Notice updated')}
+          />
+        )}
 
         {activeTab === 'content' && <>
           <AboutEditor homepage={homepage} onSave={(d) => save('about', d)} onAddFeature={(d) => add(addOrgFeature, d, 'Feature added')} onDeleteFeature={(i) => del(deleteOrgFeature, i, 'Deleted')} onUpdateFeature={(i, d) => update(updateOrgFeature, i, d, 'Feature updated')} />

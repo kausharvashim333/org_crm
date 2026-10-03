@@ -529,8 +529,8 @@ export default function OrgHomepage() {
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 w-full">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
                 
-                {/* Left Hero Column (7 Cols on desktop) */}
-                <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-5">
+                {/* Left Hero Column */}
+                <div className={`${hp.hero?.showNoticeBoard !== false ? 'lg:col-span-7 items-center lg:items-start text-center lg:text-left' : 'lg:col-span-12 max-w-4xl mx-auto items-center text-center'} flex flex-col space-y-5`}>
                   
                   {/* Top Notification Badge with typing effect */}
                   <Reveal>
@@ -624,7 +624,7 @@ export default function OrgHomepage() {
 
                   {/* Action CTA Buttons with shimmer + arrow bounce */}
                   <Reveal delay={400}>
-                    <div className="flex flex-wrap gap-3 justify-center lg:justify-start w-full pt-1">
+                    <div className={`flex flex-wrap gap-3 ${hp.hero?.showNoticeBoard !== false ? 'justify-center lg:justify-start' : 'justify-center'} w-full pt-1`}>
                       <Link
                         to="/courses"
                         className="btn-shimmer inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-lg shadow-indigo-600/20 transition-all hover:scale-105 group"
@@ -680,30 +680,31 @@ export default function OrgHomepage() {
 
                 </div>
 
-                {/* Right Hero Column: Visual Showcase (5 Cols on desktop) */}
-                <div className="lg:col-span-5 w-full">
-                  <Reveal delay={200}>
-                    <div className="relative">
-                      {/* Main visual card */}
-                      <div className="bg-white/60 border border-white/60 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-indigo-300/30 relative overflow-hidden liquid-glass liquid-refraction">
-                        {/* Shimmer top bar */}
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500" style={{ backgroundSize: '200% 100%', animation: 'border-glow 3s linear infinite' }} />
-                        
-                        {/* Widget Header */}
-                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-xs">
-                              <Bell className="w-4 h-4" />
+                {/* Right Hero Column: Visual Showcase (Notice Board) */}
+                {hp.hero?.showNoticeBoard !== false && (
+                  <div className="lg:col-span-5 w-full">
+                    <Reveal delay={200}>
+                      <div className="relative">
+                        {/* Main visual card */}
+                        <div className="bg-white/60 border border-white/60 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-indigo-300/30 relative overflow-hidden liquid-glass liquid-refraction">
+                          {/* Shimmer top bar */}
+                          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500" style={{ backgroundSize: '200% 100%', animation: 'border-glow 3s linear infinite' }} />
+                          
+                          {/* Widget Header */}
+                          <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-xs">
+                                <Bell className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h3 className="font-bold text-slate-900 text-base">{hp.hero?.noticeBoardTitle || 'Live notifications & circulars'}</h3>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-bold text-slate-900 text-base">Live notifications & circulars</h3>
-                            </div>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase tracking-wider">
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                              {hp.hero?.noticeBoardBadge || 'Live Updates'}
+                            </span>
                           </div>
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold uppercase tracking-wider">
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                            Live Updates
-                          </span>
-                        </div>
 
                       {/* Category Filter Pills & Search */}
                       <div className="space-y-2 mb-3">
@@ -806,6 +807,7 @@ export default function OrgHomepage() {
                     </div>
                   </Reveal>
                 </div>
+                )}
 
               </div>
             </div>

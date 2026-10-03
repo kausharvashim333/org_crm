@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get('/store', async (req, res) => {
   try {
-    const { category, search, level, sort, minPrice, maxPrice } = req.query;
+    const { category, search, level, sort, minPrice, maxPrice, courseType } = req.query;
     let filter = { isActive: true, approvalStatus: 'approved' };
 
     if (category && category !== 'All') {
@@ -16,14 +16,32 @@ router.get('/store', async (req, res) => {
     if (level && level !== 'All') {
       filter.level = level;
     }
+    if (courseType === 'free') {
+      filter.$or = [
+        { isFree: true },
+        { $and: [{ salePrice: { $lte: 0 } }, { fee: { $lte: 0 } }] },
+      ];
+    } else if (courseType === 'paid') {
+      filter.isFree = { $ne: true };
+      filter.$or = [
+        { salePrice: { $gt: 0 } },
+        { fee: { $gt: 0 } },
+      ];
+    }
     if (search && typeof search === 'string') {
       const sanitizedSearch = escapeRegex(search.trim());
-      filter.$or = [
+      const searchOr = [
         { name: { $regex: sanitizedSearch, $options: 'i' } },
         { code: { $regex: sanitizedSearch, $options: 'i' } },
         { description: { $regex: sanitizedSearch, $options: 'i' } },
         { category: { $regex: sanitizedSearch, $options: 'i' } },
       ];
+      if (filter.$or) {
+        filter.$and = [{ $or: filter.$or }, { $or: searchOr }];
+        delete filter.$or;
+      } else {
+        filter.$or = searchOr;
+      }
     }
 
     let sortObj = { displayOrder: 1, enrolledCount: -1, createdAt: -1 };
@@ -151,6 +169,14 @@ router.get('/:id', protect, async (req, res) => {
 
 const sanitizeCourseFeeData = (body) => {
   const data = { ...body };
+  if (data.isFree === true || data.isFree === 'true') {
+    data.isFree = true;
+    data.studentFee = 0;
+    data.fee = 0;
+    data.salePrice = 0;
+  } else if (data.isFree !== undefined) {
+    data.isFree = false;
+  }
   const sFee = Number(data.studentFee !== undefined ? data.studentFee : (data.fee !== undefined ? data.fee : 0));
   const oFee = Number(data.organizationFee !== undefined ? data.organizationFee : 0);
   const cFee = Number(data.certificateFee !== undefined ? data.certificateFee : 0);

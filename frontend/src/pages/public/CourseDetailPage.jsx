@@ -78,6 +78,7 @@ export default function CourseDetailPage() {
     );
   }
 
+  const isFreeCourse = Boolean(course.isFree) || (Number(course.salePrice || 0) === 0 && Number(course.fee || 0) === 0 && Number(course.studentFee || 0) === 0) || course.feeDisplayType === 'free';
   const original = course.originalPrice || course.fee || 0;
   const sale = course.salePrice || course.fee || 0;
   const monthlyFee = course.monthlyFee || 0;
@@ -235,52 +236,68 @@ export default function CourseDetailPage() {
                 </div>
               </div>
 
-              {/* Pricing */}
+              {/* Pricing or Free Banner */}
               <div className="mb-4">
-                <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Special Student Price</div>
-                {feeDisplayType === 'monthly' && monthlyFee ? (
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-black text-slate-900">
-                      ₹{monthlyFee.toLocaleString('en-IN')}
+                {isFreeCourse ? (
+                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full inline-block">
+                      100% Free Course
                     </span>
-                    <span className="text-sm font-bold text-slate-500">/month</span>
-                  </div>
-                ) : feeDisplayType === 'both' && monthlyFee ? (
-                  <div className="space-y-1">
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-2xl font-black text-slate-900">
-                        ₹{monthlyFee.toLocaleString('en-IN')}
-                      </span>
-                      <span className="text-sm font-bold text-slate-500">/month</span>
+                    <div className="text-2xl font-black text-emerald-950">
+                      ₹0 (निःशुल्क एडमिशन)
                     </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-lg font-bold text-slate-700">or ₹{sale.toLocaleString('en-IN')}</span>
-                      <span className="text-xs text-slate-500">one-time</span>
-                      {original > sale && (
-                        <span className="text-sm text-slate-400 line-through">₹{original.toLocaleString('en-IN')}</span>
-                      )}
-                    </div>
+                    <p className="text-xs text-emerald-700 font-medium leading-relaxed">
+                      Zero registration fee. Complete access to online lectures & assessments.
+                    </p>
                   </div>
                 ) : (
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-black text-slate-900">
-                      ₹{sale.toLocaleString('en-IN')}
-                    </span>
-                    {original > sale && (
-                      <span className="text-base text-slate-400 line-through">
-                        ₹{original.toLocaleString('en-IN')}
-                      </span>
+                  <>
+                    <div className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Special Student Price</div>
+                    {feeDisplayType === 'monthly' && monthlyFee ? (
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-3xl font-black text-slate-900">
+                          ₹{monthlyFee.toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-sm font-bold text-slate-500">/month</span>
+                      </div>
+                    ) : feeDisplayType === 'both' && monthlyFee ? (
+                      <div className="space-y-1">
+                        <div className="flex items-baseline gap-3">
+                          <span className="text-2xl font-black text-slate-900">
+                            ₹{monthlyFee.toLocaleString('en-IN')}
+                          </span>
+                          <span className="text-sm font-bold text-slate-500">/month</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-lg font-bold text-slate-700">or ₹{sale.toLocaleString('en-IN')}</span>
+                          <span className="text-xs text-slate-500">one-time</span>
+                          {original > sale && (
+                            <span className="text-sm text-slate-400 line-through">₹{original.toLocaleString('en-IN')}</span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-3xl font-black text-slate-900">
+                          ₹{sale.toLocaleString('en-IN')}
+                        </span>
+                        {original > sale && (
+                          <span className="text-base text-slate-400 line-through">
+                            ₹{original.toLocaleString('en-IN')}
+                          </span>
+                        )}
+                        {discountPercent > 0 && (
+                          <span className="px-2 py-0.5 bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold rounded-lg">
+                            {discountPercent}% OFF
+                          </span>
+                        )}
+                      </div>
                     )}
-                    {discountPercent > 0 && (
-                      <span className="px-2 py-0.5 bg-rose-50 text-rose-600 border border-rose-200 text-xs font-bold rounded-lg">
-                        {discountPercent}% OFF
-                      </span>
-                    )}
-                  </div>
+                    <div className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" /> Special promotional fee valid today!
+                    </div>
+                  </>
                 )}
-                <div className="text-xs text-rose-600 font-semibold mt-1 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> Special promotional fee valid today!
-                </div>
                 {course.feeNote && (
                   <p className="text-xs text-slate-500 font-medium mt-2 italic leading-tight">{course.feeNote}</p>
                 )}
@@ -290,9 +307,14 @@ export default function CourseDetailPage() {
               <div className="space-y-2.5 mb-6">
                 <Link
                   to={`/checkout/${course._id}`}
-                  className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-center font-bold rounded-2xl transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 group cursor-pointer"
+                  className={`w-full py-3.5 px-4 text-white text-center font-black rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 group cursor-pointer ${
+                    isFreeCourse
+                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25'
+                      : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/25'
+                  }`}
                 >
-                  Enroll Now & Get Instant Access <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <span>{isFreeCourse ? 'Enroll for Free Now (निःशुल्क शुरू करें)' : 'Enroll Now & Get Instant Access'}</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
 
                 <button

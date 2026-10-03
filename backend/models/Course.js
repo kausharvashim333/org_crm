@@ -38,6 +38,7 @@ const courseSchema = new mongoose.Schema({
   image: { type: String },
   isActive: { type: Boolean, default: true },
   // E-commerce & Store Fields
+  isFree: { type: Boolean, default: false },
   originalPrice: { type: Number, default: 0 },
   salePrice: { type: Number, default: 0 },
   isPublishedForSale: { type: Boolean, default: true },

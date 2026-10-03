@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, Globe, Upload, ArrowUp, ArrowDown, Edit, FileText, Star, Pencil } from 'lucide-react';
+import { Save, Plus, Trash2, Globe, Upload, ArrowUp, ArrowDown, Edit, FileText, Star, Pencil, Bell, ArrowRight } from 'lucide-react';
 import { uploadOrgImage, uploadOrgLogo, uploadOrgFavicon, uploadOrgPdf } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { refreshOrgSettings } from '../../hooks/useOrgSettings';
@@ -8,7 +8,7 @@ function Field({ label, children }) {
   return <div><label className="block text-sm font-medium mb-1">{label}</label>{children}</div>;
 }
 
-export function HeroEditor({ homepage, onSave }) {
+export function HeroEditor({ homepage, onSave, onGoToNotices }) {
   const [data, setData] = useState(() => {
     const hero = homepage.hero || {};
     const existingPoints = hero.points || [];
@@ -24,6 +24,9 @@ export function HeroEditor({ homepage, onSave }) {
         ? hero.trendingCourses
         : ['ADCA Pro', 'Tally Prime GST', 'Full Stack Web Dev', 'Python AI', 'Financial Accounting'],
       showTrendingCourses: hero.showTrendingCourses !== false,
+      showNoticeBoard: hero.showNoticeBoard !== false,
+      noticeBoardTitle: hero.noticeBoardTitle !== undefined ? hero.noticeBoardTitle : 'Live notifications & circulars',
+      noticeBoardBadge: hero.noticeBoardBadge !== undefined ? hero.noticeBoardBadge : 'Live Updates',
     };
   });
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -229,6 +232,77 @@ export function HeroEditor({ homepage, onSave }) {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Hero Notice Board (Live Notifications & Circulars) */}
+      <div className="border border-indigo-100 bg-indigo-50/40 p-4 rounded-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-indigo-600 text-white"><Bell className="w-4 h-4" /></span>
+              <h4 className="font-bold text-sm text-slate-800">Hero Section Notice Board (Live Circulars & Updates)</h4>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              Configure the live notices & circulars card displayed on the right side of the homepage Hero section.
+            </p>
+          </div>
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs w-fit shrink-0">
+            <input
+              type="checkbox"
+              checked={data.showNoticeBoard !== false}
+              onChange={(e) => setData({ ...data, showNoticeBoard: e.target.checked })}
+            />
+            Show Notice Board in Hero
+          </label>
+        </div>
+
+        {data.showNoticeBoard !== false && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <Field label="Notice Board Card Title">
+              <input
+                type="text"
+                value={data.noticeBoardTitle !== undefined ? data.noticeBoardTitle : 'Live notifications & circulars'}
+                onChange={(e) => setData({ ...data, noticeBoardTitle: e.target.value })}
+                className="input-field text-xs font-medium"
+                placeholder="e.g. Live notifications & circulars"
+              />
+            </Field>
+            <Field label="Live Badge Text">
+              <input
+                type="text"
+                value={data.noticeBoardBadge !== undefined ? data.noticeBoardBadge : 'Live Updates'}
+                onChange={(e) => setData({ ...data, noticeBoardBadge: e.target.value })}
+                className="input-field text-xs font-medium"
+                placeholder="e.g. Live Updates"
+              />
+            </Field>
+          </div>
+        )}
+
+        <div className="bg-white p-3.5 rounded-xl border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-800">Active Hero Notices:</span>
+              <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
+                {(homepage.notices?.items || []).length} notices
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              {(homepage.notices?.items || []).length > 0
+                ? `Latest: "${(homepage.notices?.items || [])[0]?.title}"`
+                : 'No notices added yet. Click the button to add or edit notices.'}
+            </p>
+          </div>
+          {onGoToNotices && (
+            <button
+              type="button"
+              onClick={onGoToNotices}
+              className="btn-primary text-xs flex items-center justify-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg whitespace-nowrap shadow-xs"
+            >
+              <Bell className="w-3.5 h-3.5" /> Manage Notices & Circulars <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <button onClick={() => {
@@ -1321,9 +1395,25 @@ export function NoticesEditor({ homepage, onSave, onAdd, onDelete, onUpdate }) {
 
   return (
     <div className="card space-y-4">
-      <h3 className="font-semibold">Notices & Announcements</h3>
-      <Field label="Title"><input type="text" value={data.title || ''} onChange={(e) => setData({ ...data, title: e.target.value })} className="input-field" /></Field>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={data.show !== false} onChange={(e) => setData({ ...data, show: e.target.checked })} /> Show this section</label>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-base sm:text-lg">Notices & Circulars (Hero & Public)</h3>
+        <span className="text-xs bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-full">
+          {(data.items || []).length} Total
+        </span>
+      </div>
+
+      <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3 flex items-start gap-2.5 text-xs text-indigo-900">
+        <Bell className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+        <div>
+          <p className="font-bold">Website Hero Section & Public Board Display</p>
+          <p className="text-indigo-700 mt-0.5">
+            All notices listed here appear live in the <strong>Hero Section</strong> right-side card (Live notifications & circulars) as well as the main headquarters notice board (<strong>/notices</strong>).
+          </p>
+        </div>
+      </div>
+
+      <Field label="Section Title (For /notices Page)"><input type="text" value={data.title || ''} onChange={(e) => setData({ ...data, title: e.target.value })} className="input-field" /></Field>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={data.show !== false} onChange={(e) => setData({ ...data, show: e.target.checked })} /> Show standalone notices section on homepage</label>
       <div className="border-t pt-4">
         <div className="space-y-2 mb-4">
           {(data.items || []).map((n, i) => (

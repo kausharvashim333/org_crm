@@ -98,6 +98,7 @@ export const submitStudentAssessment = (data) => API.post('/student-lms/submit-a
 export const getStudentCertificate = (id) => API.get(`/student-lms/certificate/${id}`);
 export const updateStudentLmsProfile = (data) => API.put('/student-lms/profile', data);
 export const uploadStudentLmsDocument = (formData) => API.post('/student-lms/upload-document', formData);
+export const enrollStudentLmsCourse = (data) => API.post('/student-lms/enroll-course', data);
 
 export const getBatches = (params) => API.get('/batches', { params });
 export const getBatch = (id) => API.get(`/batches/${id}`);

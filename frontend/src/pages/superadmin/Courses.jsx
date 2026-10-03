@@ -26,6 +26,7 @@ const initialCourseState = {
   registrationFee: '',
   originalPrice: '',
   salePrice: '',
+  isFree: false,
   category: '',
   centerType: 'All',
   image: '',
@@ -121,6 +122,7 @@ export default function AdminCourses() {
       registrationFee: c.registrationFee ? String(c.registrationFee) : '',
       originalPrice: c.originalPrice ? String(c.originalPrice) : '',
       salePrice: c.salePrice ? String(c.salePrice) : '',
+      isFree: Boolean(c.isFree) || (Number(c.salePrice || 0) === 0 && Number(c.fee || 0) === 0),
       category: c.category || '',
       centerType: c.centerType || 'All',
       image: c.image || '',
@@ -199,6 +201,7 @@ export default function AdminCourses() {
         registrationFee: +formData.registrationFee || 0,
         originalPrice: +formData.originalPrice || 0,
         salePrice: +formData.salePrice || 0,
+        isFree: Boolean(formData.isFree),
         highlights: formData.highlights.filter(h => h.trim()),
         requiredDocuments: formData.requiredDocumentsList,
       };
@@ -584,6 +587,42 @@ export default function AdminCourses() {
             </div>
             <div><label className="block text-sm font-medium mb-1">Duration *</label><input type="text" required value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: e.target.value })} className="input-field" placeholder="e.g. 6 Months" /></div>
             <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="text" inputMode="numeric" value={formData.durationMonths} onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value })} className="input-field" /></div>
+          </div>
+
+          {/* Free vs Paid Toggle */}
+          <div className="bg-gradient-to-r from-indigo-50/70 to-emerald-50/70 p-3.5 rounded-2xl border border-slate-200">
+            <label className="block text-xs font-black text-slate-800 mb-2">
+              Course Nature (Free vs Paid Program)
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, isFree: false })}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
+                  !formData.isFree
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <span>💳 Paid Course (सशुल्क सर्टिफाइड कोर्स)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, isFree: true, fee: '0', studentFee: '0', salePrice: '0', monthlyFee: '0' })}
+                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
+                  formData.isFree
+                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <span>🎁 100% Free Course (निःशुल्क कोर्स)</span>
+              </button>
+            </div>
+            {formData.isFree && (
+              <p className="text-[11px] text-emerald-700 font-semibold mt-2 bg-emerald-100/60 p-2 rounded-lg">
+                ✓ Free Course: Students can enroll for free with 1 click. Showcased in the Free Courses segment.
+              </p>
+            )}
           </div>
 
           {/* Fee Display Type + Fee Input */}

@@ -14,6 +14,13 @@ export default function CourseCheckoutPage() {
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
   const { user, loginUser } = useAuth ? useAuth() : { user: null, loginUser: () => {} };
+  const storedStudent = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('student_user') || 'null');
+    } catch {
+      return null;
+    }
+  })();
 
   const [course, setCourse] = useState(null);
   const [partners, setPartners] = useState([]);
@@ -22,9 +29,9 @@ export default function CourseCheckoutPage() {
 
   // Form State
   const [formData, setFormData] = useState({
-    customerName: user?.name || '',
-    customerEmail: user?.email || '',
-    customerPhone: user?.phone || '',
+    customerName: user?.name || storedStudent?.name || '',
+    customerEmail: user?.email || storedStudent?.email || '',
+    customerPhone: user?.phone || storedStudent?.phone || '',
     customerCity: '',
     customerState: '',
     learningMode: 'online', // 'online' | 'hybrid_offline_lab'
@@ -55,8 +62,9 @@ export default function CourseCheckoutPage() {
       });
   }, [courseId]);
 
-  const basePrice = course ? (course.salePrice > 0 ? course.salePrice : (course.fee || 1999)) : 0;
-  const originalPrice = course ? (course.originalPrice > 0 ? course.originalPrice : (course.fee || 2999)) : 0;
+  const isFreeCourse = Boolean(course?.isFree) || (Number(course?.salePrice || 0) === 0 && Number(course?.fee || 0) === 0);
+  const basePrice = course ? (isFreeCourse ? 0 : (course.salePrice > 0 ? course.salePrice : (course.fee > 0 ? course.fee : 1999))) : 0;
+  const originalPrice = course ? (isFreeCourse ? 0 : (course.originalPrice > 0 ? course.originalPrice : (course.fee > 0 ? course.fee : 2999))) : 0;
   const discountAmount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const finalPayable = Math.max(0, Math.round(basePrice - discountAmount));
 
@@ -421,51 +429,66 @@ export default function CourseCheckoutPage() {
             </div>
 
             {/* Step 3: Payment Method Selection */}
-            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-4">
-              <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-                <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
-                  3
+            {finalPayable === 0 ? (
+              <div className="bg-emerald-50 rounded-3xl p-6 md:p-8 border border-emerald-200 shadow-sm space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                    ✓
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-emerald-950">100% Free Course Enrollment</h3>
+                    <p className="text-xs text-emerald-800 mt-0.5">
+                      No payment is required for this course. Click the button below to instantly activate your Student LMS access and generate your admission confirmation.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">Select Payment Method</h3>
               </div>
-
-              <div className="space-y-3">
-                <label className="flex items-center justify-between p-4 rounded-2xl border border-indigo-200 bg-indigo-50/30 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <QrCode className="w-5 h-5 text-indigo-600" />
-                    <div>
-                      <div className="font-bold text-sm text-slate-900">Instant UPI & QR Code / NetBanking</div>
-                      <div className="text-xs text-slate-500">Google Pay, PhonePe, Paytm, BHIM UPI</div>
-                    </div>
+            ) : (
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                  <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                    3
                   </div>
-                  <input
-                    type="radio"
-                    name="paymentGateway"
-                    checked={formData.paymentGateway === 'upi_qr'}
-                    onChange={() => setFormData({ ...formData, paymentGateway: 'upi_qr' })}
-                    className="text-indigo-600"
-                  />
-                </label>
+                  <h3 className="text-lg font-bold text-slate-900">Select Payment Method</h3>
+                </div>
 
-                <label className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-5 h-5 text-indigo-600" />
-                    <div>
-                      <div className="font-bold text-sm text-slate-900">Credit / Debit Card (Visa, Mastercard, RuPay)</div>
-                      <div className="text-xs text-slate-500">Secure card payment gateway</div>
+                <div className="space-y-3">
+                  <label className="flex items-center justify-between p-4 rounded-2xl border border-indigo-200 bg-indigo-50/30 cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <QrCode className="w-5 h-5 text-indigo-600" />
+                      <div>
+                        <div className="font-bold text-sm text-slate-900">Instant UPI & QR Code / NetBanking</div>
+                        <div className="text-xs text-slate-500">Google Pay, PhonePe, Paytm, BHIM UPI</div>
+                      </div>
                     </div>
-                  </div>
-                  <input
-                    type="radio"
-                    name="paymentGateway"
-                    checked={formData.paymentGateway === 'razorpay'}
-                    onChange={() => setFormData({ ...formData, paymentGateway: 'razorpay' })}
-                    className="text-indigo-600"
-                  />
-                </label>
+                    <input
+                      type="radio"
+                      name="paymentGateway"
+                      checked={formData.paymentGateway === 'upi_qr'}
+                      onChange={() => setFormData({ ...formData, paymentGateway: 'upi_qr' })}
+                      className="text-indigo-600"
+                    />
+                  </label>
+
+                  <label className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="w-5 h-5 text-indigo-600" />
+                      <div>
+                        <div className="font-bold text-sm text-slate-900">Credit / Debit Card / Razorpay</div>
+                        <div className="text-xs text-slate-500">Visa, Mastercard, RuPay & All UPI Wallets</div>
+                      </div>
+                    </div>
+                    <input
+                      type="radio"
+                      name="paymentGateway"
+                      checked={formData.paymentGateway === 'razorpay'}
+                      onChange={() => setFormData({ ...formData, paymentGateway: 'razorpay' })}
+                      className="text-indigo-600"
+                    />
+                  </label>
+                </div>
               </div>
-
-            </div>
+            )}
 
           </div>
 
@@ -599,11 +622,15 @@ export default function CourseCheckoutPage() {
                 {submitting ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Processing Enrollment...</span>
+                    <span>{finalPayable === 0 ? 'Activating Free Enrollment...' : 'Opening Payment Gateway...'}</span>
                   </>
                 ) : (
                   <>
-                    <span>Complete Order & Start Learning</span>
+                    <span>
+                      {finalPayable === 0
+                        ? 'Enroll for Free Now (निःशुल्क शुरू करें)'
+                        : `Pay ₹${finalPayable.toLocaleString('en-IN')} & Complete Enrollment`}
+                    </span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}

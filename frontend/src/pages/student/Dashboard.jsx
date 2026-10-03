@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getStudentLmsDashboard, changePassword, updateStudentLmsProfile, getStudentAvailableExams, uploadStudentLmsDocument } from '../../api';
+import { getStudentLmsDashboard, changePassword, updateStudentLmsProfile, getStudentAvailableExams, uploadStudentLmsDocument, enrollStudentLmsCourse } from '../../api';
 import { useToast } from '../../context/ToastContext';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
 import { 
@@ -8,7 +8,7 @@ import {
   FileText, Calendar, CreditCard, Download, ExternalLink, ShieldCheck, MapPin, Phone, 
   Mail, KeyRound, Clock, Sparkles, Building2, Check, AlertCircle, Menu, X, ChevronRight,
   Edit3, Save, Lock, School, BookMarked, UserCheck, Shield, Bell, ClipboardList, TrendingUp,
-  BellRing
+  BellRing, Gift, Printer, Search, QrCode
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -215,6 +215,8 @@ export default function StudentDashboard() {
   const student = dashboardData?.student;
   const courses = dashboardData?.courses || [];
   const fees = dashboardData?.fees || [];
+  const orders = dashboardData?.orders || [];
+  const availableCourses = dashboardData?.availableCourses || [];
   const attendance = dashboardData?.attendance || [];
   const materials = dashboardData?.materials || [];
   const certificates = dashboardData?.certificates || [];
@@ -224,6 +226,14 @@ export default function StudentDashboard() {
   const [availableExams, setAvailableExams] = useState([]);
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
+  // Extra Courses state
+  const [extraCourseSegment, setExtraCourseSegment] = useState('all'); // 'all' | 'free' | 'paid'
+  const [extraCourseSearch, setExtraCourseSearch] = useState('');
+  const [enrollingExtraCourseId, setEnrollingExtraCourseId] = useState(null);
+
+  // Official Receipt Modal state
+  const [selectedReceiptModal, setSelectedReceiptModal] = useState(null);
+
   const orgSettings = dashboardData?.orgSettings;
   const orgLogo = orgSettings?.logo || '';
   const orgName = orgSettings?.orgName || 'Training Institute';
@@ -232,10 +242,80 @@ export default function StudentDashboard() {
   const partnerName = partner?.instituteName || orgName;
   const partnerCity = partner?.city ? `${partner.city}${partner.state ? `, ${partner.state}` : ''}` : 'Direct Online Learning';
 
-  // Fee calculation summary
+  // Un-enrolled Extra Courses calculation
+  const enrolledCourseIds = new Set(courses.map(c => c._id?.toString()));
+  const unEnrolledCourses = availableCourses.filter(c => !enrolledCourseIds.has(c._id?.toString()));
+
+  // Unified Payment Receipts (Both Online Orders & Center Tuition Fees)
+  const formattedOrderReceipts = orders.map(ord => ({
+    _id: ord._id,
+    type: 'order',
+    receiptNo: ord.invoiceNumber || ord.orderNumber,
+    orderNumber: ord.orderNumber,
+    invoiceNumber: ord.invoiceNumber,
+    title: ord.courseId?.name || ord.courseName || 'Online Course Certification',
+    category: ord.courseId?.category || 'Certified Course',
+    date: ord.paidAt || ord.createdAt,
+    amount: ord.finalAmount || 0,
+    originalAmount: ord.originalPrice || 0,
+    discountAmount: ord.discountAmount || 0,
+    paymentMode: ord.finalAmount === 0 
+      ? '100% Free Scholarship / Enrollment' 
+      : (ord.paymentGateway === 'upi_qr' 
+          ? 'UPI / QR Code' 
+          : ord.paymentGateway === 'razorpay' 
+          ? 'Razorpay (Cards / NetBanking / UPI)' 
+          : (ord.paymentGateway || 'Online Payment')),
+    transactionId: ord.transactionId || ord.paymentDetails?.razorpay_payment_id || `TXN-${ord._id.slice(-8).toUpperCase()}`,
+    status: 'paid',
+    orderData: ord,
+  }));
+
+  const formattedFeeReceipts = fees.map(f => ({
+    _id: f._id,
+    type: 'fee',
+    receiptNo: f.receiptNo || f.transactionId || `REC-${f._id.slice(-8).toUpperCase()}`,
+    title: f.remarks || 'Center Academic Tuition Fee',
+    category: 'Center Tuition Fee',
+    date: f.paymentDate || f.createdAt,
+    amount: f.paidAmount || f.amount || 0,
+    originalAmount: f.totalAmount || f.amount || 0,
+    discountAmount: 0,
+    paymentMode: f.paymentMode || 'Cash / Offline Center',
+    transactionId: f.transactionId || `FEE-${f._id.slice(-8).toUpperCase()}`,
+    status: 'paid',
+    feeData: f,
+  }));
+
+  const allReceipts = [...formattedOrderReceipts, ...formattedFeeReceipts].sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
+
+  const totalPaidAmount = allReceipts.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
   const totalFeeAmount = fees.reduce((acc, f) => acc + (f.totalAmount || f.amount || 0), 0);
-  const paidFeeAmount = fees.reduce((acc, f) => acc + (f.paidAmount || (f.status === 'paid' ? f.amount : 0)), 0);
-  const pendingFeeAmount = Math.max(0, totalFeeAmount - paidFeeAmount);
+  const paidCenterFeeAmount = fees.reduce((acc, f) => acc + (f.paidAmount || (f.status === 'paid' ? f.amount : 0)), 0);
+  const pendingFeeAmount = Math.max(0, totalFeeAmount - paidCenterFeeAmount);
+
+  // Enroll in extra course from student profile
+  const handleEnrollExtraCourse = async (course) => {
+    const isFree = Boolean(course.isFree) || (Number(course.salePrice || 0) === 0 && Number(course.fee || 0) === 0);
+
+    if (isFree) {
+      setEnrollingExtraCourseId(course._id);
+      try {
+        await enrollStudentLmsCourse({ courseId: course._id });
+        showSuccess(`🎉 Enrolled successfully in ${course.name}! It is now available in your My Courses tab.`);
+        loadDashboard();
+      } catch (err) {
+        showError(err.response?.data?.message || 'Failed to enroll in extra course');
+      } finally {
+        setEnrollingExtraCourseId(null);
+      }
+    } else {
+      // Paid course requires payment
+      navigate(`/checkout/${course._id}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
@@ -302,10 +382,11 @@ export default function StudentDashboard() {
           </div>
           {[
             { id: 'courses', label: 'My Courses', icon: BookOpen, count: courses.length },
+            { id: 'extra-courses', label: 'Enroll Extra Courses', icon: Sparkles, count: unEnrolledCourses.length },
             { id: 'materials', label: 'Study Materials', icon: FileText, count: materials.length },
             { id: 'attendance', label: 'My Attendance', icon: Calendar, count: attendance.length },
             { id: 'exams', label: 'Exams & Tests', icon: ClipboardList, count: exams.length },
-            { id: 'fees', label: 'Fee Receipts', icon: CreditCard, count: fees.length },
+            { id: 'fees', label: 'Payment Receipts', icon: CreditCard, count: allReceipts.length },
             { id: 'certificates', label: 'My Certificates', icon: Award, count: certificates.length },
             { id: 'profile', label: 'My Profile & Settings', icon: User },
           ].map((tab) => {
@@ -370,10 +451,11 @@ export default function StudentDashboard() {
             <div>
               <h1 className="font-black text-sm sm:text-base text-slate-900 capitalize">
                 {activeTab === 'courses' && '📚 My Enrolled Courses'}
+                {activeTab === 'extra-courses' && '🌟 Explore & Enroll Extra Courses'}
                 {activeTab === 'materials' && '📁 Study Materials & eBook Notes'}
                 {activeTab === 'attendance' && '📅 My Attendance Records'}
                 {activeTab === 'exams' && '📝 Exams & Tests'}
-                {activeTab === 'fees' && '💳 Fee Receipts & Ledger'}
+                {activeTab === 'fees' && '💳 Payment Receipts & Invoice Ledger'}
                 {activeTab === 'certificates' && '🎓 My QR Verifiable Certificates'}
                 {activeTab === 'profile' && '⚙️ My Profile & Security Settings'}
               </h1>
@@ -497,7 +579,35 @@ export default function StudentDashboard() {
 
           {/* Option 1: My Courses */}
           {activeTab === 'courses' && (
-            <div className="space-y-4 animate-fadeIn">
+            <div className="space-y-6 animate-fadeIn">
+              {/* Extra Courses Promo Callout */}
+              {unEnrolledCourses.length > 0 && (
+                <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-purple-500/10 border border-indigo-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+                      <Sparkles className="w-6 h-6 text-amber-300" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-900 text-sm sm:text-base">
+                        Want to learn more skills? Enroll in Extra Courses!
+                      </h4>
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        {unEnrolledCourses.filter(c => c.isFree).length} Free Courses & {unEnrolledCourses.filter(c => !c.isFree).length} Pro Certifications available to add to your profile.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('extra-courses')}
+                    className="py-2.5 px-5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <span>Browse Extra Courses</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-indigo-600" /> Enrolled Video Courses ({courses.length})
@@ -581,6 +691,234 @@ export default function StudentDashboard() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Option: Enroll Extra Courses */}
+          {activeTab === 'extra-courses' && (
+            <div className="space-y-6 animate-fadeIn">
+              {/* Header Box */}
+              <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden border border-indigo-950/40">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="space-y-2 max-w-2xl">
+                    <span className="bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-emerald-500/30 inline-flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Multi-Course Skill Boost
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      Explore & Enroll in Extra Courses
+                    </h2>
+                    <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                      Enroll in 100% Free Skill Courses with 1-click or advance with industry-recognized certifications. All your certificates and receipts will be stored right here in your student profile!
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 shrink-0">
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/15 text-center space-y-0.5">
+                      <p className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Free Courses</p>
+                      <p className="text-xl font-black text-emerald-400">
+                        {unEnrolledCourses.filter(c => c.isFree).length}
+                      </p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 border border-white/15 text-center space-y-0.5">
+                      <p className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Pro Programs</p>
+                      <p className="text-xl font-black text-indigo-300">
+                        {unEnrolledCourses.filter(c => !c.isFree).length}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Segment & Search Controls */}
+              <div className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl w-full sm:w-auto overflow-x-auto">
+                  <button
+                    type="button"
+                    onClick={() => setExtraCourseSegment('all')}
+                    className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                      extraCourseSegment === 'all'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    All Available ({unEnrolledCourses.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExtraCourseSegment('free')}
+                    className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                      extraCourseSegment === 'free'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'text-emerald-700 hover:text-emerald-800'
+                    }`}
+                  >
+                    🎁 Free Courses ({unEnrolledCourses.filter(c => c.isFree).length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExtraCourseSegment('paid')}
+                    className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap ${
+                      extraCourseSegment === 'paid'
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-indigo-700 hover:text-indigo-800'
+                    }`}
+                  >
+                    ⭐ Certified Pro ({unEnrolledCourses.filter(c => !c.isFree).length})
+                  </button>
+                </div>
+
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search extra courses..."
+                    value={extraCourseSearch}
+                    onChange={(e) => setExtraCourseSearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Extra Courses Grid */}
+              {(() => {
+                const displayedExtraCourses = unEnrolledCourses.filter(c => {
+                  const matchesSegment =
+                    extraCourseSegment === 'all' ||
+                    (extraCourseSegment === 'free' && c.isFree) ||
+                    (extraCourseSegment === 'paid' && !c.isFree);
+                  const matchesSearch =
+                    !extraCourseSearch.trim() ||
+                    c.name?.toLowerCase().includes(extraCourseSearch.toLowerCase()) ||
+                    c.category?.toLowerCase().includes(extraCourseSearch.toLowerCase()) ||
+                    c.code?.toLowerCase().includes(extraCourseSearch.toLowerCase());
+                  return matchesSegment && matchesSearch;
+                });
+
+                if (displayedExtraCourses.length === 0) {
+                  return (
+                    <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-sm space-y-3">
+                      <Sparkles className="w-12 h-12 text-slate-300 mx-auto" />
+                      <h4 className="font-extrabold text-slate-800 text-base">No Extra Courses Found</h4>
+                      <p className="text-xs text-slate-500">
+                        {unEnrolledCourses.length === 0 
+                          ? 'You are enrolled in all available courses in our catalog!' 
+                          : 'Try changing your search or segment filter.'}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {displayedExtraCourses.map((c) => {
+                      const isFree = c.isFree;
+                      const isEnrolling = enrollingExtraCourseId === c._id;
+
+                      return (
+                        <div
+                          key={c._id}
+                          className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group hover:border-indigo-200"
+                        >
+                          <div className={`p-5 relative overflow-hidden text-white ${
+                            isFree 
+                              ? 'bg-gradient-to-br from-emerald-950 via-teal-900 to-slate-900' 
+                              : 'bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900'
+                          }`}>
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-white/10 text-white/90 border border-white/15">
+                                {c.category || 'Certification'}
+                              </span>
+                              {isFree ? (
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
+                                  <Gift className="w-3 h-3" /> Free Course
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-600 text-white flex items-center gap-1 shadow-sm">
+                                  <Award className="w-3 h-3 text-amber-300" /> Pro Certified
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="text-[10px] font-mono font-bold tracking-wider opacity-75">
+                              {c.code || 'SKILL'}
+                            </div>
+                            <h4 className="text-white font-black text-base line-clamp-2 leading-snug mt-1 group-hover:text-indigo-200 transition-colors">
+                              {c.name}
+                            </h4>
+                          </div>
+
+                          {/* Card Content - NO AMOUNT DISPLAYED */}
+                          <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                              {c.description || 'Master professional skills with chapter lessons, practice projects, and official certificate.'}
+                            </p>
+
+                            <div className="flex items-center justify-between text-[11px] text-slate-500 py-1 border-y border-slate-100">
+                              <span className="flex items-center gap-1 font-medium">
+                                <Clock className="w-3.5 h-3.5 text-slate-400" /> {c.duration || '3 Months'}
+                              </span>
+                              <span className="flex items-center gap-1 font-medium">
+                                <BookOpen className="w-3.5 h-3.5 text-slate-400" /> {c.chapters?.length || 10}+ Lessons
+                              </span>
+                              <span className="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                                {c.level || 'All Levels'}
+                              </span>
+                            </div>
+
+                            {/* Program Type Banner */}
+                            <div className={`p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between ${
+                              isFree 
+                                ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/70' 
+                                : 'bg-indigo-50 text-indigo-950 border border-indigo-200/70'
+                            }`}>
+                              <span className="text-[11px] font-bold">
+                                {isFree ? '🎁 Free Student Scholarship' : '💎 Career Track with Certificate'}
+                              </span>
+                              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                                isFree ? 'bg-emerald-200/70 text-emerald-900' : 'bg-indigo-200/70 text-indigo-900'
+                              }`}>
+                                {isFree ? 'Free' : 'Paid'}
+                              </span>
+                            </div>
+
+                            {/* Action Button */}
+                            <div className="pt-1">
+                              <button
+                                type="button"
+                                onClick={() => handleEnrollExtraCourse(c)}
+                                disabled={isEnrolling}
+                                className={`w-full py-3 px-4 text-white text-xs font-black rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                                  isFree
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
+                                    : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20'
+                                }`}
+                              >
+                                {isEnrolling ? (
+                                  <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span>Activating Course...</span>
+                                  </>
+                                ) : isFree ? (
+                                  <>
+                                    <Gift className="w-4 h-4" />
+                                    <span>Enroll for Free (1-Click)</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <CreditCard className="w-4 h-4" />
+                                    <span>Enroll & Pay (पेमेंट करें)</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -813,63 +1151,90 @@ export default function StudentDashboard() {
             </div>
           )}
 
-          {/* Option 3: Fee Receipts */}
+          {/* Option 3: Payment Receipts */}
           {activeTab === 'fees' && (
             <div className="space-y-6 animate-fadeIn">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-1">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Course Fee</p>
-                  <p className="text-2xl font-black text-slate-900">₹{totalFeeAmount}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Paid Amount</p>
+                  <p className="text-2xl font-black text-slate-900">₹{totalPaidAmount.toLocaleString('en-IN')}</p>
                 </div>
                 <div className="bg-white rounded-3xl p-6 border border-emerald-200/80 shadow-sm space-y-1 bg-emerald-50/20">
-                  <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Paid Amount</p>
-                  <p className="text-2xl font-black text-emerald-700">₹{paidFeeAmount}</p>
+                  <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Payment Receipts Issued</p>
+                  <p className="text-2xl font-black text-emerald-700">{allReceipts.length}</p>
                 </div>
-                <div className="bg-white rounded-3xl p-6 border border-amber-200/80 shadow-sm space-y-1 bg-amber-50/20">
-                  <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Pending Balance</p>
-                  <p className="text-2xl font-black text-amber-700">₹{pendingFeeAmount}</p>
+                <div className="bg-white rounded-3xl p-6 border border-indigo-200/80 shadow-sm space-y-1 bg-indigo-50/20">
+                  <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Enrolled Programs</p>
+                  <p className="text-2xl font-black text-indigo-700">{courses.length}</p>
                 </div>
               </div>
 
               <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
                 <div className="p-5 px-6 border-b border-slate-100 flex items-center justify-between">
                   <h3 className="font-black text-slate-800 text-base flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-indigo-600" /> Fee Payment Receipts ({fees.length})
+                    <CreditCard className="w-5 h-5 text-indigo-600" /> All Course & Fee Payment Receipts ({allReceipts.length})
                   </h3>
                 </div>
 
-                {fees.length === 0 ? (
+                {allReceipts.length === 0 ? (
                   <div className="p-12 text-center text-slate-400 space-y-2">
                     <CreditCard className="w-10 h-10 text-slate-300 mx-auto" />
-                    <p className="font-bold text-slate-600">No Fee Payment Receipts Recorded Yet</p>
+                    <p className="font-bold text-slate-600">No Payment Receipts Recorded Yet</p>
+                    <p className="text-xs text-slate-400">When you enroll in free or paid courses, official payment receipts will appear here.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs text-slate-700">
                       <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase tracking-wider border-b border-slate-100">
                         <tr>
-                          <th className="px-6 py-3.5">Receipt / Transaction ID</th>
-                          <th className="px-6 py-3.5">Payment Date</th>
-                          <th className="px-6 py-3.5">Payment Mode</th>
-                          <th className="px-6 py-3.5">Amount Paid</th>
-                          <th className="px-6 py-3.5">Status</th>
+                          <th className="px-6 py-4">Receipt / Order No</th>
+                          <th className="px-6 py-4">Course / Program</th>
+                          <th className="px-6 py-4">Payment Date</th>
+                          <th className="px-6 py-4">Payment Mode</th>
+                          <th className="px-6 py-4">Amount Paid</th>
+                          <th className="px-6 py-4">Status</th>
+                          <th className="px-6 py-4 text-right">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {fees.map((fee) => (
-                          <tr key={fee._id} className="hover:bg-slate-50/80 transition-colors">
+                      <tbody className="divide-y divide-slate-100 font-medium">
+                        {allReceipts.map((rcpt) => (
+                          <tr key={rcpt._id} className="hover:bg-slate-50/80 transition-colors">
                             <td className="px-6 py-4 font-mono font-bold text-slate-900">
-                              {fee.receiptNo || fee.transactionId || fee._id.slice(-8).toUpperCase()}
+                              {rcpt.receiptNo}
                             </td>
-                            <td className="px-6 py-4 font-medium">
-                              {fee.paymentDate ? new Date(fee.paymentDate).toLocaleDateString() : new Date(fee.createdAt).toLocaleDateString()}
+                            <td className="px-6 py-4">
+                              <span className="font-bold text-slate-900 block">{rcpt.title}</span>
+                              <span className="text-[10px] text-slate-400">{rcpt.category}</span>
                             </td>
-                            <td className="px-6 py-4 font-semibold uppercase">{fee.paymentMode || 'Cash / Online'}</td>
-                            <td className="px-6 py-4 font-black text-slate-900 text-sm">₹{fee.paidAmount || fee.amount}</td>
+                            <td className="px-6 py-4">
+                              {rcpt.date ? new Date(rcpt.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-700">
+                                {rcpt.paymentMode}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 font-black text-slate-900 text-sm">
+                              {rcpt.amount === 0 ? (
+                                <span className="text-emerald-600 font-bold">₹0 (Free)</span>
+                              ) : (
+                                `₹${Number(rcpt.amount).toLocaleString('en-IN')}`
+                              )}
+                            </td>
                             <td className="px-6 py-4">
                               <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                Paid
+                                Paid / Confirmed
                               </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedReceiptModal(rcpt)}
+                                className="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                                <span>View Receipt</span>
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -1688,6 +2053,153 @@ export default function StudentDashboard() {
                   >
                     Upload Document
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Official Printable Receipt Modal */}
+          {selectedReceiptModal && (
+            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
+              <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 relative my-8 text-slate-800">
+                
+                {/* Modal Controls */}
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" /> Official Tax / Fee Payment Receipt
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => window.print()}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    >
+                      <Printer className="w-3.5 h-3.5" /> Print / Save PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReceiptModal(null)}
+                      className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Printable Receipt Paper Sheet */}
+                <div className="p-6 bg-slate-50/60 rounded-2xl border border-slate-200/80 space-y-6 text-slate-800">
+                  
+                  {/* Header Branding */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b-2 border-slate-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                        {partnerLogo ? (
+                          <img src={partnerLogo} alt="Logo" className="w-full h-full object-cover" />
+                        ) : (
+                          <GraduationCap className="w-7 h-7 text-indigo-600" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-black text-base text-slate-900 leading-tight uppercase">{partnerName}</h3>
+                        <p className="text-[11px] text-slate-500 font-medium">Digital Learning & Skill Certification Network</p>
+                        <p className="text-[10px] text-slate-400 font-mono mt-0.5">ISO 9001:2015 Quality Certified Organization</p>
+                      </div>
+                    </div>
+
+                    <div className="text-left sm:text-right space-y-0.5">
+                      <div className="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 font-black text-xs rounded-full uppercase tracking-wider mb-1">
+                        ✓ Payment Verified
+                      </div>
+                      <div className="text-xs font-mono font-bold text-slate-700">Receipt No: {selectedReceiptModal.receiptNo}</div>
+                      <div className="text-[11px] text-slate-500">
+                        Date: {new Date(selectedReceiptModal.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Student Details Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-white rounded-xl border border-slate-100 text-xs">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Student Name</span>
+                      <span className="font-bold text-slate-900 text-sm">{user?.name || student?.fullName}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Student ID No</span>
+                      <span className="font-mono font-bold text-slate-900 text-sm">{user?.studentIdNo || student?.studentIdNo || 'STU-ONLINE'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mobile / WhatsApp</span>
+                      <span className="font-bold text-slate-900">{user?.phone || student?.phone || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Registered Email</span>
+                      <span className="font-bold text-slate-900 truncate block">{user?.email || 'N/A'}</span>
+                    </div>
+                  </div>
+
+                  {/* Itemized Table */}
+                  <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider">
+                        <tr>
+                          <th className="p-3 pl-4">Description / Program</th>
+                          <th className="p-3 text-right">Original Fee</th>
+                          <th className="p-3 text-right">Scholarship / Disc</th>
+                          <th className="p-3 text-right pr-4">Net Paid</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-medium">
+                        <tr>
+                          <td className="p-4">
+                            <div className="font-bold text-slate-900 text-sm">{selectedReceiptModal.title}</div>
+                            <div className="text-[11px] text-slate-500 mt-0.5">
+                              Mode: {selectedReceiptModal.paymentMode} · Transaction ID: <span className="font-mono">{selectedReceiptModal.transactionId}</span>
+                            </div>
+                          </td>
+                          <td className="p-4 text-right font-mono text-slate-500">
+                            {selectedReceiptModal.originalAmount ? `₹${Number(selectedReceiptModal.originalAmount).toLocaleString('en-IN')}` : '₹0'}
+                          </td>
+                          <td className="p-4 text-right font-mono text-emerald-600">
+                            {selectedReceiptModal.discountAmount ? `-₹${Number(selectedReceiptModal.discountAmount).toLocaleString('en-IN')}` : '₹0'}
+                          </td>
+                          <td className="p-4 text-right pr-4 font-black text-slate-900 text-sm">
+                            {selectedReceiptModal.amount === 0 ? (
+                              <span className="text-emerald-600">₹0 (Free)</span>
+                            ) : (
+                              `₹${Number(selectedReceiptModal.amount).toLocaleString('en-IN')}`
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Total Paid Row */}
+                  <div className="flex items-center justify-between p-4 bg-indigo-50/80 rounded-xl border border-indigo-100">
+                    <div>
+                      <span className="text-xs font-bold text-indigo-950 uppercase tracking-wider block">Total Amount Received</span>
+                      <span className="text-[11px] text-indigo-700">Digital Payment Confirmation with Lifetime Validity</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-black text-indigo-900">
+                        {selectedReceiptModal.amount === 0 ? '₹0.00 (FREE)' : `₹${Number(selectedReceiptModal.amount).toLocaleString('en-IN')}`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Footer Stamp & Sign */}
+                  <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 border-t border-slate-200">
+                    <div className="space-y-1 text-center sm:text-left">
+                      <p className="font-semibold text-slate-700">Terms & Verification:</p>
+                      <p>This is a computer-generated official payment receipt. No physical signature is required.</p>
+                      <p>QR code verification & official course access activated automatically in student portal.</p>
+                    </div>
+                    <div className="text-center shrink-0 border border-slate-200 p-2.5 rounded-xl bg-white">
+                      <div className="font-bold text-slate-900 text-xs uppercase">{partnerName}</div>
+                      <div className="text-[10px] text-emerald-600 font-black mt-1">★ AUTHORIZED ACCOUNTS SEAL ★</div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>

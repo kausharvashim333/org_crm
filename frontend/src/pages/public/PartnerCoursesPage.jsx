@@ -154,7 +154,7 @@ export default function PartnerCoursesPage() {
                         <div className="flex items-center gap-1.5 text-xs text-slate-500">
                           <Clock className="w-3.5 h-3.5" /> {c.duration || 'Flexible'}
                         </div>
-                        <span className="font-black text-base" style={{ color: themeColor }}>₹{c.studentFee || c.fee || 0}</span>
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">Certified</span>
                       </div>
                       <Link to={`/institute/${slug}/admission`} className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-xs text-white transition-all hover:scale-105" style={{ backgroundColor: themeColor }}>
                         Enroll Now <ArrowRight className="w-3.5 h-3.5" />

@@ -11,6 +11,7 @@ const User = require('../models/User');
 const OrgHomepage = require('../models/OrgHomepage');
 const Exam = require('../models/Exam');
 const Notification = require('../models/Notification');
+const Order = require('../models/Order');
 const { protect } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
@@ -332,11 +333,27 @@ router.get('/dashboard', protect, async (req, res) => {
       };
     });
 
-    // 2. Fee Receipts & Ledger
+    // 2. Fee Receipts & Orders (Unified Payment Receipts)
     let feeRecords = [];
     if (student) {
       feeRecords = await Fee.find({ studentId: student._id }).sort({ createdAt: -1 }).lean();
     }
+
+    // Completed Course Orders (Online store / gateway payments & free enrollments)
+    const orderFilter = {
+      paymentStatus: 'completed',
+      $or: [
+        { userId: req.user._id },
+        ...(student ? [{ studentId: student._id }] : []),
+        ...(req.user.email ? [{ customerEmail: req.user.email.toLowerCase().trim() }] : []),
+        ...(student?.email ? [{ customerEmail: student.email.toLowerCase().trim() }] : []),
+      ],
+    };
+    const orderRecords = await Order.find(orderFilter)
+      .populate('courseId', 'name code duration image salePrice level category')
+      .populate('preferredFranchiseCenter', 'instituteName centerCode city state phone')
+      .sort({ paidAt: -1, createdAt: -1 })
+      .lean();
 
     // 3. Attendance Logs
     let attendanceLogs = [];
@@ -397,7 +414,20 @@ router.get('/dashboard', protect, async (req, res) => {
       notifications = await Notification.find({ toPartnerId: null, type: 'broadcast' }).sort({ createdAt: -1 }).limit(10).lean();
     }
 
-    // 8. Organization Settings for Direct Online Students
+    // 8. Available Courses for Exploring & Enrolling in Extra Courses
+    const allActiveCourses = await Course.find({ isActive: true, approvalStatus: 'approved' })
+      .select('name code description duration durationMonths category fee salePrice originalPrice isFree badge level rating enrolledCount chapters image highlights')
+      .sort({ displayOrder: 1, enrolledCount: -1 })
+      .lean();
+
+    const enrolledCourseIds = new Set((courses || []).map(c => c._id.toString()));
+    const availableCourses = allActiveCourses.map(c => ({
+      ...c,
+      isEnrolled: enrolledCourseIds.has(c._id.toString()),
+      isFree: Boolean(c.isFree) || (Number(c.salePrice || 0) === 0 && Number(c.fee || 0) === 0),
+    }));
+
+    // 9. Organization Settings for Direct Online Students
     const orgHp = await OrgHomepage.findOne().lean();
 
     res.json({
@@ -418,6 +448,8 @@ router.get('/dashboard', protect, async (req, res) => {
       student,
       courses: coursesWithProgress,
       fees: feeRecords,
+      orders: orderRecords,
+      availableCourses,
       attendance: attendanceLogs,
       materials,
       certificates,
@@ -425,6 +457,97 @@ router.get('/dashboard', protect, async (req, res) => {
       notifications,
     });
   } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Enroll into Free Course or initiate enroll into extra course from student profile
+router.post('/enroll-course', protect, async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: 'courseId is required' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+
+    const student = await getStudentForUser(req.user);
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'Student profile not found' });
+    }
+
+    const isFree = Boolean(course.isFree) || (Number(course.salePrice || 0) === 0 && Number(course.fee || 0) === 0);
+
+    if (!isFree) {
+      return res.status(400).json({
+        success: false,
+        requiresPayment: true,
+        message: 'This is a paid certification. Payment is required to enroll.',
+        courseId: course._id,
+        payableAmount: course.salePrice || course.fee || 999,
+      });
+    }
+
+    // Add to enrolled courses
+    if (!student.courseId) student.courseId = [];
+    const isEnrolled = student.courseId.some(id => id.toString() === course._id.toString());
+    if (!isEnrolled) {
+      student.courseId.push(course._id);
+      await student.save();
+    }
+
+    // Initialize StudentProgress
+    let progress = await StudentProgress.findOne({ studentId: student._id, courseId: course._id });
+    if (!progress) {
+      progress = await StudentProgress.create({
+        studentId: student._id,
+        userId: req.user._id,
+        courseId: course._id,
+        watchedChapters: [],
+        isCompleted: false,
+      });
+    }
+
+    // Create a 0-amount Order record so student has an official receipt in their profile!
+    let order = await Order.findOne({
+      courseId: course._id,
+      $or: [{ userId: req.user._id }, { studentId: student._id }],
+      paymentStatus: 'completed',
+    });
+
+    if (!order) {
+      order = await Order.create({
+        courseId: course._id,
+        userId: req.user._id,
+        studentId: student._id,
+        customerName: student.fullName || req.user.name,
+        customerEmail: req.user.email,
+        customerPhone: student.phone || req.user.phone || '9999999999',
+        learningMode: 'online',
+        originalPrice: course.originalPrice || 0,
+        discountAmount: course.originalPrice || 0,
+        finalAmount: 0,
+        paymentGateway: 'free',
+        paymentStatus: 'completed',
+        transactionId: `FREE-${Date.now()}`,
+        paidAt: new Date(),
+        notes: 'Enrolled in 100% Free Course from Student Dashboard',
+      });
+
+      await Course.findByIdAndUpdate(course._id, { $inc: { enrolledCount: 1 } });
+    }
+
+    res.json({
+      success: true,
+      message: `Enrolled successfully in ${course.name}!`,
+      courseId: course._id,
+      order,
+    });
+  } catch (error) {
+    console.error('Enroll course error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
