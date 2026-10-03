@@ -423,7 +423,7 @@ export default function AdminCounselling() {
                 </div>
                 <p className="text-xs text-slate-500 line-clamp-2">{s.description}</p>
                 <div className="flex items-center justify-between text-xs pt-2 border-t">
-                  <span className="font-bold text-indigo-700">1-on-1: ₹{s.price} · Group: ₹{s.groupPrice ?? 0} · {s.duration}</span>
+                  <span className="font-bold text-indigo-700">1-on-1: ₹{s.price} · Group: ₹{s.groupPrice ?? 0}</span>
                   {s.isActive ? <span className="badge badge-success text-[10px]">Live</span> : <span className="badge badge-warning text-[10px]">Hidden</span>}
                 </div>
               </div>
@@ -854,8 +854,10 @@ export default function AdminCounselling() {
                 })}
               </div>
             </div>
-            <div><label className="block text-xs font-medium mb-1">Duration</label><input className="input-field" value={serviceForm.duration} onChange={(e) => setServiceForm({ ...serviceForm, duration: e.target.value })} /></div>
-            <div><label className="block text-xs font-medium mb-1">Badge</label><input className="input-field" placeholder="Popular / New" value={serviceForm.badge} onChange={(e) => setServiceForm({ ...serviceForm, badge: e.target.value })} /></div>
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium mb-1">Badge (optional)</label>
+              <input className="input-field" placeholder="Popular / New" value={serviceForm.badge} onChange={(e) => setServiceForm({ ...serviceForm, badge: e.target.value })} />
+            </div>
             
             <div className="sm:col-span-2 pt-2 border-t border-slate-100">
               <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">1-on-1 Consultation Pricing</span>

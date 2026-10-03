@@ -584,8 +584,8 @@ export default function OrgCounsellingPage() {
                       {/* Bottom Callout & Action (NO CLUTTERED AMOUNT SHOWN) */}
                       <div className="pt-2 border-t border-slate-100 space-y-3">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[11px] text-slate-500 flex items-center gap-1 font-medium">
-                            <Clock className="w-3.5 h-3.5 text-slate-400" /> {s.duration || '30 min'}
+                          <span className="text-[11px] text-slate-500 font-medium">
+                            {modeLabels[s.mode] || '1-on-1 Session'}
                           </span>
                           <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
                             isViewFree
@@ -653,8 +653,8 @@ export default function OrgCounsellingPage() {
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                           <Users className="w-3 h-3 text-indigo-600" /> Group Masterclass
                         </span>
-                        <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" /> {s.groupSessionDuration || s.duration || '60 min'}
+                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50/80 px-2 py-0.5 rounded-full border border-indigo-100">
+                          Live Interactive
                         </span>
                       </div>
 
