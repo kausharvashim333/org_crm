@@ -34,6 +34,8 @@ import {
   Layers,
   ArrowUpRight,
   Filter,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 const modeIcons = {
@@ -69,6 +71,7 @@ export default function OrgCounsellingPage() {
   const [counsellingSegment, setCounsellingSegment] = useState('free');
   const [cardTrackOverrides, setCardTrackOverrides] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCards, setExpandedCards] = useState({});
 
   const [form, setForm] = useState({ name: '', phone: '', email: '', city: '', message: '', slotId: '', mode: 'video' });
 
@@ -445,66 +448,65 @@ export default function OrgCounsellingPage() {
                   ? (s.freeDescription || s.description || 'Quick 15-minute career clarity consultation, course curriculum recommendations, and eligibility guidance.')
                   : (s.paidDescription || s.description || 'Deep 45-minute personalized roadmap, industry portfolio review, placement strategies & senior mentor guidance.');
 
+                const cardKey = `${s._id}_${isViewFree ? 'free' : 'paid'}`;
+                const isExpanded = expandedCards[cardKey];
+
                 return (
                   <div
                     key={s._id || i}
-                    className={`bg-white rounded-3xl border transition-all duration-300 flex flex-col justify-between overflow-hidden relative group ${
+                    className={`bg-white rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden relative group ${
                       !isViewFree
-                        ? 'border-amber-300/60 hover:border-amber-400 hover:shadow-xl hover:shadow-amber-500/10 ring-1 ring-amber-400/20'
-                        : 'border-slate-200/80 hover:border-emerald-400 hover:shadow-xl hover:shadow-emerald-500/10'
+                        ? 'border-amber-300/60 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/10 ring-1 ring-amber-400/20'
+                        : 'border-slate-200/80 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/10'
                     }`}
                   >
-                    {/* Header Banner */}
-                    <div className={`p-5 relative text-white ${
+                    {/* Header Banner — Compact */}
+                    <div className={`px-4 py-3 relative text-white ${
                       isViewFree
                         ? 'bg-gradient-to-br from-emerald-950 via-teal-900 to-slate-900'
                         : 'bg-gradient-to-br from-slate-950 via-indigo-950 to-amber-950/70'
                     }`}>
-                      <div className="flex items-center justify-between gap-2 mb-2.5">
-                        <div className="flex items-center gap-1">
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/90 border border-white/15">
-                            {modeLabels[s.mode] || 'Video / Call'}
-                          </span>
-                        </div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-white/10 text-white/90 border border-white/15">
+                          {modeLabels[s.mode] || 'Video / Call'}
+                        </span>
 
-                        {/* Top Badge: Free vs Premium Crown */}
                         {isViewFree ? (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
-                            <Gift className="w-3 h-3" /> 100% Free
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
+                            <Gift className="w-2.5 h-2.5" /> Free
                           </span>
                         ) : (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1 shadow-sm border border-amber-300">
-                            <Crown className="w-3 h-3 fill-amber-950 text-amber-950" />
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1 shadow-sm border border-amber-300">
+                            <Crown className="w-2.5 h-2.5 fill-amber-950 text-amber-950" />
                             <span>PREMIUM</span>
                           </span>
                         )}
                       </div>
 
-                      <h3 className="font-black text-white text-base leading-snug group-hover:text-amber-200 transition-colors">
+                      <h3 className="font-black text-white text-sm leading-snug group-hover:text-amber-200 transition-colors">
                         {s.name}
                       </h3>
-
                     </div>
 
-                    {/* Card Body */}
-                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    {/* Card Body — Compact */}
+                    <div className="px-4 py-3 flex-1 flex flex-col justify-between space-y-3">
                       
                       {/* Track Switcher if in 'All' Tab */}
                       {counsellingSegment === 'all' && (
-                        <div className="flex items-center p-1 bg-slate-100 rounded-xl text-[11px] font-bold">
+                        <div className="flex items-center p-0.5 bg-slate-100 rounded-lg text-[10px] font-bold">
                           <button
                             type="button"
                             onClick={() => setCardTrackOverrides((prev) => ({ ...prev, [s._id]: 'free' }))}
-                            className={`flex-1 py-1 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                            className={`flex-1 py-1 px-2 rounded-md transition-all flex items-center justify-center gap-1 cursor-pointer ${
                               isViewFree ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
-                            <Gift className="w-3 h-3" /> Free Guidance
+                            <Gift className="w-3 h-3" /> Free
                           </button>
                           <button
                             type="button"
                             onClick={() => setCardTrackOverrides((prev) => ({ ...prev, [s._id]: 'paid' }))}
-                            className={`flex-1 py-1 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                            className={`flex-1 py-1 px-2 rounded-md transition-all flex items-center justify-center gap-1 cursor-pointer ${
                               !isViewFree ? 'bg-amber-500 text-slate-950 shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
@@ -513,91 +515,106 @@ export default function OrgCounsellingPage() {
                         </div>
                       )}
 
-                      {/* Distinct Description */}
+                      {/* Description — Truncated with View More */}
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1 text-slate-400">
-                          {isViewFree ? (
-                            <><Gift className="w-3 h-3 text-emerald-600" /> Free Guidance Focus</>
-                          ) : (
-                            <><Crown className="w-3 h-3 text-amber-500 fill-amber-500" /> Premium Mentorship Blueprint</>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-600 leading-relaxed">
+                        <p className={`text-xs text-slate-600 leading-relaxed ${
+                          !isExpanded ? 'line-clamp-2' : ''
+                        }`}>
                           {currentDescription}
                         </p>
+                        {currentDescription && currentDescription.length > 80 && (
+                          <button
+                            type="button"
+                            onClick={() => setExpandedCards((prev) => ({ ...prev, [cardKey]: !prev[cardKey] }))}
+                            className={`mt-1 text-[11px] font-bold flex items-center gap-0.5 cursor-pointer transition-colors ${
+                              isViewFree ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-600 hover:text-amber-700'
+                            }`}
+                          >
+                            {isExpanded ? (
+                              <>View Less <ChevronUp className="w-3 h-3" /></>
+                            ) : (
+                              <>View More <ChevronDown className="w-3 h-3" /></>
+                            )}
+                          </button>
+                        )}
                       </div>
 
-                      {/* Highlights */}
-                      <div className={`space-y-1.5 p-3 rounded-2xl border ${
-                        isViewFree
-                          ? 'bg-emerald-50/50 border-emerald-100'
-                          : 'bg-amber-50/40 border-amber-200/60'
-                      }`}>
-                        {(isViewFree ? [
-                          '1-on-1 Consultation via Video / Phone / WhatsApp',
-                          'Course Syllabus & Career Eligibility Roadmap',
-                        ] : [
-                          'Comprehensive 12-Month Career & Placement Blueprint',
-                          'Direct Senior Mentor Q&A and Action Plan',
-                        ]).map((h, hIdx) => (
-                          <div key={hIdx} className="flex items-start gap-2 text-[11px] text-slate-700 font-medium">
-                            {isViewFree ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                            ) : (
-                              <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0 mt-0.5" />
-                            )}
-                            <span className="line-clamp-1">{h}</span>
+                      {/* Expanded Content — Highlights + Note (only when expanded) */}
+                      {isExpanded && (
+                        <>
+                          {/* Highlights */}
+                          <div className={`space-y-1.5 p-2.5 rounded-xl border ${
+                            isViewFree
+                              ? 'bg-emerald-50/50 border-emerald-100'
+                              : 'bg-amber-50/40 border-amber-200/60'
+                          }`}>
+                            {(isViewFree ? [
+                              '1-on-1 Consultation via Video / Phone / WhatsApp',
+                              'Course Syllabus & Career Eligibility Roadmap',
+                            ] : [
+                              'Comprehensive 12-Month Career & Placement Blueprint',
+                              'Direct Senior Mentor Q&A and Action Plan',
+                            ]).map((h, hIdx) => (
+                              <div key={hIdx} className="flex items-start gap-2 text-[11px] text-slate-700 font-medium">
+                                {isViewFree ? (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                ) : (
+                                  <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0 mt-0.5" />
+                                )}
+                                <span>{h}</span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Bilingual Note on Counselling Card (Free vs Premium) */}
-                      <div className={`p-2.5 rounded-2xl text-[11px] leading-snug flex items-start gap-2 border ${
-                        isViewFree
-                          ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950 shadow-xs'
-                          : 'bg-amber-50/95 border-amber-200/90 text-amber-950 shadow-xs'
-                      }`}>
-                        <span className={`px-1.5 py-0.5 rounded font-black text-[9px] uppercase tracking-wider shrink-0 mt-0.5 ${
-                          isViewFree ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-200 text-amber-950'
-                        }`}>
-                          नोट / Note
-                        </span>
-                        <div className="space-y-0.5">
-                          <p className="font-semibold text-slate-800">
-                            {isViewFree ? (
-                              <>काउंसलिंग <strong className="text-emerald-900 font-bold">अनुभवी काउंसलर (Experienced Counsellor)</strong> द्वारा कराई जाएगी।</>
-                            ) : (
-                              <>काउंसलिंग <strong className="text-amber-900 font-bold">अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)</strong> द्वारा कराई जाएगी।</>
-                            )}
-                          </p>
-                          <p className="text-[10px] text-slate-500 font-medium">
-                            {isViewFree
-                              ? 'Counselling will be conducted by experienced counsellors.'
-                              : 'Counselling will be conducted by experienced working professionals.'}
-                          </p>
-                        </div>
-                      </div>
+                          {/* Bilingual Note */}
+                          <div className={`p-2 rounded-xl text-[10px] leading-snug flex items-start gap-2 border ${
+                            isViewFree
+                              ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950'
+                              : 'bg-amber-50/95 border-amber-200/90 text-amber-950'
+                          }`}>
+                            <span className={`px-1.5 py-0.5 rounded font-black text-[8px] uppercase tracking-wider shrink-0 mt-0.5 ${
+                              isViewFree ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-200 text-amber-950'
+                            }`}>
+                              नोट
+                            </span>
+                            <div className="space-y-0.5">
+                              <p className="font-semibold text-slate-800">
+                                {isViewFree ? (
+                                  <>काउंसलिंग <strong className="text-emerald-900 font-bold">अनुभवी काउंसलर (Experienced Counsellor)</strong> द्वारा कराई जाएगी।</>
+                                ) : (
+                                  <>काउंसलिंग <strong className="text-amber-900 font-bold">अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)</strong> द्वारा कराई जाएगी।</>
+                                )}
+                              </p>
+                              <p className="text-[9px] text-slate-500 font-medium">
+                                {isViewFree
+                                  ? 'Counselling will be conducted by experienced counsellors.'
+                                  : 'Counselling will be conducted by experienced working professionals.'}
+                              </p>
+                            </div>
+                          </div>
+                        </>
+                      )}
 
-                      {/* Bottom Callout & Action (NO CLUTTERED AMOUNT SHOWN) */}
-                      <div className="pt-2 border-t border-slate-100 space-y-3">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-[11px] text-slate-500 font-medium">
+                      {/* Bottom Action */}
+                      <div className="pt-2 border-t border-slate-100 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-slate-500 font-medium">
                             {modeLabels[s.mode] || '1-on-1 Session'}
                           </span>
-                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                          <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full ${
                             isViewFree
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1'
                           }`}>
-                            {!isViewFree && <Crown className="w-3 h-3 fill-amber-900" />}
-                            {isViewFree ? '100% Free' : 'Premium Mentorship'}
+                            {!isViewFree && <Crown className="w-2.5 h-2.5 fill-amber-900" />}
+                            {isViewFree ? '100% Free' : 'Premium'}
                           </span>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => openBook('one_on_one', s, isViewFree)}
-                          className={`w-full py-3 px-4 text-xs font-black rounded-2xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer text-white ${
+                          className={`w-full py-2.5 px-3 text-xs font-black rounded-xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer text-white ${
                             isViewFree
                               ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25'
                               : 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:opacity-95 shadow-amber-500/25'
