@@ -1625,7 +1625,14 @@ const validateFileSize = (file, showError) => {
 };
 
 export function SettingsEditor({ homepage, onSave, onHomepageUpdate }) {
-  const [settings, setSettings] = useState(homepage.settings || {});
+  const [settings, setSettings] = useState(() => {
+    const s = homepage.settings || {};
+    return {
+      ...s,
+      orgName: (s.orgName && typeof s.orgName === 'string' && s.orgName.trim()) ? s.orgName : 'Lili Organization',
+      logo: (s.logo && typeof s.logo === 'string' && s.logo.trim()) ? s.logo : '/uploads/logo-1783236511925-286536357.jpeg',
+    };
+  });
   const { showSuccess, showError } = useToast();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);

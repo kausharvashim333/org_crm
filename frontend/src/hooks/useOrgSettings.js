@@ -14,18 +14,27 @@ let cachedSettings = (() => {
 
 let listeners = [];
 
+function normalize(s) {
+  if (!s) return null;
+  return {
+    ...s,
+    orgName: (s.orgName && typeof s.orgName === 'string' && s.orgName.trim() !== '') ? s.orgName : 'Lili Organization',
+    logo: (s.logo && typeof s.logo === 'string' && s.logo.trim() !== '') ? s.logo : '/uploads/logo-1783236511925-286536357.jpeg',
+  };
+}
+
 export function useOrgSettings() {
-  const [settings, setSettings] = useState(cachedSettings);
+  const [settings, setSettings] = useState(normalize(cachedSettings));
 
   useEffect(() => {
     if (cachedSettings) {
-      applySettings(cachedSettings);
+      applySettings(normalize(cachedSettings));
     }
 
     let mounted = true;
     getOrgHomepagePublic()
       .then(res => {
-        const s = res.data.homepage?.settings || {};
+        const s = normalize(res.data.homepage?.settings || {});
         cachedSettings = s;
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
@@ -38,7 +47,8 @@ export function useOrgSettings() {
       .catch(() => {});
 
     const listener = (s) => {
-      if (mounted) setSettings(s);
+      const norm = normalize(s);
+      if (mounted) setSettings(norm);
     };
     listeners.push(listener);
 
@@ -54,10 +64,11 @@ export function useOrgSettings() {
 function applySettings(settings) {
   if (!settings) return;
 
-  if (settings.browserTitle) {
+  const orgName = (settings.orgName && typeof settings.orgName === 'string' && settings.orgName.trim() !== '') ? settings.orgName : 'Lili Organization';
+  if (settings.browserTitle && settings.browserTitle.trim()) {
     document.title = settings.browserTitle;
-  } else if (settings.orgName) {
-    document.title = settings.orgName;
+  } else if (orgName) {
+    document.title = orgName;
   }
 
   if (settings.favicon) {

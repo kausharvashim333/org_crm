@@ -45,8 +45,8 @@ export default function Navbar({ activePage }) {
   }, [location.pathname]);
 
   const themeColor = hp?.settings?.themeColor || '#2563eb';
-  const orgName = hp?.settings?.orgName || 'Skill India';
-  const logo = hp?.settings?.logo;
+  const orgName = (hp?.settings?.orgName && hp.settings.orgName.trim()) || 'Lili Organization';
+  const logo = (hp?.settings?.logo && typeof hp.settings.logo === 'string' && hp.settings.logo.trim() !== '') ? hp.settings.logo : '/uploads/logo-1783236511925-286536357.jpeg';
 
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [enquiryForm, setEnquiryForm] = useState({

@@ -23,17 +23,20 @@ export default function AdminSettings() {
 
   useEffect(() => {
     getOrgHomepage().then(res => {
-      setOrgData(res.data);
-      const s = res.data.settings || {};
+      const hp = res.data?.homepage || res.data || {};
+      setOrgData(hp);
+      const s = hp.settings || {};
       setOrgForm({
-        orgName: s.orgName || '',
-        shortName: s.shortName || '',
-        tagline: s.tagline || '',
-        browserTitle: s.browserTitle || '',
+        orgName: (s.orgName && s.orgName.trim()) ? s.orgName : 'Lili Organization',
+        shortName: s.shortName || 'Lili Org',
+        tagline: s.tagline || 'Govt. Recognized & ISO 9001:2015 Certified Educational Network',
+        browserTitle: s.browserTitle || 'Lili Organization - Training Institute & Career Network',
         themeColor: s.themeColor || '#2563eb',
         fontChoice: s.fontChoice || 'inter',
         partnerContributionFee: s.partnerContributionFee || 0,
         partnerContributionLabel: s.partnerContributionLabel || 'Organization Contribution',
+        logo: (s.logo && s.logo.trim()) ? s.logo : '/uploads/logo-1783236511925-286536357.jpeg',
+        favicon: s.favicon || '',
       });
       setOrgLoading(false);
     }).catch(() => setOrgLoading(false));
@@ -55,7 +58,17 @@ export default function AdminSettings() {
     e.preventDefault();
     setSavingOrg(true);
     try {
-      await updateOrgHomepage({ settings: orgForm });
+      const existingSettings = orgData?.settings || {};
+      const payload = {
+        settings: {
+          ...existingSettings,
+          ...orgForm,
+          logo: orgForm.logo || existingSettings.logo || '/uploads/logo-1783236511925-286536357.jpeg',
+        }
+      };
+      const res = await updateOrgHomepage(payload);
+      const updatedHp = res.data?.homepage || res.data;
+      setOrgData(updatedHp);
       showSuccess('Organization branding updated successfully');
     } catch (error) {
       showError('Failed to update organization settings');
@@ -75,7 +88,9 @@ export default function AdminSettings() {
       showSuccess('Logo uploaded successfully');
       setLogoFile(null);
       const res = await getOrgHomepage();
-      setOrgData(res.data);
+      const updatedHp = res.data?.homepage || res.data;
+      setOrgData(updatedHp);
+      setOrgForm(prev => ({ ...prev, logo: updatedHp?.settings?.logo || '' }));
     } catch (error) {
       showError('Failed to upload logo');
     } finally {

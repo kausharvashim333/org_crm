@@ -476,9 +476,16 @@ const createDefaultIfMissing = async (lean = false) => {
 router.get('/public', async (req, res) => {
   try {
     const homepage = await createDefaultIfMissing(true);
-    if (homepage && homepage.settings && homepage.settings.logo) {
+    if (homepage) {
+      homepage.settings = homepage.settings || {};
+      if (!homepage.settings.orgName || !homepage.settings.orgName.trim()) {
+        homepage.settings.orgName = 'Lili Organization';
+      }
+      if (!homepage.settings.logo || !homepage.settings.logo.trim()) {
+        homepage.settings.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+      }
       const logoPath = homepage.settings.logo;
-      if (logoPath.startsWith('/uploads/')) {
+      if (logoPath && logoPath.startsWith('/uploads/')) {
         const baseUrl = (process.env.CLIENT_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
         homepage.settings.logo = `${baseUrl}${logoPath}`;
       }
@@ -492,6 +499,15 @@ router.get('/public', async (req, res) => {
 router.get('/', protect, superAdminOnly, async (req, res) => {
   try {
     const homepage = await createDefaultIfMissing();
+    if (homepage) {
+      homepage.settings = homepage.settings || {};
+      if (!homepage.settings.orgName || !homepage.settings.orgName.trim()) {
+        homepage.settings.orgName = 'Lili Organization';
+      }
+      if (!homepage.settings.logo || !homepage.settings.logo.trim()) {
+        homepage.settings.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+      }
+    }
     res.json({ success: true, homepage });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -502,7 +518,24 @@ router.put('/', protect, superAdminOnly, async (req, res) => {
   try {
     const homepage = await createDefaultIfMissing();
     Object.keys(req.body).forEach(key => {
-      homepage.set(key, req.body[key]);
+      if (key === 'settings' && typeof req.body.settings === 'object' && req.body.settings !== null) {
+        const existing = homepage.settings ? (homepage.settings.toObject ? homepage.settings.toObject() : homepage.settings) : {};
+        const incoming = req.body.settings;
+        const merged = { ...existing, ...incoming };
+        // Preserve logo if not supplied or empty
+        if (!incoming.logo && existing.logo) {
+          merged.logo = existing.logo;
+        } else if (!merged.logo) {
+          merged.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+        }
+        // Preserve orgName if empty
+        if (!merged.orgName || !merged.orgName.trim()) {
+          merged.orgName = (existing.orgName && existing.orgName.trim()) ? existing.orgName : 'Lili Organization';
+        }
+        homepage.set('settings', merged);
+      } else {
+        homepage.set(key, req.body[key]);
+      }
     });
     await homepage.save();
     res.json({ success: true, homepage });
@@ -519,8 +552,21 @@ router.put('/section/:section', protect, superAdminOnly, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid section' });
     }
     const homepage = await createDefaultIfMissing();
-    homepage[section] = req.body[section];
-    homepage.markModified(section);
+    if (section === 'settings' && typeof req.body.settings === 'object' && req.body.settings !== null) {
+      const existing = homepage.settings ? (homepage.settings.toObject ? homepage.settings.toObject() : homepage.settings) : {};
+      const incoming = req.body.settings;
+      const merged = { ...existing, ...incoming };
+      if (!incoming.logo && existing.logo) merged.logo = existing.logo;
+      else if (!merged.logo) merged.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+      if (!merged.orgName || !merged.orgName.trim()) {
+        merged.orgName = (existing.orgName && existing.orgName.trim()) ? existing.orgName : 'Lili Organization';
+      }
+      homepage.settings = merged;
+      homepage.markModified('settings');
+    } else {
+      homepage[section] = req.body[section];
+      homepage.markModified(section);
+    }
     await homepage.save();
     res.json({ success: true, homepage });
   } catch (error) {
