@@ -34,8 +34,7 @@ import {
   Layers,
   ArrowUpRight,
   Filter,
-  ChevronDown,
-  ChevronUp,
+  ChevronRight,
 } from 'lucide-react';
 
 const modeIcons = {
@@ -71,7 +70,7 @@ export default function OrgCounsellingPage() {
   const [counsellingSegment, setCounsellingSegment] = useState('free');
   const [cardTrackOverrides, setCardTrackOverrides] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCards, setExpandedCards] = useState({});
+  const [detailFor, setDetailFor] = useState(null);
 
   const [form, setForm] = useState({ name: '', phone: '', email: '', city: '', message: '', slotId: '', mode: 'video' });
 
@@ -434,7 +433,7 @@ export default function OrgCounsellingPage() {
               <p className="font-bold text-slate-700">No counselling services available</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredServices.map((s, i) => {
                 // Determine whether this card shows Free or Paid track
                 const isItemFreeByDefault = s.isFree || Number(s.price || 0) === 0;
@@ -448,9 +447,6 @@ export default function OrgCounsellingPage() {
                   ? (s.freeDescription || s.description || 'Quick 15-minute career clarity consultation, course curriculum recommendations, and eligibility guidance.')
                   : (s.paidDescription || s.description || 'Deep 45-minute personalized roadmap, industry portfolio review, placement strategies & senior mentor guidance.');
 
-                const cardKey = `${s._id}_${isViewFree ? 'free' : 'paid'}`;
-                const isExpanded = expandedCards[cardKey];
-
                 return (
                   <div
                     key={s._id || i}
@@ -461,7 +457,7 @@ export default function OrgCounsellingPage() {
                     }`}
                   >
                     {/* Header Banner — Compact */}
-                    <div className={`px-4 py-3 relative text-white ${
+                    <div className={`px-3.5 py-2.5 relative text-white ${
                       isViewFree
                         ? 'bg-gradient-to-br from-emerald-950 via-teal-900 to-slate-900'
                         : 'bg-gradient-to-br from-slate-950 via-indigo-950 to-amber-950/70'
@@ -483,13 +479,13 @@ export default function OrgCounsellingPage() {
                         )}
                       </div>
 
-                      <h3 className="font-black text-white text-sm leading-snug group-hover:text-amber-200 transition-colors">
+                      <h3 className="font-black text-white text-sm leading-snug line-clamp-2 group-hover:text-amber-200 transition-colors">
                         {s.name}
                       </h3>
                     </div>
 
                     {/* Card Body — Compact */}
-                    <div className="px-4 py-3 flex-1 flex flex-col justify-between space-y-3">
+                    <div className="px-3.5 py-3 flex-1 flex flex-col justify-between space-y-2.5">
                       
                       {/* Track Switcher if in 'All' Tab */}
                       {counsellingSegment === 'all' && (
@@ -515,85 +511,21 @@ export default function OrgCounsellingPage() {
                         </div>
                       )}
 
-                      {/* Description — Truncated with View More */}
+                      {/* Description — Truncated, full text in View More popup */}
                       <div>
-                        <p className={`text-xs text-slate-600 leading-relaxed ${
-                          !isExpanded ? 'line-clamp-2' : ''
-                        }`}>
+                        <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
                           {currentDescription}
                         </p>
-                        {currentDescription && currentDescription.length > 80 && (
-                          <button
-                            type="button"
-                            onClick={() => setExpandedCards((prev) => ({ ...prev, [cardKey]: !prev[cardKey] }))}
-                            className={`mt-1 text-[11px] font-bold flex items-center gap-0.5 cursor-pointer transition-colors ${
-                              isViewFree ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-600 hover:text-amber-700'
-                            }`}
-                          >
-                            {isExpanded ? (
-                              <>View Less <ChevronUp className="w-3 h-3" /></>
-                            ) : (
-                              <>View More <ChevronDown className="w-3 h-3" /></>
-                            )}
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => setDetailFor({ type: 'one_on_one', item: s, isFree: isViewFree, description: currentDescription })}
+                          className={`mt-1 text-[11px] font-bold flex items-center gap-0.5 cursor-pointer transition-colors ${
+                            isViewFree ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-600 hover:text-amber-700'
+                          }`}
+                        >
+                          View More <ChevronRight className="w-3 h-3" />
+                        </button>
                       </div>
-
-                      {/* Expanded Content — Highlights + Note (only when expanded) */}
-                      {isExpanded && (
-                        <>
-                          {/* Highlights */}
-                          <div className={`space-y-1.5 p-2.5 rounded-xl border ${
-                            isViewFree
-                              ? 'bg-emerald-50/50 border-emerald-100'
-                              : 'bg-amber-50/40 border-amber-200/60'
-                          }`}>
-                            {(isViewFree ? [
-                              '1-on-1 Consultation via Video / Phone / WhatsApp',
-                              'Course Syllabus & Career Eligibility Roadmap',
-                            ] : [
-                              'Comprehensive 12-Month Career & Placement Blueprint',
-                              'Direct Senior Mentor Q&A and Action Plan',
-                            ]).map((h, hIdx) => (
-                              <div key={hIdx} className="flex items-start gap-2 text-[11px] text-slate-700 font-medium">
-                                {isViewFree ? (
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                                ) : (
-                                  <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0 mt-0.5" />
-                                )}
-                                <span>{h}</span>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Bilingual Note */}
-                          <div className={`p-2 rounded-xl text-[10px] leading-snug flex items-start gap-2 border ${
-                            isViewFree
-                              ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950'
-                              : 'bg-amber-50/95 border-amber-200/90 text-amber-950'
-                          }`}>
-                            <span className={`px-1.5 py-0.5 rounded font-black text-[8px] uppercase tracking-wider shrink-0 mt-0.5 ${
-                              isViewFree ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-200 text-amber-950'
-                            }`}>
-                              नोट
-                            </span>
-                            <div className="space-y-0.5">
-                              <p className="font-semibold text-slate-800">
-                                {isViewFree ? (
-                                  <>काउंसलिंग <strong className="text-emerald-900 font-bold">अनुभवी काउंसलर (Experienced Counsellor)</strong> द्वारा कराई जाएगी।</>
-                                ) : (
-                                  <>काउंसलिंग <strong className="text-amber-900 font-bold">अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)</strong> द्वारा कराई जाएगी।</>
-                                )}
-                              </p>
-                              <p className="text-[9px] text-slate-500 font-medium">
-                                {isViewFree
-                                  ? 'Counselling will be conducted by experienced counsellors.'
-                                  : 'Counselling will be conducted by experienced working professionals.'}
-                              </p>
-                            </div>
-                          </div>
-                        </>
-                      )}
 
                       {/* Bottom Action */}
                       <div className="pt-2 border-t border-slate-100 space-y-2">
@@ -614,7 +546,7 @@ export default function OrgCounsellingPage() {
                         <button
                           type="button"
                           onClick={() => openBook('one_on_one', s, isViewFree)}
-                          className={`w-full py-2.5 px-3 text-xs font-black rounded-xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer text-white ${
+                          className={`w-full py-2 px-3 text-xs font-black rounded-xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer text-white ${
                             isViewFree
                               ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25'
                               : 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:opacity-95 shadow-amber-500/25'
@@ -645,7 +577,7 @@ export default function OrgCounsellingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {groupServices.map((s) => {
                 const isScheduled = Boolean(s.groupSessionDate);
                 const scheduleDateStr = isScheduled
@@ -660,9 +592,9 @@ export default function OrgCounsellingPage() {
                 return (
                   <div
                     key={`grp_${s._id}`}
-                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between p-6 relative group"
+                    className="bg-white rounded-2xl border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between p-4 relative group"
                   >
-                    <div className="space-y-3">
+                    <div className="space-y-2.5">
                       <div className="flex items-center justify-between gap-2">
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                           <Users className="w-3 h-3 text-indigo-600" /> Group Masterclass
@@ -672,31 +604,46 @@ export default function OrgCounsellingPage() {
                         </span>
                       </div>
 
-                      <h3 className="font-black text-slate-900 text-base leading-snug">
+                      <h3 className="font-black text-slate-900 text-sm leading-snug line-clamp-2">
                         {s.name}
                       </h3>
 
                       {isScheduled && (
-                        <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-950 flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
-                          <span>Scheduled Date: <strong>{scheduleDateStr}</strong></span>
+                        <div className="px-2.5 py-2 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-950 flex items-center gap-2">
+                          <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>Scheduled: <strong>{scheduleDateStr}</strong></span>
                         </div>
                       )}
 
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                        {s.description || 'Interactive live group webinar with dedicated doubt solving.'}
-                      </p>
+                      <div>
+                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                          {s.description || 'Interactive live group webinar with dedicated doubt solving.'}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setDetailFor({
+                            type: 'group',
+                            item: s,
+                            isFree: true,
+                            description: s.description || 'Interactive live group webinar with dedicated doubt solving.',
+                            scheduleDateStr,
+                          })}
+                          className="mt-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5 cursor-pointer"
+                        >
+                          View More <ChevronRight className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                         Open for Registration
                       </span>
 
                       <button
                         type="button"
                         onClick={() => openBook('group', s, true)}
-                        className="px-5 py-2.5 rounded-2xl text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+                        className="px-4 py-2 rounded-xl text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
                       >
                         Book Seat <ArrowRight className="w-3.5 h-3.5" />
                       </button>
@@ -736,6 +683,94 @@ export default function OrgCounsellingPage() {
           </div>
         </div>
       </section>
+
+      {/* View More — Full Details Modal */}
+      {detailFor && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDetailFor(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] shadow-2xl overflow-hidden flex flex-col border border-slate-100" onClick={(e) => e.stopPropagation()}>
+            <div className={`p-5 text-white relative ${
+              detailFor.type === 'group'
+                ? 'bg-gradient-to-r from-indigo-700 to-indigo-900'
+                : detailFor.isFree
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-700'
+                  : 'bg-gradient-to-r from-slate-950 via-indigo-900 to-amber-950'
+            }`}>
+              <button
+                type="button"
+                onClick={() => setDetailFor(null)}
+                className="absolute right-4 top-4 p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 text-white">
+                {detailFor.type === 'group' ? 'Group Masterclass' : detailFor.isFree ? 'Free Session' : 'Premium Mentorship'}
+              </span>
+              <h3 className="font-black text-lg leading-snug mt-2 pr-8">{detailFor.item.name}</h3>
+              <p className="text-xs text-white/80 mt-1">
+                {detailFor.type === 'group'
+                  ? (detailFor.scheduleDateStr ? `Scheduled: ${detailFor.scheduleDateStr}` : 'Date & time will be shared by the organization')
+                  : (modeLabels[detailFor.item.mode] || '1-on-1 Session')}
+              </p>
+            </div>
+
+            <div className="p-5 overflow-y-auto space-y-4">
+              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{detailFor.description}</p>
+
+              {detailFor.type === 'one_on_one' && (
+                <>
+                  <div className={`space-y-1.5 p-3 rounded-xl border ${
+                    detailFor.isFree ? 'bg-emerald-50/50 border-emerald-100' : 'bg-amber-50/40 border-amber-200/60'
+                  }`}>
+                    {(detailFor.isFree ? [
+                      '1-on-1 Consultation via Video / Phone / WhatsApp',
+                      'Course Syllabus & Career Eligibility Roadmap',
+                    ] : [
+                      'Comprehensive 12-Month Career & Placement Blueprint',
+                      'Direct Senior Mentor Q&A and Action Plan',
+                    ]).map((h) => (
+                      <div key={h} className="flex items-start gap-2 text-xs text-slate-700 font-medium">
+                        {detailFor.isFree
+                          ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                          : <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0 mt-0.5" />}
+                        <span>{h}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className={`p-3 rounded-xl text-[11px] leading-snug border ${
+                    detailFor.isFree ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-amber-50 border-amber-200 text-amber-950'
+                  }`}>
+                    <p className="font-semibold">
+                      नोट: काउंसलिंग {detailFor.isFree ? 'अनुभवी काउंसलर (Experienced Counsellor)' : 'अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)'} द्वारा कराई जाएगी।
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setDetailFor(null)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => { const d = detailFor; setDetailFor(null); openBook(d.type, d.item, d.isFree); }}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-black text-white cursor-pointer ${
+                  detailFor.type === 'group'
+                    ? 'bg-indigo-600 hover:bg-indigo-700'
+                    : detailFor.isFree ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-gradient-to-r from-amber-500 to-indigo-600'
+                }`}
+              >
+                {detailFor.type === 'group' ? 'Book Seat' : detailFor.isFree ? 'Book Free Session' : 'Book Premium Mentorship'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Booking Drawer / Modal */}
       {bookFor && (
