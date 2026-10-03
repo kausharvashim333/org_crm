@@ -268,7 +268,7 @@ export default function OrgCounsellingPage() {
   return (
     <div className="bg-slate-50 min-h-screen flex flex-col font-sans text-slate-800">
       <SEO
-        title={settings.pageTitle || '1-on-1 Career Counselling & Guidance - Free & Pro Sessions'}
+        title={settings.pageTitle || '1-on-1 Career Counselling & Guidance - Free & Premium Sessions'}
         description={settings.pageSubtitle || 'Personalized career counselling and roadmap consultation with industry mentors.'}
       />
       <Navbar activePage="counselling" />
@@ -347,7 +347,7 @@ export default function OrgCounsellingPage() {
               </span>
             </button>
 
-            {/* 2. Paid / Pro Mentorship Tab */}
+            {/* 2. Paid / Premium Mentorship Tab */}
             <button
               type="button"
               onClick={() => setCounsellingSegment('paid')}
@@ -359,12 +359,12 @@ export default function OrgCounsellingPage() {
             >
               <div className="flex items-center gap-1.5">
                 <Crown className="w-4 h-4 shrink-0 fill-current" />
-                <span className="text-xs">Pro Mentorship</span>
+                <span className="text-xs">Premium Mentorship</span>
               </div>
               <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
                 counsellingSegment === 'paid' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
               }`}>
-                👑 1-on-1
+                👑 Premium
               </span>
             </button>
 
@@ -419,7 +419,7 @@ export default function OrgCounsellingPage() {
                   ? 'Zero fee required. Complete free guidance for course selection and roadmap.'
                   : counsellingSegment === 'paid'
                   ? 'In-depth personalized consultation with senior mentors and job strategies.'
-                  : 'Every session is offered in both Free Guidance and Premium Pro Mentorship tracks.'}
+                  : 'Every session is offered in both Free Guidance and Premium Mentorship tracks.'}
               </p>
             </div>
           </div>
@@ -474,7 +474,7 @@ export default function OrgCounsellingPage() {
                         ) : (
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1 shadow-sm border border-amber-300">
                             <Crown className="w-3 h-3 fill-amber-950 text-amber-950" />
-                            <span>PREMIUM PRO</span>
+                            <span>PREMIUM</span>
                           </span>
                         )}
                       </div>
@@ -511,7 +511,7 @@ export default function OrgCounsellingPage() {
                               !isViewFree ? 'bg-amber-500 text-slate-950 shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
-                            <Crown className="w-3 h-3 fill-slate-950" /> Pro Mentorship
+                            <Crown className="w-3 h-3 fill-slate-950" /> Premium
                           </button>
                         </div>
                       )}
@@ -522,7 +522,7 @@ export default function OrgCounsellingPage() {
                           {isViewFree ? (
                             <><Gift className="w-3 h-3 text-emerald-600" /> Free Guidance Focus</>
                           ) : (
-                            <><Crown className="w-3 h-3 text-amber-500 fill-amber-500" /> Pro Mentorship Blueprint</>
+                            <><Crown className="w-3 h-3 text-amber-500 fill-amber-500" /> Premium Mentorship Blueprint</>
                           )}
                         </div>
                         <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
@@ -566,7 +566,7 @@ export default function OrgCounsellingPage() {
                               : 'bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1'
                           }`}>
                             {!isViewFree && <Crown className="w-3 h-3 fill-amber-900" />}
-                            {isViewFree ? '100% Free' : 'Pro Mentorship'}
+                            {isViewFree ? '100% Free' : 'Premium Mentorship'}
                           </span>
                         </div>
 
@@ -580,7 +580,7 @@ export default function OrgCounsellingPage() {
                           }`}
                         >
                           {!isViewFree && <Crown className="w-3.5 h-3.5 fill-white" />}
-                          <span>{isViewFree ? 'Book Free Session (निःशुल्क)' : 'Book Pro Mentorship'}</span>
+                          <span>{isViewFree ? 'Book Free Session (निःशुल्क)' : 'Book Premium Mentorship'}</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -720,7 +720,7 @@ export default function OrgCounsellingPage() {
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-amber-950 flex items-center gap-1 font-bold">
-                    <Crown className="w-3 h-3 fill-amber-950" /> Premium Pro Mentorship
+                    <Crown className="w-3 h-3 fill-amber-950" /> Premium Mentorship
                   </span>
                 )}
               </div>
@@ -846,7 +846,7 @@ export default function OrgCounsellingPage() {
                       <span>
                         {bookFor.isFree
                           ? 'Confirm FREE Session (निःशुल्क स्लॉट बुक करें)'
-                          : `Pay ₹${bookFor.item.price || 499} & Book Pro Mentorship`}
+                          : `Pay ₹${bookFor.item.price || 499} & Book Premium Mentorship`}
                       </span>
                     </>
                   )}

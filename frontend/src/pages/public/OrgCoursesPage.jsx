@@ -262,7 +262,7 @@ export default function OrgCoursesPage() {
               </span>
             </button>
 
-            {/* 2. Paid / Pro Certification Tab */}
+            {/* 2. Paid / Premium Track Tab */}
             <button
               type="button"
               onClick={() => handleTabChange('paid')}
@@ -274,7 +274,7 @@ export default function OrgCoursesPage() {
             >
               <div className="flex items-center gap-1.5">
                 <Crown className="w-4 h-4 shrink-0 fill-current" />
-                <span className="text-xs">Pro Track</span>
+                <span className="text-xs">Premium</span>
               </div>
               <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
                 courseSegment === 'paid' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
@@ -313,7 +313,7 @@ export default function OrgCoursesPage() {
               className="px-3.5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer border border-indigo-200/60"
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Compare Free vs Pro</span>
+              <span>Compare Free vs Premium</span>
             </button>
 
             <div className="flex items-center gap-1.5">
@@ -351,7 +351,7 @@ export default function OrgCoursesPage() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-                  सभी विद्यार्थियों के लिए बिना किसी एडमिशन चार्ज के डिजिटल शिक्षा। वीडियो क्लासेज, असाइनमेंट्स और स्टूडेंट पोर्टल। यदि आपको सरकारी/कॉर्पोरेट नौकरियों के लिए मान्यता प्राप्त हार्डकॉपी सर्टिफिकेट व ऑफलाइन लैब प्रैक्टिकल चाहिए, तो आप प्रो ट्रैक भी चुन सकते हैं।
+                  सभी विद्यार्थियों के लिए बिना किसी एडमिशन चार्ज के डिजिटल शिक्षा। वीडियो क्लासेज, असाइनमेंट्स और स्टूडेंट पोर्टल। यदि आपको सरकारी/कॉर्पोरेट नौकरियों के लिए मान्यता प्राप्त हार्डकॉपी सर्टिफिकेट व ऑफलाइन लैब प्रैक्टिकल चाहिए, तो आप प्रीमियम ट्रैक भी चुन सकते हैं।
                 </p>
               </div>
             </div>
@@ -361,7 +361,7 @@ export default function OrgCoursesPage() {
               className="shrink-0 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-black transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm"
             >
               <Info className="w-3.5 h-3.5 text-emerald-300" />
-              <span>Free vs Pro तुलना</span>
+              <span>Free vs Premium तुलना</span>
             </button>
           </div>
         )}
@@ -376,7 +376,7 @@ export default function OrgCoursesPage() {
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950">
-                    👑 Premium Pro Certification Track
+                    👑 Premium Certification Track
                   </span>
                   <span className="text-xs text-amber-200 font-semibold flex items-center gap-1">
                     <Award className="w-3.5 h-3.5 text-amber-400" /> ISO 9001:2015 QR-Verified Hardcopy • Offline Computer Lab Hands-On
@@ -393,7 +393,7 @@ export default function OrgCoursesPage() {
               className="shrink-0 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-md shadow-amber-500/20"
             >
               <Info className="w-3.5 h-3.5" />
-              <span>Pro Track Benefits</span>
+              <span>Premium Track Benefits</span>
             </button>
           </div>
         )}
@@ -402,7 +402,7 @@ export default function OrgCoursesPage() {
           <div className="mb-6 p-4 rounded-2xl bg-indigo-900/40 text-slate-200 border border-indigo-500/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2.5">
               <Layers className="w-5 h-5 text-indigo-400 shrink-0" />
-              <span>Lili Organization के प्रत्येक कोर्स में दो ट्रैक्स उपलब्ध हैं: <strong>100% Free Foundation Track</strong> और <strong>👑 Premium Pro Certified Track</strong>।</span>
+              <span>Lili Organization के प्रत्येक कोर्स में दो ट्रैक्स उपलब्ध हैं: <strong>100% Free Foundation Track</strong> और <strong>👑 Premium Certified Track</strong>।</span>
             </div>
             <button
               onClick={() => setShowComparisonModal(true)}
@@ -463,7 +463,7 @@ export default function OrgCoursesPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-bold text-slate-800">{filteredCourses.length}</span>
             <span>
-              {courseSegment === 'free' ? 'courses (100% Free Learning Track)' : courseSegment === 'paid' ? 'courses (Premium Pro Certification Track)' : 'courses available in Free & Pro versions'}
+              {courseSegment === 'free' ? 'courses (100% Free Learning Track)' : courseSegment === 'paid' ? 'courses (Premium Certification Track)' : 'courses available in Free & Premium versions'}
             </span>
             {selectedCategory !== 'All' && (
               <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md font-bold text-[11px]">
@@ -547,7 +547,7 @@ export default function OrgCoursesPage() {
                         ) : (
                           <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1.5 shadow-md shadow-amber-500/30 border border-amber-300">
                             <Crown className="w-3.5 h-3.5 fill-amber-950 text-amber-950" />
-                            <span>PREMIUM PRO</span>
+                            <span>PREMIUM</span>
                           </span>
                         )}
                       </div>
@@ -560,7 +560,7 @@ export default function OrgCoursesPage() {
                           </span>
                           {!isViewFree && (
                             <span className="px-1.5 py-0.2 bg-amber-400/20 border border-amber-400/40 text-amber-300 text-[9px] font-bold rounded">
-                              PRO CERTIFIED
+                              PREMIUM
                             </span>
                           )}
                         </div>
@@ -592,7 +592,7 @@ export default function OrgCoursesPage() {
                               !isViewFree ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
-                            <Crown className="w-3 h-3 fill-slate-950" /> Premium Pro
+                            <Crown className="w-3 h-3 fill-slate-950" /> Premium
                           </button>
                         </div>
                       )}
@@ -693,7 +693,7 @@ export default function OrgCoursesPage() {
                             : 'bg-amber-200 text-amber-950 font-black flex items-center gap-1'
                         }`}>
                           {!isViewFree && <Crown className="w-3 h-3 fill-amber-950" />}
-                          {isViewFree ? 'Free' : 'Pro'}
+                          {isViewFree ? 'Free' : 'Premium'}
                         </span>
                       </div>
 
@@ -898,7 +898,7 @@ export default function OrgCoursesPage() {
               कोर्स चुनने में मदद चाहिए? Lili Advisor से सीधे बात करें
             </h3>
             <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
-              अगर आप तय नहीं कर पा रहे हैं कि कौन सा कोर्स या ट्रैक (Free या Pro) आपके करियर के लिए सबसे सही रहेगा, तो हमारे अकादमिक काउंसलर से WhatsApp पर निःशुल्क परामर्श लें।
+              अगर आप तय नहीं कर पा रहे हैं कि कौन सा कोर्स या ट्रैक (Free या Premium) आपके करियर के लिए सबसे सही रहेगा, तो हमारे अकादमिक काउंसलर से WhatsApp पर निःशुल्क परामर्श लें।
             </p>
           </div>
 
@@ -924,7 +924,7 @@ export default function OrgCoursesPage() {
             कोर्सेस और एनरोलमेंट से जुड़े अक्सर पूछे जाने वाले सवाल
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 mt-2">
-            Free और Pro Certification ट्रैक्स के बारे में आपके सभी सवालों के जवाब यहाँ हैं
+            Free और Premium Certification ट्रैक्स के बारे में आपके सभी सवालों के जवाब यहाँ हैं
           </p>
         </div>
 
@@ -935,16 +935,16 @@ export default function OrgCoursesPage() {
               a: 'हाँ, Lili Organization के Free Courses 100% निःशुल्क हैं। इसमें कोई एडमिशन चार्ज या छिपा हुआ मासिक शुल्क नहीं है। आपको सेल्फ-पेस्ड वीडियो लेक्चर्स, ऑनलाइन प्रैक्टिस टेस्ट और लाइफटाइम स्टूडेंट पोर्टल एक्सेस तुरंत मिलता है।'
             },
             {
-              q: 'Free Course और Pro Certification Track में मुख्य अंतर क्या है?',
-              a: 'Free Track में आपको पूरा ऑनलाइन करिकुलम, वीडियो क्लासेस और ऑनलाइन टेस्ट मिलते हैं। जबकि Pro Track में आपको ISO 9001:2015 मान्यता प्राप्त हार्डकॉपी सर्टिफिकेट (QR कोड सत्यापन के साथ), पार्टनर सेंटर्स पर ऑफलाइन कंप्यूटर लैब एक्सेस, और 1-on-1 फैकल्टी डाउट क्लीयरेंस व प्लेसमेंट असिस्टेंस मिलता है।'
+              q: 'Free Course और Premium Certification Track में मुख्य अंतर क्या है?',
+              a: 'Free Track में आपको पूरा ऑनलाइन करिकुलम, वीडियो क्लासेस और ऑनलाइन टेस्ट मिलते हैं। जबकि Premium Track में आपको ISO 9001:2015 मान्यता प्राप्त हार्डकॉपी सर्टिफिकेट (QR कोड सत्यापन के साथ), पार्टनर सेंटर्स पर ऑफलाइन कंप्यूटर लैब एक्सेस, और 1-on-1 फैकल्टी डाउट क्लीयरेंस व प्लेसमेंट असिस्टेंस मिलता है।'
             },
             {
               q: 'क्या मैं एक साथ एक से ज्यादा Free Courses में एनरोल कर सकता हूँ?',
               a: 'बिल्कुल! जब आप किसी भी एक कोर्स में एनरोल करते हैं, तो आपके Student LMS Profile डैशबोर्ड में "Extra Courses" का विकल्प खुल जाता है, जहाँ से आप अपनी पसंद के अन्य फ्री कोर्सेस को भी 1-क्लिक में शुरू कर सकते हैं।'
             },
             {
-              q: 'Free Course पूरा करने के बाद क्या Pro Certificate में अपग्रेड कर सकते हैं?',
-              a: 'हाँ, यदि आप पहले फ्री में सीखते हैं और बाद में सरकारी/कॉर्पोरेट नौकरियों के लिए मान्यता प्राप्त सर्टिफिकेट या ऑफलाइन लैब प्रैक्टिकल चाहते हैं, तो आप कभी भी अपने स्टूडेंट प्रोफाइल से प्रो सर्टिफिकेशन में अपग्रेड कर सकते हैं।'
+              q: 'Free Course पूरा करने के बाद क्या Premium Certificate में अपग्रेड कर सकते हैं?',
+              a: 'हाँ, यदि आप पहले फ्री में सीखते हैं और बाद में सरकारी/कॉर्पोरेट नौकरियों के लिए मान्यता प्राप्त सर्टिफिकेट या ऑफलाइन लैब प्रैक्टिकल चाहते हैं, तो आप कभी भी अपने स्टूडेंट प्रोफाइल से प्रीमियम सर्टिफिकेशन में अपग्रेड कर सकते हैं।'
             },
             {
               q: 'एडमिशन और कोर्स पेमेंट की रसीद (Receipt) कहाँ मिलेगी?',
@@ -983,7 +983,7 @@ export default function OrgCoursesPage() {
         </div>
       </section>
 
-      {/* Track Comparison Modal (Free Track vs Pro Certification) */}
+      {/* Track Comparison Modal (Free Track vs Premium Certification) */}
       {showComparisonModal && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-slate-200 relative">
@@ -999,7 +999,7 @@ export default function OrgCoursesPage() {
                 Curriculum Track Comparison
               </span>
               <h3 className="text-2xl font-black text-slate-900">
-                Free Track vs Pro Certification
+                Free Track vs Premium Certification
               </h3>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                 Choose the best path for your career goals. You can always start with Free and upgrade anytime.
@@ -1022,7 +1022,7 @@ export default function OrgCoursesPage() {
                     <th className="py-3 px-4 font-black text-amber-900 text-center bg-amber-50/70 w-1/3">
                       <div className="flex items-center justify-center gap-1">
                         <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-700" />
-                        <span>Pro Certified Track</span>
+                        <span>Premium Track</span>
                       </div>
                       <span className="text-[10px] font-normal text-amber-700 block mt-0.5">Career & Job Ready</span>
                     </th>
@@ -1143,7 +1143,7 @@ export default function OrgCoursesPage() {
                 className="py-3 px-4 bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:opacity-95 text-white font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition"
               >
                 <Crown className="w-4 h-4 fill-white" />
-                <span>Show Pro Certified Courses</span>
+                <span>Show Premium Courses</span>
               </button>
             </div>
           </div>
@@ -1175,7 +1175,7 @@ export default function OrgCoursesPage() {
                   </span>
                 ) : (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-900 flex items-center gap-1">
-                    <Crown className="w-3 h-3 fill-amber-700" /> Pro Certified
+                    <Crown className="w-3 h-3 fill-amber-700" /> Premium
                   </span>
                 )}
               </div>
@@ -1274,7 +1274,7 @@ export default function OrgCoursesPage() {
                   }`}
                 >
                   {!previewSyllabusCourse.isViewFree && <Crown className="w-3.5 h-3.5 fill-white" />}
-                  <span>{previewSyllabusCourse.isViewFree ? 'Enroll in Free Track' : 'Get Pro Certified'}</span>
+                  <span>{previewSyllabusCourse.isViewFree ? 'Enroll in Free Track' : 'Get Premium Certified'}</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               </div>

@@ -361,7 +361,7 @@ export default function CourseCheckoutPage() {
               </div>
               <div>
                 <span className="px-2.5 py-0.5 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-full text-[10px] font-black uppercase tracking-wider">
-                  👑 Premium Professional Track
+                  👑 Premium Track
                 </span>
                 <h3 className="text-xl font-black mt-0.5">Government Recognized & ISO 9001:2015 Certification</h3>
                 <p className="text-slate-300 text-xs mt-0.5">
@@ -679,7 +679,7 @@ export default function CourseCheckoutPage() {
                     isFreeCourse ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900 border border-amber-300'
                   }`}>
                     {!isFreeCourse && <Crown className="w-3 h-3 fill-amber-900" />}
-                    {isFreeCourse ? 'Free Track' : 'Pro Certification'}
+                    {isFreeCourse ? 'Free Track' : 'Premium Track'}
                   </span>
                   <h4 className="font-bold text-sm text-slate-900 truncate">{course.name}</h4>
                   <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">

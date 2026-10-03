@@ -193,7 +193,7 @@ export default function CourseDetailPage() {
                 {isFreeCourse ? (
                   <>🎁 100% Free Learning Track</>
                 ) : (
-                  <><Crown className="w-3.5 h-3.5 fill-amber-950" /> ★ Premium Certified Pro Track</>
+                  <><Crown className="w-3.5 h-3.5 fill-amber-950" /> ★ Premium Track</>
                 )}
               </span>
               <span className="px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-medium border border-white/15">
@@ -221,7 +221,7 @@ export default function CourseDetailPage() {
               ) : (
                 <div className="bg-gradient-to-r from-indigo-950/60 to-amber-950/40 border border-amber-400/40 rounded-2xl p-5 text-amber-100 text-base md:text-lg leading-relaxed whitespace-pre-line shadow-inner">
                   <div className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-1.5 flex items-center gap-1.5">
-                    <Crown className="w-4 h-4 text-amber-400 fill-amber-400" /> Premium Pro Curriculum & Highlights
+                    <Crown className="w-4 h-4 text-amber-400 fill-amber-400" /> Premium Curriculum & Highlights
                   </div>
                   {course.paidDescription || course.description}
                 </div>
@@ -407,7 +407,7 @@ export default function CourseDetailPage() {
                   }`}
                 >
                   {!isFreeCourse && <Crown className="w-4 h-4 fill-white" />}
-                  <span>{isFreeCourse ? 'Enroll for Free Now (निःशुल्क शुरू करें)' : 'Get Certified & Enroll Pro'}</span>
+                  <span>{isFreeCourse ? 'Enroll for Free Now (निःशुल्क शुरू करें)' : 'Get Certified & Enroll (Premium)'}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
 
