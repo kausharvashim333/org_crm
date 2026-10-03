@@ -236,68 +236,87 @@ export default function OrgCoursesPage() {
       {/* Main Content Area */}
       <section className="py-10 px-4 max-w-7xl mx-auto w-full flex-1">
         
-        {/* SEGMENT SWITCHER: Free (Default 1st) vs Paid (2nd) vs All (3rd) */}
-        <div className="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200/80 shadow-sm mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* SEGMENT SWITCHER: Free (Default 1st) vs Paid (2nd) vs All (3rd) - NO SCROLL NEEDED */}
+        <div className="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200/80 shadow-sm mb-6 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           
-          {/* Main Segment Tabs - Free is default & 1st */}
-          <div className="flex items-center gap-2 w-full md:w-auto p-1.5 bg-slate-100/80 rounded-2xl overflow-x-auto">
+          {/* Main Segment Tabs: Responsive 3-Column Grid (Zero Scroll) */}
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/60 w-full lg:max-w-xl">
             {/* 1. Free Courses Tab (Default) */}
             <button
+              type="button"
               onClick={() => handleTabChange('free')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer ${
                 courseSegment === 'free'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/25 scale-[1.02]'
-                  : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 font-black'
+                  : 'text-slate-600 hover:text-emerald-700 hover:bg-white/80 font-bold'
               }`}
             >
-              <Gift className="w-4 h-4" />
-              <span>Free Courses / निःशुल्क ({courses.length})</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${courseSegment === 'free' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
-                100% Free • Default
+              <div className="flex items-center gap-1.5">
+                <Gift className="w-4 h-4 shrink-0" />
+                <span className="text-xs">Free Track</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                courseSegment === 'free' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'
+              }`}>
+                100% Free
               </span>
             </button>
 
             {/* 2. Paid / Pro Certification Tab */}
             <button
+              type="button"
               onClick={() => handleTabChange('paid')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer ${
                 courseSegment === 'paid'
-                  ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
-                  : 'text-amber-800 hover:text-amber-900 hover:bg-amber-50'
+                  ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 text-white shadow-md shadow-amber-500/30 font-black'
+                  : 'text-slate-600 hover:text-amber-800 hover:bg-white/80 font-bold'
               }`}
             >
-              <Crown className="w-4 h-4 text-amber-300 fill-amber-300" />
-              <span>Paid Courses / प्रीमियम सर्टिफाइड ({courses.length})</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${courseSegment === 'paid' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'}`}>
-                👑 Pro Certified
+              <div className="flex items-center gap-1.5">
+                <Crown className="w-4 h-4 shrink-0 fill-current" />
+                <span className="text-xs">Pro Track</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                courseSegment === 'paid' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
+              }`}>
+                👑 Certified
               </span>
             </button>
 
             {/* 3. All Courses Tab */}
             <button
+              type="button"
               onClick={() => handleTabChange('all')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer ${
                 courseSegment === 'all'
-                  ? 'bg-white text-slate-900 shadow-md shadow-slate-200 scale-[1.02]'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                  ? 'bg-white text-slate-900 shadow-md shadow-slate-200 font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80 font-bold'
               }`}
             >
-              <Layers className="w-4 h-4 text-indigo-600" />
-              <span>All Courses ({courses.length})</span>
+              <div className="flex items-center gap-1.5">
+                <Layers className="w-4 h-4 shrink-0 text-indigo-600" />
+                <span className="text-xs">All Courses</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                courseSegment === 'all' ? 'bg-slate-200 text-slate-800' : 'bg-slate-200/70 text-slate-600'
+              }`}>
+                {courses.length}
+              </span>
             </button>
           </div>
 
-          {/* Quick Actions: Compare Tracks & Sort */}
-          <div className="flex items-center gap-3 shrink-0 text-xs text-slate-600 w-full md:w-auto justify-between md:justify-end">
+          {/* Quick Actions: Compare Tracks & Sort (Fits without pushing or overflowing) */}
+          <div className="flex items-center gap-2.5 shrink-0 text-xs text-slate-600 justify-between lg:justify-end">
             <button
+              type="button"
               onClick={() => setShowComparisonModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer border border-indigo-200/60"
+              className="px-3.5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer border border-indigo-200/60"
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
               <span>Compare Free vs Pro</span>
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="font-bold flex items-center gap-1 text-slate-500">
                 <Filter className="w-3.5 h-3.5 text-slate-400" /> Sort:
               </span>
@@ -394,18 +413,22 @@ export default function OrgCoursesPage() {
           </div>
         )}
 
-        {/* Category Pills & Level Filters */}
-        <div className="space-y-3 mb-6">
-          {/* Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {/* Category Pills & Level Filters (No Horizontal Scroll - Neatly Wrapped) */}
+        <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/80 shadow-xs mb-6 space-y-3">
+          {/* Category Filter Pills (Wrapped cleanly) */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider shrink-0 flex items-center gap-1 mr-1">
+              <Filter className="w-3.5 h-3.5 text-indigo-500" /> Category:
+            </span>
             {categories.map((cat) => (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 shrink-0 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-slate-900 text-white shadow-md'
-                    : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-100'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
                 }`}
               >
                 {cat === 'All' ? 'All Categories' : cat}
@@ -413,17 +436,20 @@ export default function OrgCoursesPage() {
             ))}
           </div>
 
-          {/* Level Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide text-xs">
-            <span className="text-slate-400 font-semibold px-1 text-[11px] uppercase tracking-wider shrink-0">Level:</span>
+          {/* Level Filter Pills (Wrapped cleanly) */}
+          <div className="flex items-center gap-2 flex-wrap pt-2.5 border-t border-slate-100 text-xs">
+            <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider shrink-0 mr-1">
+              Skill Level:
+            </span>
             {['All', 'Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
               <button
                 key={lvl}
+                type="button"
                 onClick={() => setSelectedLevel(lvl)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition cursor-pointer shrink-0 ${
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
                   selectedLevel === lvl
-                    ? 'bg-indigo-600 text-white font-bold'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
                 }`}
               >
                 {lvl === 'All' ? 'All Levels' : lvl}
@@ -453,6 +479,7 @@ export default function OrgCoursesPage() {
 
           {(selectedCategory !== 'All' || selectedLevel !== 'All' || courseSegment !== 'free' || searchQuery) && (
             <button
+              type="button"
               onClick={() => { setSelectedCategory('All'); setSelectedLevel('All'); handleTabChange('free'); setSearchQuery(''); }}
               className="hover:underline text-xs font-bold text-indigo-600 cursor-pointer"
             >

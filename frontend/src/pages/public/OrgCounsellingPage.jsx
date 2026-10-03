@@ -65,8 +65,8 @@ export default function OrgCounsellingPage() {
   const [bookFor, setBookFor] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
-  // Segment Switcher: 'all' | 'free' | 'paid'
-  const [counsellingSegment, setCounsellingSegment] = useState('all');
+  // Segment Switcher: 'free' (default) | 'paid' | 'all'
+  const [counsellingSegment, setCounsellingSegment] = useState('free');
   const [cardTrackOverrides, setCardTrackOverrides] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -321,50 +321,71 @@ export default function OrgCounsellingPage() {
       {/* Main Container */}
       <section className="py-10 px-4 max-w-6xl mx-auto w-full flex-1">
         
-        {/* SEGMENT SWITCHER: Free vs Paid vs All */}
-        <div className="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200/80 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* SEGMENT SWITCHER: Free (Default 1st) vs Paid (2nd) vs All (3rd) - NO SCROLL NEEDED */}
+        <div className="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200/80 shadow-sm mb-8 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           
-          {/* Main Segment Tabs */}
-          <div className="flex items-center gap-2 w-full md:w-auto p-1.5 bg-slate-100/80 rounded-2xl overflow-x-auto">
+          {/* Main Segment Tabs: Responsive 3-Column Grid (Zero Scroll) */}
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/60 w-full lg:max-w-xl">
+            {/* 1. Free Guidance Tab (Default) */}
             <button
-              onClick={() => setCounsellingSegment('all')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
-                counsellingSegment === 'all'
-                  ? 'bg-white text-slate-900 shadow-md shadow-slate-200 scale-[1.02]'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-              }`}
-            >
-              <Layers className="w-4 h-4 text-indigo-600" />
-              <span>All Sessions ({services.length})</span>
-            </button>
-
-            <button
+              type="button"
               onClick={() => setCounsellingSegment('free')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer ${
                 counsellingSegment === 'free'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/25 scale-[1.02]'
-                  : 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 font-black'
+                  : 'text-slate-600 hover:text-emerald-700 hover:bg-white/80 font-bold'
               }`}
             >
-              <Gift className="w-4 h-4" />
-              <span>Free Guidance / निःशुल्क ({services.length})</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${counsellingSegment === 'free' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
+              <div className="flex items-center gap-1.5">
+                <Gift className="w-4 h-4 shrink-0" />
+                <span className="text-xs">Free Guidance</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                counsellingSegment === 'free' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'
+              }`}>
                 100% Free
               </span>
             </button>
 
+            {/* 2. Paid / Pro Mentorship Tab */}
             <button
+              type="button"
               onClick={() => setCounsellingSegment('paid')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer ${
                 counsellingSegment === 'paid'
-                  ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
-                  : 'text-amber-800 hover:text-amber-900 hover:bg-amber-50'
+                  ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 text-white shadow-md shadow-amber-500/30 font-black'
+                  : 'text-slate-600 hover:text-amber-800 hover:bg-white/80 font-bold'
               }`}
             >
-              <Crown className="w-4 h-4 text-amber-300 fill-amber-300" />
-              <span>Paid / 1-on-1 Mentorship ({services.length})</span>
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${counsellingSegment === 'paid' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'}`}>
-                👑 Pro Track
+              <div className="flex items-center gap-1.5">
+                <Crown className="w-4 h-4 shrink-0 fill-current" />
+                <span className="text-xs">Pro Mentorship</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                counsellingSegment === 'paid' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
+              }`}>
+                👑 1-on-1
+              </span>
+            </button>
+
+            {/* 3. All Sessions Tab */}
+            <button
+              type="button"
+              onClick={() => setCounsellingSegment('all')}
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2 px-2 sm:px-3 rounded-xl transition-all cursor-pointer ${
+                counsellingSegment === 'all'
+                  ? 'bg-white text-slate-900 shadow-md shadow-slate-200 font-black'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80 font-bold'
+              }`}
+            >
+              <div className="flex items-center gap-1.5">
+                <Layers className="w-4 h-4 shrink-0 text-indigo-600" />
+                <span className="text-xs">All Sessions</span>
+              </div>
+              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                counsellingSegment === 'all' ? 'bg-slate-200 text-slate-800' : 'bg-slate-200/70 text-slate-600'
+              }`}>
+                {services.length}
               </span>
             </button>
           </div>
