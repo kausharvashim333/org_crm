@@ -5,8 +5,12 @@ const courseSchema = new mongoose.Schema({
   name: { type: String, required: true },
   code: { type: String },
   description: { type: String },
+  freeDescription: { type: String, default: '' },
+  paidDescription: { type: String, default: '' },
   syllabus: [{
     module: { type: String },
+    description: { type: String, default: '' },
+    durationHours: { type: String, default: '' },
     topics: [{ type: String }],
   }],
   duration: { type: String },

@@ -5,13 +5,14 @@ import Modal from '../../components/Modal';
 import { Table, TableRow, TableCell } from '../../components/Table';
 import ChapterManagerModal from '../../components/ChapterManagerModal';
 import AIDescriptionModal from '../../components/AIDescriptionModal';
-import { Plus, Check, X, Trash2, BookOpen, Video, Edit, FileText, Sparkles, ChevronUp, ChevronDown, Clock, Tag, Settings2, Image as ImageIcon, Upload, Star } from 'lucide-react';
-
+import { Plus, Check, X, Trash2, BookOpen, Video, Edit, FileText, Sparkles, ChevronUp, ChevronDown, Clock, Tag, Settings2, Image as ImageIcon, Upload, Star, ListOrdered, Layers, CheckCircle2, AlertCircle, HelpCircle } from 'lucide-react';
 
 const initialCourseState = {
   name: '',
   code: '',
   description: '',
+  freeDescription: '',
+  paidDescription: '',
   duration: '',
   durationMonths: '',
   totalHours: '',
@@ -34,6 +35,8 @@ const initialCourseState = {
   language: 'Hindi / Hinglish',
   badge: 'Govt Certified',
   highlights: [],
+  whatYouWillLearn: [],
+  syllabus: [],
   requiredDocumentsList: [
     { docName: 'Passport Photo', isCompulsory: true },
     { docName: 'Aadhaar Card', isCompulsory: true },
@@ -59,7 +62,7 @@ export default function AdminCourses() {
   const [newDocName, setNewDocName] = useState('');
   const [newDocCompulsory, setNewDocCompulsory] = useState(true);
   const [newDocType, setNewDocType] = useState('document');
-  const [activeTab, setActiveTab] = useState('basic');
+  const [modalTab, setModalTab] = useState('basic');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [newHighlight, setNewHighlight] = useState('');
   const [centerTypes, setCenterTypes] = useState([]);
@@ -67,6 +70,13 @@ export default function AdminCourses() {
   const [ctForm, setCtForm] = useState({ name: '' });
   const [editCT, setEditCT] = useState(null);
   const [renameCTName, setRenameCTName] = useState('');
+
+  // Syllabus & Outcomes Local Inputs
+  const [newModuleTitle, setNewModuleTitle] = useState('');
+  const [newModuleDuration, setNewModuleDuration] = useState('');
+  const [newModuleDesc, setNewModuleDesc] = useState('');
+  const [newModuleTopicsText, setNewModuleTopicsText] = useState('');
+  const [newLearnItem, setNewLearnItem] = useState('');
 
   const load = () => {
     getCourses().then(res => { setCourses(res.data.courses); setLoading(false); }).catch(() => setLoading(false));
@@ -85,11 +95,13 @@ export default function AdminCourses() {
   const handleOpenAdd = () => {
     setEditCourse(null);
     setFormData(initialCourseState);
+    setModalTab('basic');
     setShowAdd(true);
   };
 
   const handleEdit = (c) => {
     setEditCourse(c);
+    setModalTab('basic');
     let docs = [];
     if (Array.isArray(c.requiredDocuments) && c.requiredDocuments.length > 0) {
       docs = c.requiredDocuments.map(d => {
@@ -108,6 +120,8 @@ export default function AdminCourses() {
       name: c.name,
       code: c.code || '',
       description: c.description || '',
+      freeDescription: c.freeDescription || '',
+      paidDescription: c.paidDescription || '',
       duration: c.duration || '',
       durationMonths: c.durationMonths ? String(c.durationMonths) : '',
       totalHours: c.totalHours ? String(c.totalHours) : '',
@@ -130,6 +144,8 @@ export default function AdminCourses() {
       language: c.language || 'Hindi / Hinglish',
       badge: c.badge || 'Govt Certified',
       highlights: c.highlights || [],
+      whatYouWillLearn: Array.isArray(c.whatYouWillLearn) ? c.whatYouWillLearn : [],
+      syllabus: Array.isArray(c.syllabus) ? c.syllabus : [],
       requiredDocumentsList: docs,
     });
     setShowAdd(true);
@@ -186,6 +202,65 @@ export default function AdminCourses() {
     });
   };
 
+  // Syllabus & Outcome Helpers
+  const handleAddModule = () => {
+    if (!newModuleTitle.trim()) return;
+    const topicsArray = newModuleTopicsText
+      .split(/[\n,]+/)
+      .map(t => t.trim())
+      .filter(Boolean);
+
+    setFormData(prev => ({
+      ...prev,
+      syllabus: [
+        ...(prev.syllabus || []),
+        {
+          module: newModuleTitle.trim(),
+          durationHours: newModuleDuration.trim(),
+          description: newModuleDesc.trim(),
+          topics: topicsArray,
+        }
+      ]
+    }));
+    setNewModuleTitle('');
+    setNewModuleDuration('');
+    setNewModuleDesc('');
+    setNewModuleTopicsText('');
+  };
+
+  const handleRemoveModule = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      syllabus: (prev.syllabus || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleRemoveTopic = (modIdx, topicIdx) => {
+    setFormData(prev => {
+      const updatedSyllabus = [...(prev.syllabus || [])];
+      const targetMod = { ...updatedSyllabus[modIdx] };
+      targetMod.topics = targetMod.topics.filter((_, i) => i !== topicIdx);
+      updatedSyllabus[modIdx] = targetMod;
+      return { ...prev, syllabus: updatedSyllabus };
+    });
+  };
+
+  const handleAddLearnItem = () => {
+    if (!newLearnItem.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      whatYouWillLearn: [...(prev.whatYouWillLearn || []), newLearnItem.trim()]
+    }));
+    setNewLearnItem('');
+  };
+
+  const handleRemoveLearnItem = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      whatYouWillLearn: (prev.whatYouWillLearn || []).filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -202,7 +277,9 @@ export default function AdminCourses() {
         originalPrice: +formData.originalPrice || 0,
         salePrice: +formData.salePrice || 0,
         isFree: Boolean(formData.isFree),
-        highlights: formData.highlights.filter(h => h.trim()),
+        highlights: (formData.highlights || []).filter(h => h.trim()),
+        whatYouWillLearn: (formData.whatYouWillLearn || []).filter(w => w.trim()),
+        syllabus: formData.syllabus || [],
         requiredDocuments: formData.requiredDocumentsList,
       };
       delete payload.requiredDocumentsList;
@@ -567,190 +644,760 @@ export default function AdminCourses() {
         onSaved={load}
       />
 
-      <Modal isOpen={showAdd} onClose={() => { setShowAdd(false); setEditCourse(null); }} title={editCourse ? 'Edit Course & Required Documents' : 'Add Standard Course'} size="lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm font-medium mb-1">Course Name *</label><input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="input-field" placeholder="e.g. DCA - Diploma in Computer Applications" /></div>
-            <div><label className="block text-sm font-medium mb-1">Course Code</label><input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })} className="input-field" placeholder="e.g. DCA" /></div>
-            <div>
-              <label className="block text-sm font-medium mb-1 text-slate-700">Center Type / Vertical *</label>
-              <select value={formData.centerType || 'All'} onChange={(e) => setFormData({ ...formData, centerType: e.target.value })} className="input-field bg-white font-semibold text-indigo-900 border-indigo-200">
-                <option value="All">🌐 All Center Types (Global)</option>
-                {centerTypes.map(ct => (<option key={ct._id} value={ct.name}>{ct.name}</option>))}
-              </select>
-            </div>
-            <div><label className="block text-sm font-medium mb-1">Category</label>
-              <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="input-field bg-white font-semibold text-indigo-900 border-indigo-200">
-                <option value="">— Select Category —</option>
-                {categories.map(cat => (<option key={cat._id} value={cat.name}>{cat.name}</option>))}
-              </select>
-            </div>
-            <div><label className="block text-sm font-medium mb-1">Duration *</label><input type="text" required value={formData.duration} onChange={(e) => setFormData({ ...formData, duration: e.target.value })} className="input-field" placeholder="e.g. 6 Months" /></div>
-            <div><label className="block text-sm font-medium mb-1">Duration (Months)</label><input type="text" inputMode="numeric" value={formData.durationMonths} onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value })} className="input-field" /></div>
-          </div>
+      <Modal isOpen={showAdd} onClose={() => { setShowAdd(false); setEditCourse(null); }} title={editCourse ? 'Edit Course & Curriculum Syllabus' : 'Create Course & Curriculum'} size="xl">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Modal Tab Headers */}
+          <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2 overflow-x-auto text-xs font-bold scrollbar-none">
+            <button
+              type="button"
+              onClick={() => setModalTab('basic')}
+              className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                modalTab === 'basic' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>📌 1. Basic Info & Nature</span>
+            </button>
 
-          {/* Free vs Paid Toggle */}
-          <div className="bg-gradient-to-r from-indigo-50/70 to-emerald-50/70 p-3.5 rounded-2xl border border-slate-200">
-            <label className="block text-xs font-black text-slate-800 mb-2">
-              Course Nature (Free vs Paid Program)
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, isFree: false })}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
-                  !formData.isFree
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                <span>💳 Paid Course (सशुल्क सर्टिफाइड कोर्स)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, isFree: true, fee: '0', studentFee: '0', salePrice: '0', monthlyFee: '0' })}
-                className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
-                  formData.isFree
-                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                <span>🎁 100% Free Course (निःशुल्क कोर्स)</span>
-              </button>
-            </div>
-            {formData.isFree && (
-              <p className="text-[11px] text-emerald-700 font-semibold mt-2 bg-emerald-100/60 p-2 rounded-lg">
-                ✓ Free Course: Students can enroll for free with 1 click. Showcased in the Free Courses segment.
-              </p>
-            )}
-          </div>
-
-          {/* Fee Display Type + Fee Input */}
-          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-            <div>
-              <label className="block text-[11px] font-black text-slate-700 mb-1">Fee Display Type</label>
-              <select value={formData.feeDisplayType} onChange={(e) => setFormData({ ...formData, feeDisplayType: e.target.value })} className="input-field bg-white font-bold text-slate-800 border-slate-300 text-xs">
-                <option value="full">Full Fee Only</option>
-                <option value="monthly">Monthly Fee Only</option>
-                <option value="both">Both (Monthly + Full)</option>
-              </select>
-              <span className="text-[9px] text-slate-500 block mt-0.5">How fee appears on public course page</span>
-            </div>
-            <div>
-              {formData.feeDisplayType === 'full' ? (
-                <>
-                  <label className="block text-[11px] font-black text-slate-700 mb-1">Full Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.studentFee} onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 3500" />
-                  <span className="text-[9px] text-slate-500 block mt-0.5">Total course fee shown to students</span>
-                </>
-              ) : formData.feeDisplayType === 'monthly' ? (
-                <>
-                  <label className="block text-[11px] font-black text-slate-700 mb-1">Monthly Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.monthlyFee} onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 1500" />
-                  <span className="text-[9px] text-slate-500 block mt-0.5">Per month EMI / installment</span>
-                </>
-              ) : (
-                <>
-                  <label className="block text-[11px] font-black text-slate-700 mb-1">Monthly Fee (₹)</label>
-                  <input type="text" inputMode="numeric" value={formData.monthlyFee} onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })} className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs" placeholder="e.g. 1500" />
-                  <span className="text-[9px] text-slate-500 block mt-0.5">Full fee set below in Student Fee</span>
-                </>
+            <button
+              type="button"
+              onClick={() => setModalTab('descriptions')}
+              className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                modalTab === 'descriptions' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>📝 2. Free & Paid Descriptions</span>
+              {(formData.freeDescription || formData.paidDescription) && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
               )}
-            </div>
-            <div className="col-span-2">
-              <label className="block text-[11px] font-black text-slate-700 mb-1">Fee Note (Optional)</label>
-              <input type="text" value={formData.feeNote} onChange={(e) => setFormData({ ...formData, feeNote: e.target.value })} className="input-field bg-white text-slate-800 border-slate-300 text-xs" placeholder="e.g. EMI available, 3 months course, etc." />
-              <span className="text-[9px] text-slate-500 block mt-0.5">Shown below fee on course cards (optional)</span>
-            </div>
-            <div className="col-span-2 flex items-center gap-2 pt-2 border-t border-slate-200">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
-                <input type="checkbox" checked={formData.availableToPartners} onChange={(e) => setFormData({ ...formData, availableToPartners: e.target.checked })} className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4" />
-                Available to Partners
-              </label>
-              <span className="text-[10px] text-slate-500">({formData.availableToPartners ? 'Partners can see & enroll students' : 'Hidden from all partners'})</span>
-            </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setModalTab('syllabus')}
+              className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                modalTab === 'syllabus' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>📚 3. Syllabus & Modules</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${modalTab === 'syllabus' ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-700'}`}>
+                {formData.syllabus?.length || 0}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setModalTab('pricing')}
+              className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                modalTab === 'pricing' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>💰 4. Pricing & Commercials</span>
+              {formData.isFree ? (
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-emerald-100 text-emerald-800">FREE</span>
+              ) : null}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setModalTab('documents')}
+              className={`px-3 py-2 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                modalTab === 'documents' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>📎 5. Documents ({formData.requiredDocumentsList?.length || 0})</span>
+            </button>
           </div>
 
-          {/* 3-Tier Fee Section */}
-          <div className="grid grid-cols-3 gap-3 bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-100">
-            <div>
-              <label className="block text-[11px] font-black text-indigo-900 mb-1 flex items-center gap-1"><span>🏛️</span> Org Wholesale Fee (₹)</label>
-              <input type="text" inputMode="numeric" value={formData.organizationFee} onChange={(e) => setFormData({ ...formData, organizationFee: e.target.value })} className="input-field bg-white font-extrabold text-indigo-900 border-indigo-200 text-xs" placeholder="e.g. 500" />
-              <span className="text-[9px] text-indigo-600 block mt-0.5">Franchise Royalty</span>
-            </div>
-            <div>
-              <label className="block text-[11px] font-black text-blue-900 mb-1 flex items-center gap-1"><span>📜</span> Cert-Only Fee (₹)</label>
-              <input type="text" inputMode="numeric" value={formData.certificateFee} onChange={(e) => setFormData({ ...formData, certificateFee: e.target.value })} className="input-field bg-white font-extrabold text-blue-900 border-blue-200 text-xs" placeholder="e.g. 250" />
-              <span className="text-[9px] text-blue-600 block mt-0.5">Independent Cert Charge</span>
-            </div>
-            <div>
-              <label className="block text-[11px] font-black text-slate-900 mb-1 flex items-center gap-1"><span>🎓</span> Student Fee (₹)</label>
-              <input type="text" inputMode="numeric" value={formData.studentFee} onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })} className="input-field bg-white font-extrabold text-slate-900 border-slate-300 text-xs" placeholder="e.g. 3500" />
-              <span className="text-[9px] text-slate-500 block mt-0.5">Student Tuition Charge</span>
-            </div>
-          </div>
-
-          {/* Required Documents */}
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-            <label className="block text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center justify-between">
-              <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-indigo-600" /> Required Student Documents Config</span>
-              <span className="text-[10px] text-indigo-600 font-normal">Toggle Compulsory Flag</span>
-            </label>
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {formData.requiredDocumentsList.map((doc, idx) => (
-                <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 bg-white border rounded-xl text-xs gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex flex-col gap-0.5">
-                      <button type="button" disabled={idx === 0} onClick={() => moveDocumentItem(idx, 'up')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
-                      <button type="button" disabled={idx === formData.requiredDocumentsList.length - 1} onClick={() => moveDocumentItem(idx, 'down')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
+          {/* TAB 1: BASIC INFO & COURSE NATURE */}
+          {modalTab === 'basic' && (
+            <div className="space-y-4 animate-fadeIn">
+              {/* Free vs Paid Nature Toggle */}
+              <div className="bg-gradient-to-r from-indigo-50/80 via-white to-emerald-50/80 p-4 rounded-2xl border border-slate-200 space-y-2">
+                <label className="block text-xs font-black text-slate-800">
+                  Course Classification & Program Nature *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, isFree: false })}
+                    className={`p-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 border text-left ${
+                      !formData.isFree
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-200'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black ${!formData.isFree ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
+                      💳
                     </div>
-                    <span className="font-semibold text-slate-800">{doc.docName}</span>
+                    <div>
+                      <div className="font-extrabold text-sm">Certified Paid Course</div>
+                      <div className={`text-[10px] ${!formData.isFree ? 'text-indigo-100' : 'text-slate-400'}`}>
+                        Pro program with fees, verified certificate & placement
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, isFree: true, fee: '0', studentFee: '0', salePrice: '0', monthlyFee: '0' })}
+                    className={`p-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 border text-left ${
+                      formData.isFree
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-200'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black ${formData.isFree ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-600'}`}>
+                      🎁
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-sm">100% Free Foundation Course</div>
+                      <div className={`text-[10px] ${formData.isFree ? 'text-emerald-100' : 'text-slate-400'}`}>
+                        Zero fee enrollment, instant access in Free segment
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Course Title / Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="input-field text-xs font-semibold"
+                    placeholder="e.g. ADCA - Advanced Diploma in Computer Applications"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Course Code / Short ID</label>
+                  <input
+                    type="text"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    className="input-field text-xs uppercase font-mono"
+                    placeholder="e.g. ADCA-101"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Center Type / Vertical *</label>
+                  <select
+                    value={formData.centerType || 'All'}
+                    onChange={(e) => setFormData({ ...formData, centerType: e.target.value })}
+                    className="input-field bg-white font-semibold text-slate-800 text-xs"
+                  >
+                    <option value="All">🌐 All Center Types (Global)</option>
+                    {centerTypes.map(ct => (<option key={ct._id} value={ct.name}>{ct.name}</option>))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Academic Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="input-field bg-white font-semibold text-slate-800 text-xs"
+                  >
+                    <option value="">— Select Category —</option>
+                    {categories.map(cat => (<option key={cat._id} value={cat.name}>{cat.name}</option>))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Duration Display *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.duration}
+                    onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                    className="input-field text-xs"
+                    placeholder="e.g. 6 Months (Daily 2 Hours)"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Months</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.durationMonths}
+                      onChange={(e) => setFormData({ ...formData, durationMonths: e.target.value })}
+                      className="input-field text-xs"
+                      placeholder="e.g. 6"
+                    />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <select value={doc.docType || 'document'} onChange={(e) => updateDocumentType(idx, e.target.value)} className="input-field text-[11px] py-1 px-2 font-semibold border-indigo-200 bg-slate-50 hover:bg-white text-indigo-900">
-                      <option value="document">📄 PDF / Doc</option>
-                      <option value="image">📷 Image</option>
-                      <option value="id_proof">🪪 ID Proof</option>
-                      <option value="any">📎 Any Format</option>
-                    </select>
-                    <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 font-medium text-[11px]">
-                      <input type="checkbox" checked={doc.isCompulsory} onChange={() => toggleDocumentCompulsory(idx)} className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" />
-                      {doc.isCompulsory ? <span className="badge badge-danger text-[10px]">Compulsory</span> : <span className="badge badge-info text-[10px]">Optional</span>}
-                    </label>
-                    <button type="button" onClick={() => removeDocumentItem(idx)} className="text-slate-400 hover:text-red-600 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Total Hours</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.totalHours}
+                      onChange={(e) => setFormData({ ...formData, totalHours: e.target.value })}
+                      className="input-field text-xs"
+                      placeholder="e.g. 180"
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="flex items-center gap-2 pt-2 border-t">
-              <input type="text" value={newDocName} onChange={(e) => setNewDocName(e.target.value)} placeholder="e.g. 12th Marksheet, Income Certificate" className="input-field flex-1 text-xs py-1.5" />
-              <select value={newDocType} onChange={(e) => setNewDocType(e.target.value)} className="input-field text-xs py-1.5 w-36 font-semibold">
-                <option value="document">📄 PDF / Doc</option>
-                <option value="image">📷 Image</option>
-                <option value="id_proof">🪪 ID Proof</option>
-                <option value="any">📎 Any Format</option>
-              </select>
-              <label className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 cursor-pointer">
-                <input type="checkbox" checked={newDocCompulsory} onChange={(e) => setNewDocCompulsory(e.target.checked)} className="rounded text-indigo-600 w-3.5 h-3.5" /> Compulsory
-              </label>
-              <button type="button" onClick={addDocumentItem} className="btn-secondary text-xs px-3 py-2 font-semibold text-indigo-600 border-indigo-200">+ Add</button>
-            </div>
-          </div>
 
-          {/* Description */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium">Course Description</label>
-              <button type="button" onClick={() => setShowAIModal(true)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg transition-all">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Write with AI
-              </button>
-            </div>
-            <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="input-field text-xs leading-relaxed" placeholder="Detailed course overview, learning outcomes, and career opportunities..." />
-          </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Skill Level</label>
+                  <select
+                    value={formData.level}
+                    onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                    className="input-field text-xs bg-white"
+                  >
+                    <option value="Beginner to Advanced">Beginner to Advanced</option>
+                    <option value="Beginner">Beginner Level</option>
+                    <option value="Intermediate">Intermediate Level</option>
+                    <option value="Advanced / Professional">Advanced / Professional</option>
+                  </select>
+                </div>
 
-          <button type="submit" className="btn-primary w-full py-3 text-sm font-bold">
-            {editCourse ? 'Update Course Details' : 'Create Standard Course'}
-          </button>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Medium / Language</label>
+                  <input
+                    type="text"
+                    value={formData.language}
+                    onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+                    className="input-field text-xs"
+                    placeholder="e.g. Hindi / Hinglish"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-3">
+                <button
+                  type="button"
+                  onClick={() => setModalTab('descriptions')}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5"
+                >
+                  Next: Course Descriptions &rarr;
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: FREE & PAID DESCRIPTIONS */}
+          {modalTab === 'descriptions' && (
+            <div className="space-y-5 animate-fadeIn">
+              <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-xs text-amber-900 flex items-start gap-2">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-bold">Tailored Experience for Free vs Paid Learners:</strong>
+                  <p className="mt-0.5 text-amber-800">
+                    Aap Free aur Paid courses ke liye alag-alag description aur highlights likh sakte hain. Yeh public course detail page par automatically switch ho jayega.
+                  </p>
+                </div>
+              </div>
+
+              {/* Free Course Description Section */}
+              <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                    <span>🎁 Free Course Specific Description</span>
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] rounded-full">Shown in Free Mode</span>
+                  </label>
+                </div>
+                <p className="text-[11px] text-emerald-700">
+                  Highlight free foundation access, community membership, self-paced assessments, and zero upfront fees.
+                </p>
+                <textarea
+                  rows="3"
+                  value={formData.freeDescription}
+                  onChange={(e) => setFormData({ ...formData, freeDescription: e.target.value })}
+                  className="input-field bg-white text-xs leading-relaxed border-emerald-200"
+                  placeholder="e.g. Enroll for 100% Free and get instant access to foundation video lectures, practical exercises, and interactive quizzes. Perfect for beginners starting their journey..."
+                />
+              </div>
+
+              {/* Paid Course Description Section */}
+              <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                    <span>⭐ Certified Paid Course Specific Description</span>
+                    <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[10px] rounded-full">Shown in Paid Mode</span>
+                  </label>
+                </div>
+                <p className="text-[11px] text-indigo-700">
+                  Highlight pro career benefits, physical lab sessions, ISO/Govt verified certificate, mentorship, and placement assistance.
+                </p>
+                <textarea
+                  rows="3"
+                  value={formData.paidDescription}
+                  onChange={(e) => setFormData({ ...formData, paidDescription: e.target.value })}
+                  className="input-field bg-white text-xs leading-relaxed border-indigo-200"
+                  placeholder="e.g. Complete industry-standard professional diploma with physical lab training, capstone industrial projects, 1-on-1 expert doubt clearing, and QR-verifiable authorized certification..."
+                />
+              </div>
+
+              {/* General Overview Description */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700">General Overview Description (Fallback)</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowAIModal(true)}
+                    className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" /> Write with AI
+                  </button>
+                </div>
+                <textarea
+                  rows="3"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="input-field text-xs leading-relaxed"
+                  placeholder="Comprehensive overview of the course scope and syllabus..."
+                />
+              </div>
+
+              {/* What You Will Learn (Key Outcomes) */}
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" /> What Students Will Learn (Key Outcomes)
+                </label>
+                <div className="space-y-2">
+                  {(formData.whatYouWillLearn || []).map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 text-xs">
+                      <span className="font-semibold text-slate-700 flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> {item}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLearnItem(idx)}
+                        className="text-slate-400 hover:text-red-600 p-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={newLearnItem}
+                    onChange={(e) => setNewLearnItem(e.target.value)}
+                    placeholder="e.g. Master GST invoicing, balance sheets, and Tally Prime reporting"
+                    className="input-field text-xs flex-1"
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddLearnItem(); } }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddLearnItem}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold shrink-0 hover:bg-indigo-700"
+                  >
+                    + Add Outcome
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-3">
+                <button
+                  type="button"
+                  onClick={() => setModalTab('basic')}
+                  className="px-4 py-2 border rounded-xl font-bold text-xs text-slate-600 hover:bg-slate-100"
+                >
+                  &larr; Back to Basics
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalTab('syllabus')}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5"
+                >
+                  Next: Syllabus & Modules &rarr;
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: SYLLABUS & CURRICULUM MODULES */}
+          {modalTab === 'syllabus' && (
+            <div className="space-y-5 animate-fadeIn">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-extrabold text-sm text-slate-900">Course Syllabus & Curriculum Modules</h4>
+                  <p className="text-xs text-slate-500">Break down the course into structured modules, durations, and key topics.</p>
+                </div>
+                <span className="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full">
+                  {formData.syllabus?.length || 0} Modules Configured
+                </span>
+              </div>
+
+              {/* Existing Modules List */}
+              <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                {(formData.syllabus || []).map((mod, modIdx) => (
+                  <div key={modIdx} className="p-4 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-2.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white text-xs font-black flex items-center justify-center shrink-0">
+                          {modIdx + 1}
+                        </div>
+                        <div>
+                          <div className="font-extrabold text-xs text-slate-900">{mod.module}</div>
+                          {mod.durationHours && (
+                            <span className="text-[10px] text-indigo-600 font-bold flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {mod.durationHours}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveModule(modIdx)}
+                        className="text-slate-400 hover:text-red-600 p-1 rounded-lg hover:bg-red-50"
+                        title="Delete Module"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    {mod.description && (
+                      <p className="text-[11px] text-slate-500 leading-relaxed italic">{mod.description}</p>
+                    )}
+
+                    {/* Topics List */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Topics Covered:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(mod.topics || []).map((topic, topIdx) => (
+                          <span
+                            key={topIdx}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 text-[11px] font-medium border border-slate-200"
+                          >
+                            <span>{topic}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveTopic(modIdx, topIdx)}
+                              className="text-slate-400 hover:text-red-600"
+                            >
+                              &times;
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {(formData.syllabus || []).length === 0 && (
+                  <div className="p-8 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                    <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-slate-600">No syllabus modules added yet.</p>
+                    <p className="text-[11px] text-slate-400">Use the form below to create modules and chapter topics.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Add New Module Box */}
+              <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-200 space-y-3">
+                <div className="font-extrabold text-xs text-indigo-950 flex items-center gap-1.5">
+                  <Plus className="w-4 h-4 text-indigo-600" /> Add New Module to Syllabus
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Module Title *</label>
+                    <input
+                      type="text"
+                      value={newModuleTitle}
+                      onChange={(e) => setNewModuleTitle(e.target.value)}
+                      placeholder="e.g. Module 1: Computer Fundamentals & Operating System"
+                      className="input-field text-xs bg-white font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">Duration / Hours</label>
+                    <input
+                      type="text"
+                      value={newModuleDuration}
+                      onChange={(e) => setNewModuleDuration(e.target.value)}
+                      placeholder="e.g. 15 Hours"
+                      className="input-field text-xs bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Module Summary / Description (Optional)</label>
+                  <input
+                    type="text"
+                    value={newModuleDesc}
+                    onChange={(e) => setNewModuleDesc(e.target.value)}
+                    placeholder="Short description of this unit..."
+                    className="input-field text-xs bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">Topics (Separate by commas or new lines)</label>
+                  <textarea
+                    rows="2"
+                    value={newModuleTopicsText}
+                    onChange={(e) => setNewModuleTopicsText(e.target.value)}
+                    placeholder="e.g. Introduction to GUI, Windows 11 Navigation, File Explorer, System Shortcuts, Control Panel Settings"
+                    className="input-field text-xs bg-white"
+                  />
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={handleAddModule}
+                    disabled={!newModuleTitle.trim()}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Save Module to Curriculum
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-3">
+                <button
+                  type="button"
+                  onClick={() => setModalTab('descriptions')}
+                  className="px-4 py-2 border rounded-xl font-bold text-xs text-slate-600 hover:bg-slate-100"
+                >
+                  &larr; Back to Descriptions
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalTab('pricing')}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5"
+                >
+                  Next: Commercials & Pricing &rarr;
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: PRICING & COMMERCIALS */}
+          {modalTab === 'pricing' && (
+            <div className="space-y-4 animate-fadeIn">
+              {formData.isFree ? (
+                <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-200 text-center space-y-2">
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xl mx-auto">
+                    🎁
+                  </div>
+                  <h4 className="font-black text-sm text-emerald-950">100% Free Program Configuration</h4>
+                  <p className="text-xs text-emerald-800 max-w-md mx-auto">
+                    Aapne is course ko <strong>Free Course</strong> mark kiya hai. Iske sabhi fees (Tuition, Wholesale, Cert fee) automatic ₹0 rahenge aur students 1-click se enroll kar payenge.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, isFree: false })}
+                    className="mt-2 text-xs font-bold text-indigo-600 hover:underline"
+                  >
+                    Switch to Paid Course to configure commercial fees
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Fee Display Type + Fee Input */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div>
+                      <label className="block text-xs font-black text-slate-700 mb-1">Fee Display Type</label>
+                      <select value={formData.feeDisplayType} onChange={(e) => setFormData({ ...formData, feeDisplayType: e.target.value })} className="input-field bg-white font-bold text-slate-800 border-slate-300 text-xs">
+                        <option value="full">Full Fee Only</option>
+                        <option value="monthly">Monthly Fee Only</option>
+                        <option value="both">Both (Monthly + Full)</option>
+                      </select>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">How fee appears on public course page</span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-black text-slate-700 mb-1">Student Full Fee (₹) *</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.studentFee}
+                        onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })}
+                        className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs"
+                        placeholder="e.g. 3500"
+                      />
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Total course tuition fee</span>
+                    </div>
+
+                    {(formData.feeDisplayType === 'monthly' || formData.feeDisplayType === 'both') && (
+                      <div>
+                        <label className="block text-xs font-black text-slate-700 mb-1">Monthly Installment Fee (₹)</label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={formData.monthlyFee}
+                          onChange={(e) => setFormData({ ...formData, monthlyFee: e.target.value })}
+                          className="input-field bg-white font-extrabold text-slate-800 border-slate-300 text-xs"
+                          placeholder="e.g. 1500"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-xs font-black text-slate-700 mb-1">Fee Note (Optional)</label>
+                      <input
+                        type="text"
+                        value={formData.feeNote}
+                        onChange={(e) => setFormData({ ...formData, feeNote: e.target.value })}
+                        className="input-field bg-white text-slate-800 border-slate-300 text-xs"
+                        placeholder="e.g. Flexible EMI, Exam fee included"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 3-Tier Fee Section */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-indigo-50/60 p-4 rounded-2xl border border-indigo-100">
+                    <div>
+                      <label className="block text-xs font-black text-indigo-900 mb-1 flex items-center gap-1"><span>🏛️</span> Wholesale Royalty (₹)</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.organizationFee}
+                        onChange={(e) => setFormData({ ...formData, organizationFee: e.target.value })}
+                        className="input-field bg-white font-extrabold text-indigo-900 border-indigo-200 text-xs"
+                        placeholder="e.g. 500"
+                      />
+                      <span className="text-[10px] text-indigo-600 block mt-0.5">Franchise Royalty</span>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-blue-900 mb-1 flex items-center gap-1"><span>📜</span> Cert-Only Charge (₹)</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.certificateFee}
+                        onChange={(e) => setFormData({ ...formData, certificateFee: e.target.value })}
+                        className="input-field bg-white font-extrabold text-blue-900 border-blue-200 text-xs"
+                        placeholder="e.g. 250"
+                      />
+                      <span className="text-[10px] text-blue-600 block mt-0.5">Certificate Fee</span>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-slate-900 mb-1 flex items-center gap-1"><span>🎓</span> Student Retail Fee (₹)</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.studentFee}
+                        onChange={(e) => setFormData({ ...formData, studentFee: e.target.value, fee: e.target.value })}
+                        className="input-field bg-white font-extrabold text-slate-900 border-slate-300 text-xs"
+                        placeholder="e.g. 3500"
+                      />
+                      <span className="text-[10px] text-slate-500 block mt-0.5">Retail price</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-3 bg-slate-50 rounded-xl border flex items-center gap-2">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.availableToPartners}
+                    onChange={(e) => setFormData({ ...formData, availableToPartners: e.target.checked })}
+                    className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                  />
+                  Available to Partner Centers
+                </label>
+                <span className="text-[11px] text-slate-500">({formData.availableToPartners ? 'Visible to franchise network' : 'Hidden from partner network'})</span>
+              </div>
+
+              <div className="flex items-center justify-between pt-3">
+                <button
+                  type="button"
+                  onClick={() => setModalTab('syllabus')}
+                  className="px-4 py-2 border rounded-xl font-bold text-xs text-slate-600 hover:bg-slate-100"
+                >
+                  &larr; Back to Syllabus
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModalTab('documents')}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5"
+                >
+                  Next: Required Documents &rarr;
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: REQUIRED DOCUMENTS */}
+          {modalTab === 'documents' && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                <label className="block text-xs font-bold text-indigo-900 uppercase tracking-wider flex items-center justify-between">
+                  <span className="flex items-center gap-1.5"><FileText className="w-4 h-4 text-indigo-600" /> Student Verification Documents</span>
+                  <span className="text-[10px] text-indigo-600 font-normal">Mark compulsory uploads</span>
+                </label>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {formData.requiredDocumentsList.map((doc, idx) => (
+                    <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 bg-white border rounded-xl text-xs gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-col gap-0.5">
+                          <button type="button" disabled={idx === 0} onClick={() => moveDocumentItem(idx, 'up')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
+                          <button type="button" disabled={idx === formData.requiredDocumentsList.length - 1} onClick={() => moveDocumentItem(idx, 'down')} className="text-slate-400 hover:text-indigo-600 disabled:opacity-30 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
+                        </div>
+                        <span className="font-semibold text-slate-800">{doc.docName}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select value={doc.docType || 'document'} onChange={(e) => updateDocumentType(idx, e.target.value)} className="input-field text-[11px] py-1 px-2 font-semibold border-indigo-200 bg-slate-50 hover:bg-white text-indigo-900">
+                          <option value="document">📄 PDF / Doc</option>
+                          <option value="image">📷 Image</option>
+                          <option value="id_proof">🪪 ID Proof</option>
+                          <option value="any">📎 Any Format</option>
+                        </select>
+                        <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 font-medium text-[11px]">
+                          <input type="checkbox" checked={doc.isCompulsory} onChange={() => toggleDocumentCompulsory(idx)} className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5" />
+                          {doc.isCompulsory ? <span className="badge badge-danger text-[10px]">Compulsory</span> : <span className="badge badge-info text-[10px]">Optional</span>}
+                        </label>
+                        <button type="button" onClick={() => removeDocumentItem(idx)} className="text-slate-400 hover:text-red-600 p-1"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <input type="text" value={newDocName} onChange={(e) => setNewDocName(e.target.value)} placeholder="e.g. 12th Marksheet, Income Certificate" className="input-field flex-1 text-xs py-1.5" />
+                  <select value={newDocType} onChange={(e) => setNewDocType(e.target.value)} className="input-field text-xs py-1.5 w-36 font-semibold">
+                    <option value="document">📄 PDF / Doc</option>
+                    <option value="image">📷 Image</option>
+                    <option value="id_proof">🪪 ID Proof</option>
+                    <option value="any">📎 Any Format</option>
+                  </select>
+                  <label className="flex items-center gap-1 text-[11px] font-semibold text-slate-700 cursor-pointer">
+                    <input type="checkbox" checked={newDocCompulsory} onChange={(e) => setNewDocCompulsory(e.target.checked)} className="rounded text-indigo-600 w-3.5 h-3.5" /> Compulsory
+                  </label>
+                  <button type="button" onClick={addDocumentItem} className="btn-secondary text-xs px-3 py-2 font-semibold text-indigo-600 border-indigo-200">+ Add</button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-3">
+                <button
+                  type="button"
+                  onClick={() => setModalTab('pricing')}
+                  className="px-4 py-2 border rounded-xl font-bold text-xs text-slate-600 hover:bg-slate-100"
+                >
+                  &larr; Back to Pricing
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 shadow-md"
+                >
+                  <Check className="w-4 h-4" /> {editCourse ? 'Save & Update Course' : 'Create Course Now'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Sticky Submit Bar */}
+          <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+            <span className="text-[11px] text-slate-400">
+              Editing: <strong className="text-slate-700">{formData.name || 'New Course'}</strong> {formData.isFree ? '(100% Free)' : '(Paid)'}
+            </span>
+            <button type="submit" className="btn-primary py-2.5 px-6 text-xs font-bold flex items-center gap-2">
+              <Check className="w-4 h-4" /> {editCourse ? 'Update Course & Curriculum' : 'Create Course Now'}
+            </button>
+          </div>
         </form>
       </Modal>
 

@@ -220,18 +220,21 @@ export default function Navbar({ activePage }) {
                   img.dataset.retried2 = 'true';
                   const path = logo.substring(logo.indexOf('/uploads/'));
                   img.src = `/api${path}`;
-                } else if (!img.dataset.retried3 && logo.startsWith('/uploads/')) {
-                  img.dataset.retried3 = 'true';
-                  img.src = logo;
-                } else {
-                  img.style.display = 'none';
+                } else if (!img.dataset.retriedFallback) {
+                  img.dataset.retriedFallback = 'true';
+                  img.src = '/logo.png';
                 }
               }}
             />
           ) : (
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shadow-md text-white font-bold" style={{ backgroundColor: themeColor }}>
-              <GraduationCap className="w-5 h-5" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="logo"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-slate-100 shadow-xs"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
           )}
           <span className="font-black text-base sm:text-lg lg:text-xl tracking-tight text-slate-900 truncate max-w-[150px] xs:max-w-[200px] sm:max-w-[260px]">
             {orgName}

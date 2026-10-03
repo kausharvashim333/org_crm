@@ -19,7 +19,7 @@ function normalize(s) {
   return {
     ...s,
     orgName: (s.orgName && typeof s.orgName === 'string' && s.orgName.trim() !== '') ? s.orgName : 'Lili Organization',
-    logo: (s.logo && typeof s.logo === 'string' && s.logo.trim() !== '') ? s.logo : '/uploads/logo-1783236511925-286536357.jpeg',
+    logo: (s.logo && typeof s.logo === 'string' && s.logo.trim() !== '') ? s.logo : '/logo.png',
   };
 }
 

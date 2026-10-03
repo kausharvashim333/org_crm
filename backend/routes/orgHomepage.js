@@ -481,8 +481,8 @@ router.get('/public', async (req, res) => {
       if (!homepage.settings.orgName || !homepage.settings.orgName.trim()) {
         homepage.settings.orgName = 'Lili Organization';
       }
-      if (!homepage.settings.logo || !homepage.settings.logo.trim()) {
-        homepage.settings.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+      if (!homepage.settings.logo || !homepage.settings.logo.trim() || homepage.settings.logo.includes('logo-1783236511925')) {
+        homepage.settings.logo = '/logo.png';
       }
       const logoPath = homepage.settings.logo;
       if (logoPath && logoPath.startsWith('/uploads/')) {
@@ -504,8 +504,8 @@ router.get('/', protect, superAdminOnly, async (req, res) => {
       if (!homepage.settings.orgName || !homepage.settings.orgName.trim()) {
         homepage.settings.orgName = 'Lili Organization';
       }
-      if (!homepage.settings.logo || !homepage.settings.logo.trim()) {
-        homepage.settings.logo = '/uploads/logo-1783236511925-286536357.jpeg';
+      if (!homepage.settings.logo || !homepage.settings.logo.trim() || homepage.settings.logo.includes('logo-1783236511925')) {
+        homepage.settings.logo = '/logo.png';
       }
     }
     res.json({ success: true, homepage });

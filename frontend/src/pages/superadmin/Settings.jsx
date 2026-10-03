@@ -35,7 +35,7 @@ export default function AdminSettings() {
         fontChoice: s.fontChoice || 'inter',
         partnerContributionFee: s.partnerContributionFee || 0,
         partnerContributionLabel: s.partnerContributionLabel || 'Organization Contribution',
-        logo: (s.logo && s.logo.trim()) ? s.logo : '/uploads/logo-1783236511925-286536357.jpeg',
+        logo: (s.logo && s.logo.trim() && !s.logo.includes('logo-1783236511925')) ? s.logo : '/logo.png',
         favicon: s.favicon || '',
       });
       setOrgLoading(false);

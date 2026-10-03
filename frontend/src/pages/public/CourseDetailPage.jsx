@@ -154,14 +154,18 @@ export default function CourseDetailPage() {
 
             {/* Badges */}
             <div className="flex items-center gap-3 flex-wrap">
-              <span className="px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-xs font-bold shadow-sm">
-                ★ {course.badge || 'Govt Certified'}
+              <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+                isFreeCourse
+                  ? 'bg-emerald-400 text-emerald-950'
+                  : 'bg-amber-400 text-amber-950'
+              }`}>
+                {isFreeCourse ? '🎁 100% Free Learning Track' : `★ ${course.badge || 'Govt Certified Pro Track'}`}
               </span>
               <span className="px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-medium border border-white/15">
                 ISO 9001:2015 Recognized
               </span>
               <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-medium border border-emerald-500/30">
-                100% Practical
+                100% Practical Training
               </span>
             </div>
 
@@ -170,10 +174,36 @@ export default function CourseDetailPage() {
               {course.name}
             </h1>
 
-            {/* Description */}
-            <p className="text-slate-300 text-base md:text-lg leading-relaxed max-w-3xl">
-              {course.description}
-            </p>
+            {/* Description - Distinguish Free vs Paid */}
+            <div className="space-y-3">
+              {isFreeCourse && course.freeDescription ? (
+                <div className="bg-emerald-950/40 border border-emerald-500/30 rounded-2xl p-4 text-emerald-100 text-base md:text-lg leading-relaxed whitespace-pre-line">
+                  <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" /> Free Course Description & Highlights
+                  </div>
+                  {course.freeDescription}
+                </div>
+              ) : !isFreeCourse && course.paidDescription ? (
+                <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4 text-indigo-100 text-base md:text-lg leading-relaxed whitespace-pre-line">
+                  <div className="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-1 flex items-center gap-1.5">
+                    <Award className="w-3.5 h-3.5" /> Certified Pro Curriculum & Highlights
+                  </div>
+                  {course.paidDescription}
+                </div>
+              ) : (
+                <p className="text-slate-300 text-base md:text-lg leading-relaxed max-w-3xl whitespace-pre-line">
+                  {course.description}
+                </p>
+              )}
+
+              {/* If both descriptions exist, show a secondary card */}
+              {isFreeCourse && course.paidDescription && (
+                <div className="text-xs text-indigo-300 bg-white/5 border border-white/10 rounded-xl p-3">
+                  <span className="font-bold text-amber-400">Want Professional Certification? </span>
+                  {course.paidDescription.slice(0, 140)}...
+                </div>
+              )}
+            </div>
 
             {/* Meta row */}
             <div className="flex items-center gap-6 text-sm text-slate-300 flex-wrap pt-2">
@@ -472,15 +502,24 @@ export default function CourseDetailPage() {
                   return (
                     <div
                       key={modIdx}
-                      className="border border-slate-200/80 rounded-2xl overflow-hidden transition-all"
+                      className="border border-slate-200/80 rounded-2xl overflow-hidden transition-all bg-white"
                     >
                       <button
                         onClick={() => toggleModule(modIdx)}
                         className="w-full p-4 bg-slate-50 hover:bg-slate-100/80 flex items-center justify-between text-left font-semibold text-slate-900 text-sm transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <BookOpen className="w-4 h-4 text-indigo-600" />
-                          <span>{mod.module}</span>
+                          <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0">
+                            {modIdx + 1}
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900">{mod.module}</span>
+                            {mod.durationHours > 0 && (
+                              <span className="ml-2.5 px-2 py-0.5 bg-slate-200/70 text-slate-600 rounded-md text-[10px] font-semibold">
+                                ⏱️ {mod.durationHours} Hours
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-slate-500">
                           <span>{mod.topics?.length || 0} topics</span>
@@ -489,13 +528,20 @@ export default function CourseDetailPage() {
                       </button>
 
                       {isOpen && (
-                        <div className="p-4 bg-white space-y-2 border-t border-slate-100">
-                          {(mod.topics || []).map((topic, tIdx) => (
-                            <div key={tIdx} className="flex items-center gap-2.5 text-xs text-slate-600 py-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                              <span>{topic}</span>
-                            </div>
-                          ))}
+                        <div className="p-5 bg-white space-y-3 border-t border-slate-100">
+                          {mod.description && (
+                            <p className="text-xs text-slate-600 italic bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                              {mod.description}
+                            </p>
+                          )}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            {(mod.topics || []).map((topic, tIdx) => (
+                              <div key={tIdx} className="flex items-start gap-2 text-xs text-slate-700 py-1 px-2 rounded-lg hover:bg-indigo-50/40">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
+                                <span>{topic}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -525,7 +571,7 @@ export default function CourseDetailPage() {
                     <Award className="w-6 h-6 text-amber-500" />
                     <div>
                       <div className="font-extrabold text-xs tracking-wider uppercase text-slate-800">
-                        {hp?.settings?.orgName || 'Skill India Computer Education'}
+                        {hp?.settings?.orgName || 'Lili Organization'}
                       </div>
                       <div className="text-[10px] text-slate-500">Government Registered • ISO Certified</div>
                     </div>

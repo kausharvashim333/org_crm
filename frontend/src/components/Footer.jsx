@@ -38,15 +38,19 @@ export default function Footer({ homepageData }) {
                       img.dataset.retried2 = 'true';
                       const path = logo.substring(logo.indexOf('/uploads/'));
                       img.src = `/api${path}`;
-                    } else {
-                      img.style.display = 'none';
+                    } else if (!img.dataset.retriedFallback) {
+                      img.dataset.retriedFallback = 'true';
+                      img.src = '/logo.png';
                     }
                   }}
                 />
               ) : (
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ backgroundColor: themeColor }}>
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
+                <img
+                  src="/logo.png"
+                  alt="logo"
+                  className="w-10 h-10 rounded-xl object-cover border border-slate-800"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
               )}
               <span className="font-extrabold text-xl tracking-tight">{orgName}</span>
             </div>
