@@ -34,7 +34,6 @@ import {
   Layers,
   ArrowUpRight,
   Filter,
-  ChevronRight,
 } from 'lucide-react';
 
 const modeIcons = {
@@ -70,7 +69,6 @@ export default function OrgCounsellingPage() {
   const [counsellingSegment, setCounsellingSegment] = useState('free');
   const [cardTrackOverrides, setCardTrackOverrides] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [detailFor, setDetailFor] = useState(null);
 
   const [form, setForm] = useState({ name: '', phone: '', email: '', city: '', message: '', slotId: '', mode: 'video' });
 
@@ -433,7 +431,7 @@ export default function OrgCounsellingPage() {
               <p className="font-bold text-slate-700">No counselling services available</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredServices.map((s, i) => {
                 // Determine whether this card shows Free or Paid track
                 const isItemFreeByDefault = s.isFree || Number(s.price || 0) === 0;
@@ -450,59 +448,63 @@ export default function OrgCounsellingPage() {
                 return (
                   <div
                     key={s._id || i}
-                    className={`bg-white rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden relative group ${
+                    className={`bg-white rounded-3xl border transition-all duration-300 flex flex-col justify-between overflow-hidden relative group ${
                       !isViewFree
-                        ? 'border-amber-300/60 hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/10 ring-1 ring-amber-400/20'
-                        : 'border-slate-200/80 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/10'
+                        ? 'border-amber-300/60 hover:border-amber-400 hover:shadow-xl hover:shadow-amber-500/10 ring-1 ring-amber-400/20'
+                        : 'border-slate-200/80 hover:border-emerald-400 hover:shadow-xl hover:shadow-emerald-500/10'
                     }`}
                   >
-                    {/* Header Banner — Compact */}
-                    <div className={`px-3.5 py-2.5 relative text-white ${
+                    {/* Header Banner */}
+                    <div className={`p-5 relative text-white ${
                       isViewFree
                         ? 'bg-gradient-to-br from-emerald-950 via-teal-900 to-slate-900'
                         : 'bg-gradient-to-br from-slate-950 via-indigo-950 to-amber-950/70'
                     }`}>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-white/10 text-white/90 border border-white/15">
-                          {modeLabels[s.mode] || 'Video / Call'}
-                        </span>
+                      <div className="flex items-center justify-between gap-2 mb-2.5">
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/10 text-white/90 border border-white/15">
+                            {modeLabels[s.mode] || 'Video / Call'}
+                          </span>
+                        </div>
 
+                        {/* Top Badge: Free vs Premium Crown */}
                         {isViewFree ? (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
-                            <Gift className="w-2.5 h-2.5" /> Free
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-white flex items-center gap-1 shadow-sm">
+                            <Gift className="w-3 h-3" /> 100% Free
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1 shadow-sm border border-amber-300">
-                            <Crown className="w-2.5 h-2.5 fill-amber-950 text-amber-950" />
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 flex items-center gap-1 shadow-sm border border-amber-300">
+                            <Crown className="w-3 h-3 fill-amber-950 text-amber-950" />
                             <span>PREMIUM</span>
                           </span>
                         )}
                       </div>
 
-                      <h3 className="font-black text-white text-sm leading-snug line-clamp-2 group-hover:text-amber-200 transition-colors">
+                      <h3 className="font-black text-white text-base leading-snug group-hover:text-amber-200 transition-colors">
                         {s.name}
                       </h3>
+
                     </div>
 
-                    {/* Card Body — Compact */}
-                    <div className="px-3.5 py-3 flex-1 flex flex-col justify-between space-y-2.5">
+                    {/* Card Body */}
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                       
                       {/* Track Switcher if in 'All' Tab */}
                       {counsellingSegment === 'all' && (
-                        <div className="flex items-center p-0.5 bg-slate-100 rounded-lg text-[10px] font-bold">
+                        <div className="flex items-center p-1 bg-slate-100 rounded-xl text-[11px] font-bold">
                           <button
                             type="button"
                             onClick={() => setCardTrackOverrides((prev) => ({ ...prev, [s._id]: 'free' }))}
-                            className={`flex-1 py-1 px-2 rounded-md transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                            className={`flex-1 py-1 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
                               isViewFree ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
-                            <Gift className="w-3 h-3" /> Free
+                            <Gift className="w-3 h-3" /> Free Guidance
                           </button>
                           <button
                             type="button"
                             onClick={() => setCardTrackOverrides((prev) => ({ ...prev, [s._id]: 'paid' }))}
-                            className={`flex-1 py-1 px-2 rounded-md transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                            className={`flex-1 py-1 px-2 rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer ${
                               !isViewFree ? 'bg-amber-500 text-slate-950 shadow-sm font-black' : 'text-slate-600 hover:text-slate-900'
                             }`}
                           >
@@ -511,60 +513,91 @@ export default function OrgCounsellingPage() {
                         </div>
                       )}
 
-                      {/* Description — Truncated, full text in View More popup */}
+                      {/* Distinct Description */}
                       <div>
-                        <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
+                        <div className="text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1 text-slate-400">
+                          {isViewFree ? (
+                            <><Gift className="w-3 h-3 text-emerald-600" /> Free Guidance Focus</>
+                          ) : (
+                            <><Crown className="w-3 h-3 text-amber-500 fill-amber-500" /> Premium Mentorship Blueprint</>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed">
                           {currentDescription}
                         </p>
-                        <button
-                          type="button"
-                          onClick={() => setDetailFor({ type: 'one_on_one', item: s, isFree: isViewFree, description: currentDescription })}
-                          className={`mt-1 text-[11px] font-bold flex items-center gap-0.5 cursor-pointer transition-colors ${
-                            isViewFree ? 'text-emerald-600 hover:text-emerald-700' : 'text-amber-600 hover:text-amber-700'
-                          }`}
-                        >
-                          View More <ChevronRight className="w-3 h-3" />
-                        </button>
                       </div>
 
-                      {/* Note */}
-                      <div className={`px-2.5 py-2 rounded-xl text-[10px] leading-snug flex items-start gap-2 border ${
+                      {/* Highlights */}
+                      <div className={`space-y-1.5 p-3 rounded-2xl border ${
                         isViewFree
-                          ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950'
-                          : 'bg-amber-50/95 border-amber-200/90 text-amber-950'
+                          ? 'bg-emerald-50/50 border-emerald-100'
+                          : 'bg-amber-50/40 border-amber-200/60'
                       }`}>
-                        <span className={`px-1.5 py-0.5 rounded font-black text-[8px] uppercase tracking-wider shrink-0 ${
+                        {(isViewFree ? [
+                          '1-on-1 Consultation via Video / Phone / WhatsApp',
+                          'Course Syllabus & Career Eligibility Roadmap',
+                        ] : [
+                          'Comprehensive 12-Month Career & Placement Blueprint',
+                          'Direct Senior Mentor Q&A and Action Plan',
+                        ]).map((h, hIdx) => (
+                          <div key={hIdx} className="flex items-start gap-2 text-[11px] text-slate-700 font-medium">
+                            {isViewFree ? (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                            ) : (
+                              <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0 mt-0.5" />
+                            )}
+                            <span className="line-clamp-1">{h}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Bilingual Note on Counselling Card (Free vs Premium) */}
+                      <div className={`p-2.5 rounded-2xl text-[11px] leading-snug flex items-start gap-2 border ${
+                        isViewFree
+                          ? 'bg-emerald-50/90 border-emerald-200/90 text-emerald-950 shadow-xs'
+                          : 'bg-amber-50/95 border-amber-200/90 text-amber-950 shadow-xs'
+                      }`}>
+                        <span className={`px-1.5 py-0.5 rounded font-black text-[9px] uppercase tracking-wider shrink-0 mt-0.5 ${
                           isViewFree ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-200 text-amber-950'
                         }`}>
-                          नोट
+                          नोट / Note
                         </span>
-                        <p className="font-semibold text-slate-800">
-                          काउंसलिंग <strong className={isViewFree ? 'text-emerald-900' : 'text-amber-900'}>
-                            {isViewFree ? 'अनुभवी काउंसलर (Experienced Counsellor)' : 'अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)'}
-                          </strong> द्वारा कराई जाएगी।
-                        </p>
+                        <div className="space-y-0.5">
+                          <p className="font-semibold text-slate-800">
+                            {isViewFree ? (
+                              <>काउंसलिंग <strong className="text-emerald-900 font-bold">अनुभवी काउंसलर (Experienced Counsellor)</strong> द्वारा कराई जाएगी।</>
+                            ) : (
+                              <>काउंसलिंग <strong className="text-amber-900 font-bold">अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)</strong> द्वारा कराई जाएगी।</>
+                            )}
+                          </p>
+                          <p className="text-[10px] text-slate-500 font-medium">
+                            {isViewFree
+                              ? 'Counselling will be conducted by experienced counsellors.'
+                              : 'Counselling will be conducted by experienced working professionals.'}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Bottom Action */}
-                      <div className="pt-2 border-t border-slate-100 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] text-slate-500 font-medium">
+                      {/* Bottom Callout & Action (NO CLUTTERED AMOUNT SHOWN) */}
+                      <div className="pt-2 border-t border-slate-100 space-y-3">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[11px] text-slate-500 font-medium">
                             {modeLabels[s.mode] || '1-on-1 Session'}
                           </span>
-                          <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full ${
+                          <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
                             isViewFree
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1'
                           }`}>
-                            {!isViewFree && <Crown className="w-2.5 h-2.5 fill-amber-900" />}
-                            {isViewFree ? '100% Free' : 'Premium'}
+                            {!isViewFree && <Crown className="w-3 h-3 fill-amber-900" />}
+                            {isViewFree ? '100% Free' : 'Premium Mentorship'}
                           </span>
                         </div>
 
                         <button
                           type="button"
                           onClick={() => openBook('one_on_one', s, isViewFree)}
-                          className={`w-full py-2 px-3 text-xs font-black rounded-xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer text-white ${
+                          className={`w-full py-3 px-4 text-xs font-black rounded-2xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer text-white ${
                             isViewFree
                               ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25'
                               : 'bg-gradient-to-r from-amber-500 via-amber-600 to-indigo-600 hover:opacity-95 shadow-amber-500/25'
@@ -595,7 +628,7 @@ export default function OrgCounsellingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {groupServices.map((s) => {
                 const isScheduled = Boolean(s.groupSessionDate);
                 const scheduleDateStr = isScheduled
@@ -610,9 +643,9 @@ export default function OrgCounsellingPage() {
                 return (
                   <div
                     key={`grp_${s._id}`}
-                    className="bg-white rounded-2xl border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between p-4 relative group"
+                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between p-6 relative group"
                   >
-                    <div className="space-y-2.5">
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2">
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                           <Users className="w-3 h-3 text-indigo-600" /> Group Masterclass
@@ -622,46 +655,31 @@ export default function OrgCounsellingPage() {
                         </span>
                       </div>
 
-                      <h3 className="font-black text-slate-900 text-sm leading-snug line-clamp-2">
+                      <h3 className="font-black text-slate-900 text-base leading-snug">
                         {s.name}
                       </h3>
 
                       {isScheduled && (
-                        <div className="px-2.5 py-2 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-950 flex items-center gap-2">
-                          <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span>Scheduled: <strong>{scheduleDateStr}</strong></span>
+                        <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-950 flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Scheduled Date: <strong>{scheduleDateStr}</strong></span>
                         </div>
                       )}
 
-                      <div>
-                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                          {s.description || 'Interactive live group webinar with dedicated doubt solving.'}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => setDetailFor({
-                            type: 'group',
-                            item: s,
-                            isFree: true,
-                            description: s.description || 'Interactive live group webinar with dedicated doubt solving.',
-                            scheduleDateStr,
-                          })}
-                          className="mt-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5 cursor-pointer"
-                        >
-                          View More <ChevronRight className="w-3 h-3" />
-                        </button>
-                      </div>
+                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                        {s.description || 'Interactive live group webinar with dedicated doubt solving.'}
+                      </p>
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                         Open for Registration
                       </span>
 
                       <button
                         type="button"
                         onClick={() => openBook('group', s, true)}
-                        className="px-4 py-2 rounded-xl text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+                        className="px-5 py-2.5 rounded-2xl text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
                       >
                         Book Seat <ArrowRight className="w-3.5 h-3.5" />
                       </button>
@@ -701,94 +719,6 @@ export default function OrgCounsellingPage() {
           </div>
         </div>
       </section>
-
-      {/* View More — Full Details Modal */}
-      {detailFor && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDetailFor(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] shadow-2xl overflow-hidden flex flex-col border border-slate-100" onClick={(e) => e.stopPropagation()}>
-            <div className={`p-5 text-white relative ${
-              detailFor.type === 'group'
-                ? 'bg-gradient-to-r from-indigo-700 to-indigo-900'
-                : detailFor.isFree
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-700'
-                  : 'bg-gradient-to-r from-slate-950 via-indigo-900 to-amber-950'
-            }`}>
-              <button
-                type="button"
-                onClick={() => setDetailFor(null)}
-                className="absolute right-4 top-4 p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white transition cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/20 text-white">
-                {detailFor.type === 'group' ? 'Group Masterclass' : detailFor.isFree ? 'Free Session' : 'Premium Mentorship'}
-              </span>
-              <h3 className="font-black text-lg leading-snug mt-2 pr-8">{detailFor.item.name}</h3>
-              <p className="text-xs text-white/80 mt-1">
-                {detailFor.type === 'group'
-                  ? (detailFor.scheduleDateStr ? `Scheduled: ${detailFor.scheduleDateStr}` : 'Date & time will be shared by the organization')
-                  : (modeLabels[detailFor.item.mode] || '1-on-1 Session')}
-              </p>
-            </div>
-
-            <div className="p-5 overflow-y-auto space-y-4">
-              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{detailFor.description}</p>
-
-              {detailFor.type === 'one_on_one' && (
-                <>
-                  <div className={`space-y-1.5 p-3 rounded-xl border ${
-                    detailFor.isFree ? 'bg-emerald-50/50 border-emerald-100' : 'bg-amber-50/40 border-amber-200/60'
-                  }`}>
-                    {(detailFor.isFree ? [
-                      '1-on-1 Consultation via Video / Phone / WhatsApp',
-                      'Course Syllabus & Career Eligibility Roadmap',
-                    ] : [
-                      'Comprehensive 12-Month Career & Placement Blueprint',
-                      'Direct Senior Mentor Q&A and Action Plan',
-                    ]).map((h) => (
-                      <div key={h} className="flex items-start gap-2 text-xs text-slate-700 font-medium">
-                        {detailFor.isFree
-                          ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                          : <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-500 shrink-0 mt-0.5" />}
-                        <span>{h}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className={`p-3 rounded-xl text-[11px] leading-snug border ${
-                    detailFor.isFree ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-amber-50 border-amber-200 text-amber-950'
-                  }`}>
-                    <p className="font-semibold">
-                      नोट: काउंसलिंग {detailFor.isFree ? 'अनुभवी काउंसलर (Experienced Counsellor)' : 'अनुभवी वर्किंग प्रोफेशनल (Experienced Working Professional)'} द्वारा कराई जाएगी।
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-slate-100 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setDetailFor(null)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={() => { const d = detailFor; setDetailFor(null); openBook(d.type, d.item, d.isFree); }}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-black text-white cursor-pointer ${
-                  detailFor.type === 'group'
-                    ? 'bg-indigo-600 hover:bg-indigo-700'
-                    : detailFor.isFree ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-gradient-to-r from-amber-500 to-indigo-600'
-                }`}
-              >
-                {detailFor.type === 'group' ? 'Book Seat' : detailFor.isFree ? 'Book Free Session' : 'Book Premium Mentorship'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Booking Drawer / Modal */}
       {bookFor && (
