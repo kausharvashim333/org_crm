@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { createPartnerContributionOrder, getMe, getPartnerMembershipConfig, verifyPartnerContribution } from '../../api';
 import { useToast } from '../../context/ToastContext';
-import { Award, BadgeCheck, Building2, Check, CheckCircle2, CreditCard, Headphones, Loader2, ShieldCheck, Sparkles, Users } from 'lucide-react';
+import {
+  Award, BadgeCheck, Building2, Check, CheckCircle2, CreditCard,
+  Headphones, Loader2, ShieldCheck, Sparkles, Users, Briefcase,
+  GraduationCap, Target, BookOpen
+} from 'lucide-react';
 
 const benefits = [
   { icon: BadgeCheck, title: 'Contributor recognition', description: 'Show your institute as an organization contributor after the contribution is verified.' },
@@ -123,6 +127,190 @@ export default function MembershipUpgrade() {
           </aside>
         </section>
       )}
+
+      {/* Skill Development Funding Projects & TOT Information Boxes */}
+      <section className="space-y-6 pt-4">
+        <div>
+          <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            Special Institutional Opportunities
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-2.5">
+            Skill Development Projects & Training of Trainers (TOT)
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl leading-relaxed">
+            भागीदार संस्थानों के लिए सरकारी एवं कॉर्पोरेट सीएसआर अनुदानित परियोजनाएं (Funding Projects) और शिक्षकों के आधिकारिक मास्टर ट्रेनर (TOT) सर्टिफिकेशन से जुड़ी संपूर्ण मार्गदर्शिका।
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          {/* Box 1: Skill Development Funding Projects */}
+          <div className="card p-6 sm:p-8 border border-indigo-100 bg-gradient-to-br from-white via-indigo-50/20 to-blue-50/30 rounded-3xl shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-800 border border-indigo-200 flex items-center gap-1.5 shadow-2xs">
+                  <Briefcase className="w-3.5 h-3.5 text-indigo-700" />
+                  Funding & CSR Projects
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 bg-white/80 px-2.5 py-0.5 rounded-full border border-slate-200">
+                  Target Allocation
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-slate-900 leading-snug">
+                  Skill Development Funding Projects
+                </h3>
+                <p className="text-xs font-bold text-indigo-700 mt-0.5">
+                  कौशल विकास अनुदान व सरकारी/सीएसआर परियोजनाएं
+                </p>
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  केंद्र व राज्य सरकारों (Central & State Govts) तथा प्रमुख औद्योगिक घरानों के CSR फंड्स द्वारा प्रायोजित कौशल विकास योजनाओं में भागीदार संस्थानों का चयन एवं बैच आवंटन।
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="p-3.5 bg-white rounded-2xl border border-indigo-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Govt Schemes & CSR Batch Allotment (योजनाएं एवं बैच आवंटन)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    PMKVY, DDU-GKY, State Skill Missions (SSDM), Samarth और प्रमुख कॉर्पोरेट CSR योजनाओं के तहत केंद्रों को निःशुल्क ट्रेनिंग बैचेस आवंटित किए जाते हैं।
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-2xl border border-indigo-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Target Allocation Priority (लक्ष्य आवंटन में पहली प्राथमिकता)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    कंट्रीब्यूटर व सक्रिय पार्टनर संस्थानों को उनके जिले व तहसील स्तर पर छात्र नामांकन लक्ष्य (Targets) सबसे पहले आवंटित किए जाते हैं।
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-2xl border border-indigo-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Reimbursement & Grants (प्रति छात्र प्रशिक्षण अनुदान)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    सफल प्रशिक्षण, बायोमेट्रिक अटेंडेंस व असेसमेंट पूरा होने पर सरकारी/सीएसआर नियमों के अनुसार प्रति छात्र निर्धारित अनुदान संस्था खाते में प्राप्त होता है।
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-2xl border border-indigo-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Center Audit & Compliance (सेंटर ऑडिट व एक्रिडिटेशन सपोर्ट)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    लैब उपकरण, सीसीटीवी, बायोमेट्रिक व क्लासरूम मानकों को सरकारी पोर्टल के अनुरूप तैयार करने और फिजिकल इंस्पेक्शन पास कराने में संस्था का पूर्ण मार्गदर्शन।
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-indigo-100/80 flex items-center justify-between gap-3 text-xs bg-indigo-50/60 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-4 rounded-b-3xl">
+              <span className="text-[11px] text-indigo-950 font-semibold flex items-center gap-1.5">
+                💡 <span className="font-bold">नोट:</span> Contributor सेंटर्स को प्रोजेक्ट एलोकेशन और सेंटर एक्रिडिटेशन में टॉप प्रायोरिटी दी जाती है।
+              </span>
+            </div>
+          </div>
+
+          {/* Box 2: Training of Trainers (TOT) Program */}
+          <div className="card p-6 sm:p-8 border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/20 to-teal-50/30 rounded-3xl shadow-sm relative overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between gap-3">
+                <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+                  <GraduationCap className="w-3.5 h-3.5 text-emerald-700" />
+                  TOT Certification
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 bg-white/80 px-2.5 py-0.5 rounded-full border border-slate-200">
+                  NSDC / SSC Standards
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-black text-slate-900 leading-snug">
+                  Training of Trainers (TOT) Program
+                </h3>
+                <p className="text-xs font-bold text-emerald-700 mt-0.5">
+                  प्रशिक्षकों का प्रशिक्षण एवं मास्टर ट्रेनर प्रमाणन
+                </p>
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  राष्ट्रीय कौशल विकास मानकों (NSDC / Sector Skill Councils) के अनुरूप आपके संस्थान के फैकल्टी व इंस्ट्रक्टर्स का आधिकारिक मूल्यांकन व मास्टर ट्रेनर एक्रिडिटेशन।
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <div className="p-3.5 bg-white rounded-2xl border border-emerald-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Official Master Trainer Credential (आधिकारिक मास्टर ट्रेनर प्रमाणन)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    संबंधित Sector Skill Council (SSC) के तहत ट्रेनर का औपचारिक मूल्यांकन, आधिकारिक TOT सर्टिफिकेट, डिजिटल बैज और यूनिक ट्रेनर आईडी प्राप्त होती है।
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-2xl border border-emerald-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Mandatory for Funded Projects (फंडेड प्रोजेक्ट्स हेतु अनिवार्य पात्रता)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    सरकारी व सीएसआर कौशल योजनाओं में क्लासेस केवल TOT प्रमाणित ट्रेनर द्वारा ही मान्य होती हैं, जिससे आपका केंद्र प्रोजेक्ट्स के लिए तुरंत पात्र बनता है।
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-2xl border border-emerald-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Pedagogy & Digital Lab Training (आधुनिक अध्यापन तकनीक व हैंड्स-ऑन लैब)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    आउटकम-बेस्ड एजुकेशन (OBE), इंडस्ट्री प्रोजेक्ट सिमुलेशन, डिजिटल स्मार्ट क्लासरूम डिलीवरी और स्टूडेंट इवैल्यूएशन पर विशेष प्रैक्टिकल मॉड्यूल।
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-white rounded-2xl border border-emerald-100/80 shadow-2xs space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="font-bold text-xs text-slate-800">
+                      Continuous Faculty Development (वार्षिक फैकल्टी अपस्किलिंग FDP)
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 pl-6 leading-relaxed">
+                    AI टूल्स, उभरती तकनीकों, जीएसटी/टैली, हार्डवेयर और हेल्थकेयर के नए सिलेबस के अनुसार संस्थान के शिक्षकों का वर्षभर निरंतर अपग्रेडेशन वर्कशॉप।
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-emerald-100/80 flex items-center justify-between gap-3 text-xs bg-emerald-50/60 -mx-6 -mb-6 sm:-mx-8 sm:-mb-8 p-4 rounded-b-3xl">
+              <span className="text-[11px] text-emerald-950 font-semibold flex items-center gap-1.5">
+                🏆 <span className="font-bold">मानक:</span> TOT प्रमाणित फैकल्टी आपके संस्थान को A-ग्रेड सेंटर एक्रिडिटेशन और 100% ऑडिट अनुपालन दिलाती है।
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
