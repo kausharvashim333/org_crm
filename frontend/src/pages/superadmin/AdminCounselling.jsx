@@ -415,20 +415,45 @@ export default function AdminCounselling() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {services.length === 0 && <p className="text-sm text-slate-400 col-span-full py-8 text-center">No 1-on-1 services yet.</p>}
             {services.map((s) => (
-              <div key={s._id} className="card p-4 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-800">{s.name}</h3>
+              <div key={s._id} className="card p-4 space-y-3 flex flex-col justify-between hover:shadow-md transition-all border border-slate-200">
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-900">{s.name}</h3>
+                      {s.tagline && <p className="text-[11px] text-slate-500 italic mt-0.5 line-clamp-1">"{s.tagline}"</p>}
+                    </div>
+                    {s.isActive ? (
+                      <span className="badge badge-success text-[10px] shrink-0">Live</span>
+                    ) : (
+                      <span className="badge badge-warning text-[10px] shrink-0">Hidden</span>
+                    )}
                   </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => openEditService(s)} className="text-indigo-600"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDeleteService(s._id)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
-                  </div>
+                  <p className="text-xs text-slate-600 line-clamp-2 mt-2 leading-relaxed">{s.description}</p>
                 </div>
-                <p className="text-xs text-slate-500 line-clamp-2">{s.description}</p>
-                <div className="flex items-center justify-between text-xs pt-2 border-t">
-                  <span className="font-bold text-indigo-700">1-on-1: ₹{s.price} · Group: ₹{s.groupPrice ?? 0}</span>
-                  {s.isActive ? <span className="badge badge-success text-[10px]">Live</span> : <span className="badge badge-warning text-[10px]">Hidden</span>}
+
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <span className="font-bold text-xs text-indigo-700">
+                    1-on-1: ₹{s.price} {s.enableGroupSession && `· Group: ₹${s.groupPrice ?? 0}`}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => openEditService(s)}
+                      className="px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                      title="Edit this service"
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                      <span>Edit Service</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteService(s._id)}
+                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                      title="Delete this service"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

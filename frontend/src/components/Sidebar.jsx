@@ -80,7 +80,7 @@ export default function Sidebar({ role, isOpen, onClose }) {
       icon: MessageCircle,
       links: [
         { to: '/admin/inquiries', icon: Bell, label: 'Student Inquiries' },
-        { to: '/admin/counselling', icon: MessageCircle, label: 'Counselling Bookings' },
+        { to: '/admin/counselling', icon: MessageCircle, label: 'Counselling Services & Bookings' },
         { to: '/admin/notifications', icon: MessageSquare, label: 'System Notifications' },
       ],
     },
