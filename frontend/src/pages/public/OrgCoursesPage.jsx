@@ -6,7 +6,7 @@ import Footer from '../../components/Footer';
 import SEO from '../../components/SEO';
 import { useToast } from '../../context/ToastContext';
 import {
-  GraduationCap, BookOpen, Star, Clock, Users, Search, CheckCircle2, Award,
+  GraduationCap, BookOpen, Clock, Users, Search, CheckCircle2, Award,
   Sparkles, Filter, PlayCircle, ShieldCheck, ArrowUpRight, Gift, CreditCard,
   Layers, Check, X, ArrowRight, Crown, HelpCircle, ChevronDown, ChevronUp,
   MessageCircle, Info, Zap
@@ -596,19 +596,6 @@ export default function OrgCoursesPage() {
                           </button>
                         </div>
                       )}
-
-                      {/* Rating & Learners Counter */}
-                      <div className="flex items-center justify-between text-xs pb-3 border-b border-slate-100">
-                        <div className="flex items-center gap-1 text-amber-600 font-bold">
-                          <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                          <span>{c.rating || '4.9'}</span>
-                          <span className="text-slate-400 font-normal">({c.ratingCount || 150}+)</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-slate-500 font-medium text-[11px]">
-                          <Users className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{c.enrolledCount || 300}+ students enrolled</span>
-                        </div>
-                      </div>
 
                       {/* Distinct Description (Free vs Paid) */}
                       <div>
