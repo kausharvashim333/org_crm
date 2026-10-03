@@ -34,6 +34,8 @@ import {
   Layers,
   ArrowUpRight,
   Filter,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 const modeIcons = {
@@ -69,6 +71,11 @@ export default function OrgCounsellingPage() {
   const [counsellingSegment, setCounsellingSegment] = useState('free');
   const [cardTrackOverrides, setCardTrackOverrides] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedDescIds, setExpandedDescIds] = useState({});
+
+  const toggleDesc = (id) => {
+    setExpandedDescIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const [form, setForm] = useState({ name: '', phone: '', email: '', city: '', message: '', slotId: '', mode: 'video' });
 
@@ -513,7 +520,7 @@ export default function OrgCounsellingPage() {
                         </div>
                       )}
 
-                      {/* Distinct Description */}
+                      {/* Distinct Description with View More / Less */}
                       <div>
                         <div className="text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center gap-1 text-slate-400">
                           {isViewFree ? (
@@ -522,9 +529,27 @@ export default function OrgCounsellingPage() {
                             <><Crown className="w-3 h-3 text-amber-500 fill-amber-500" /> Premium Mentorship Blueprint</>
                           )}
                         </div>
-                        <p className="text-xs text-slate-600 leading-relaxed">
+                        <p className={`text-xs text-slate-600 leading-relaxed ${!expandedDescIds[s._id || i] ? 'line-clamp-2' : ''}`}>
                           {currentDescription}
                         </p>
+                        {currentDescription && currentDescription.length > 80 && (
+                          <button
+                            type="button"
+                            onClick={() => toggleDesc(s._id || i)}
+                            className={`mt-1 text-[11px] font-bold flex items-center gap-0.5 cursor-pointer transition-colors ${
+                              isViewFree
+                                ? 'text-emerald-700 hover:text-emerald-800'
+                                : 'text-amber-700 hover:text-amber-800'
+                            }`}
+                          >
+                            {expandedDescIds[s._id || i] ? 'View Less' : 'View More'}
+                            {expandedDescIds[s._id || i] ? (
+                              <ChevronUp className="w-3 h-3" />
+                            ) : (
+                              <ChevronDown className="w-3 h-3" />
+                            )}
+                          </button>
+                        )}
                       </div>
 
                       {/* Highlights */}
@@ -666,9 +691,25 @@ export default function OrgCounsellingPage() {
                         </div>
                       )}
 
-                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                        {s.description || 'Interactive live group webinar with dedicated doubt solving.'}
-                      </p>
+                      <div>
+                        <p className={`text-xs text-slate-600 leading-relaxed ${!expandedDescIds[s._id] ? 'line-clamp-2' : ''}`}>
+                          {s.description || 'Interactive live group webinar with dedicated doubt solving.'}
+                        </p>
+                        {s.description && s.description.length > 80 && (
+                          <button
+                            type="button"
+                            onClick={() => toggleDesc(s._id)}
+                            className="mt-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5 cursor-pointer"
+                          >
+                            {expandedDescIds[s._id] ? 'View Less' : 'View More'}
+                            {expandedDescIds[s._id] ? (
+                              <ChevronUp className="w-3 h-3" />
+                            ) : (
+                              <ChevronDown className="w-3 h-3" />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
