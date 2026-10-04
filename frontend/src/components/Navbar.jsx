@@ -150,8 +150,6 @@ export default function Navbar({ activePage }) {
     { label: 'Services', to: '/services', key: 'services' },
     ...(showCounselling ? [{ label: 'Counselling', to: '/counselling', key: 'counselling' }] : []),
     { label: 'Partner with Us', to: '/franchise', key: 'franchise' },
-    { label: 'Centers', to: '/franchises', key: 'franchises' },
-    { label: 'Notices', to: '/notices', key: 'notices' },
     { label: 'About Us', to: '/about', key: 'about' },
   ];
 

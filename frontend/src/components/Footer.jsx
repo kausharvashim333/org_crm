@@ -3,14 +3,16 @@ import { Link } from 'react-router-dom';
 import { getOrgHomepagePublic } from '../api';
 import { GraduationCap, Facebook, Instagram, Youtube, MessageCircle } from 'lucide-react';
 
-export default function Footer({ homepageData }) {
-  const [hp, setHp] = useState(homepageData);
+export default function Footer({ homepageData, hp: hpProp }) {
+  const [hp, setHp] = useState(homepageData || hpProp);
 
   useEffect(() => {
-    if (!homepageData) {
-      getOrgHomepagePublic().then(res => setHp(res.data.homepage)).catch(() => {});
+    if (homepageData || hpProp) {
+      setHp(homepageData || hpProp);
+    } else {
+      getOrgHomepagePublic().then(res => setHp(res.data?.homepage)).catch(() => {});
     }
-  }, [homepageData]);
+  }, [homepageData, hpProp]);
 
   if (!hp) return null;
 
